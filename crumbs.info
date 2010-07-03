@@ -1,0 +1,5 @@
+; $Id$
+name = "Crumbs"
+description = "The ultimate breadcrumbs module"
+package = zzz
+core = 6.x

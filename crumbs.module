@@ -1,0 +1,270 @@
+<?php
+
+
+module_load_include('inc', 'crumbs', 'crumbs.menu');
+module_load_include('inc', 'crumbs', 'crumbs.taxonomy');
+module_load_include('inc', 'crumbs', 'crumbs.path');
+module_load_include('inc', 'crumbs', 'crumbs.pathauto');
+
+
+function crumbs_perm() {
+  return array('administer crumbs');
+}
+
+
+function crumbs_menu() {
+  $items = array();
+  $items['crumbs/node-type-dummy-path/%'] = array(
+    'title' => 'Crumbs dummy path',
+    'title callback' => 'check_plain',
+    'page callback' => '_crumbs_donothing',
+    'access callback' => '_crumbs_noaccess',
+  );
+  $items['admin/build/crumbs'] = array(
+    'title' => 'Crumbs config',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('crumbs_admin_form'),
+    'access arguments' => array('administer crumbs'),
+    'file' => 'crumbs.admin.inc',
+  );
+  return $items;
+}
+
+
+function _crumbs_donothing() {
+  return '';
+}
+
+function _crumbs_noaccess() {
+  return TRUE;
+}
+
+
+function crumbs_init() {
+  if (TRUE) {
+    $item = menu_get_item();
+    $link_path = $item['href'];
+  } else {
+    $link_path = 'node/51610';
+  }
+  $trail = crumbs_build_trail($link_path);
+  $breadcrumb = array();
+  foreach ($trail as $path => $menu_item) {
+    if (!$menu_item['access']) {
+      continue;
+    }
+    ($title = $menu_item['title']) ? NULL : ($title = $path);
+    $item_html = l($title, $path);
+    $breadcrumb[] = $item_html;
+  }
+  drupal_set_breadcrumb($breadcrumb);
+  _crumbs_set_trail($trail);
+}
+
+
+function crumbs_preprocess_page(&$vars) {
+  $vars['crumbs_trail'] = crumbs_get_trail();
+}
+
+
+function crumbs_get_trail() {
+  return _crumbs_set_trail();
+}
+
+
+function _crumbs_set_trail($trail = NULL) {
+  static $_trail;
+  if (is_array($trail)) {
+    $_trail = $trail;
+  }
+  else {
+    return $_trail;
+  }
+}
+
+
+function crumbs_build_trail($path) {
+  $finder = new crumbs_TrailFinder;
+  return $finder->buildTrail($path);
+}
+
+
+class crumbs_TrailFinder {
+  protected $_implementations = array();
+  protected $_order = array();
+  
+  function __construct() {
+    $this->_order = _crumbs_get_settings();
+    $this->_implementations = _crumbs_get_objects_by_method() + array(
+      'decorate' => array(),
+      'find' => array(),
+      '.' => array(),
+    );
+  }
+  
+  function buildTrail($path) {
+    $trail_reverse = array();
+    $front_normal_path = drupal_get_normal_path(variable_get('site_frontpage', 'node'));
+    while (strlen($path) && $path !== '<front>' && $path != $front_normal_path) {
+      if (isset($trail_reverse[$path])) {
+        // We found a loop! To prevent infinite recursion, we
+        // remove the loopy paths from the trail and finish directly with <front>.
+        while (isset($trail_reverse[$path])) {
+          array_pop($trail_reverse);
+        }
+        break;
+      }
+      $menu_item = menu_get_item($path);
+      if ($menu_item) {
+        $this->_decorateItem($path, $menu_item, $trail_reverse);
+        if (!$menu_item['skip_in_breadcrumb']) {
+          dpm($menu_item);
+          $trail_reverse[$path] = $menu_item;
+        }
+      }
+      $parent_path = $this->_findParentPath($path, $menu_item);
+      if ($parent_path == $path) {
+        // This is again a loop, but with just one step.
+        // Not as evil as the other kind of loop.
+        break;
+      }
+      $path = $parent_path;
+    }
+    unset($trail_reverse[$front_normal_path]);
+    $trail_reverse['<front>'] = array('title' => 'Home');
+    return array_reverse($trail_reverse);
+  }
+  
+  protected function _findParentPath($path, $menu_item) {
+    if ($menu_item) {
+      $objects = $this->_getImplementations('find', $menu_item['path']);
+      foreach ($objects as $key => $object_and_method) {
+        list($object, $method) = $object_and_method;
+        $parent_path = $object->$method($path, $menu_item, $trail_reverse);
+        if ($parent_path) {
+          return drupal_get_normal_path($parent_path);
+        }
+      }
+    }
+    // fallback: chop off the last fragment of the system path.
+    $fragments = explode('/', $path);
+    return implode('/', array_slice($fragments, 0, -1));
+  }
+  
+  protected function _decorateItem($path, &$menu_item, $trail_reverse) {
+    if ($menu_item) {
+      $objects = $this->_getImplementations('decorate', $menu_item['path']);
+      foreach (array_reverse($objects) as $key => $object_and_method) {
+        list($object, $method) = $object_and_method;
+        $object->$method($path, $menu_item, $trail_reverse);
+      }
+    }
+  }
+  
+  protected function _getImplementations($base_method, $router_path) {
+    $objects = $this->_order;
+    foreach ($this->_implementations[$base_method] as $key => $object) {
+      $objects[$key] = array($object, $base_method);
+    }
+    if ($router_path) {
+      $method = $base_method . '__' . preg_replace('/[^a-z0-9]/', '_', strtolower($menu_item['path']));
+      if (is_array($this->_implementations[$method])) {
+        foreach ($this->_implementations[$method] as $key => $object) {
+          $objects[$key] = array($object, $method);
+        }
+      }
+    }
+    foreach ($objects as $key => $x) {
+      if (!is_array($x)) {
+        unset($objects[$key]);
+      }
+    }
+    return $objects;
+  }
+}
+
+
+function _crumbs_get_settings() {
+  $settings = variable_get('crumbs', array());
+  return is_array($settings) ? $settings : array();
+}
+
+
+function _crumbs_get_objects() {
+  $sort_order = _crumbs_get_settings();
+  $objects = array();
+  foreach ($sort_order as $key => $enabled) {
+    if ($enabled) {
+      $objects[$key] = NULL;
+    }
+  }
+  foreach (module_list(FALSE, TRUE) as $module) {
+    $class = $module . '_class_CrumbsParentFinder';
+    if (class_exists($class)) {
+      if (method_exists($class, 'construct')) {
+        // use the factory method.
+        $result = call_user_func(array($class, 'construct'));
+        if (is_object($result)) {
+          $objects[$module] = $result;
+        }
+        else if (is_array($result)) {
+          foreach ($result as $key => $object) {
+            $objects["$module.$key"] = $object;
+          }
+        }
+      } else {
+        $objects[$module] = new $class;
+      }
+    }
+  }
+  foreach ($objects as $key => $object) {
+    if (!is_object($object)) {
+      unset($objects[$key]);
+    }
+  }
+  return $objects;
+}
+
+
+function _crumbs_get_objects_by_method() {
+  $sort_order = _crumbs_get_settings();
+  $objects = _crumbs_get_objects();
+  foreach ($sort_order as $key => $enabled) {
+    if (!$enabled) {
+      unset($objects[$key]);
+    }
+  }
+  $objects_by_method = array('.' => array(), 'find' => array());
+  foreach ($objects as $k => $object) {
+    if (!is_object($object)) {
+      continue;
+    }
+    $objects_by_method['.'][$k] = $object;
+    foreach (get_class_methods($object) as $method) {
+      $objects_by_method[$method][$k] = $object;
+    }
+  }
+  return $objects_by_method;
+}
+
+
+class crumbs_class_CrumbsParentFinder {
+
+  function find__node__($path, $menu_item) {
+    $node = $menu_item['page_arguments'][0];
+    $type_url_str = str_replace('_', '-', $node->type);
+    return 'crumbs/node-type-dummy-path/'. $type_url_str;
+  }
+  
+  function decorate__node($path, &$menu_item) {
+    $menu_item['skip_in_breadcrumb'] = TRUE;
+  }
+  
+  function decorate__crumbs_node_type_dummy_path__($path, &$menu_item) {
+    $menu_item['skip_in_breadcrumb'] = TRUE;
+  }
+}
+
+
+
+
