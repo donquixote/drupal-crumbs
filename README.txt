@@ -1,4 +1,4 @@
-
+$Id$
 
 The ultimate breadcrumbs solution. Powerful, flexible, and as simple and DRY as can be.
 (code will come soon)

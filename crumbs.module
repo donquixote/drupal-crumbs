@@ -1,4 +1,5 @@
 <?php
+// $Id$
 
 
 module_load_include('inc', 'crumbs', 'crumbs.menu');
@@ -118,7 +119,6 @@ class crumbs_TrailFinder {
       if ($menu_item) {
         $this->_decorateItem($path, $menu_item, $trail_reverse);
         if (!$menu_item['skip_in_breadcrumb']) {
-          dpm($menu_item);
           $trail_reverse[$path] = $menu_item;
         }
       }
