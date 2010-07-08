@@ -9,6 +9,7 @@ module_load_include('inc', 'crumbs', 'crumbs.taxonomy');
 module_load_include('inc', 'crumbs', 'crumbs.path');
 module_load_include('inc', 'crumbs', 'crumbs.pathauto');
 module_load_include('inc', 'crumbs', 'crumbs.node');
+module_load_include('inc', 'crumbs', 'crumbs.nodereference');
 module_load_include('inc', 'crumbs', 'crumbs.crumbs');
 
 function crumbs_perm() {
@@ -52,6 +53,8 @@ function crumbs_init() {
   $breadcrumb = crumbs_build_breadcrumb($trail);
   _crumbs_set_breadcrumb($breadcrumb);
   drupal_set_breadcrumb($breadcrumb);
+  $finder = _crumbs_get_finder();
+  $finder->invokeInit($trail);
 }
 
 
@@ -73,6 +76,8 @@ function crumbs_preprocess_page(&$vars) {
   // for page rendering.
   $breadcrumb = crumbs_get_breadcrumb();
   $vars['breadcrumb'] = theme('breadcrumb', $breadcrumb);
+  $finder = _crumbs_get_finder();
+  $finder->invokePreprocessPage($vars, $trail);
 }
 
 
@@ -108,11 +113,8 @@ function _crumbs_set_breadcrumb($breadcrumb = NULL) {
 }
 
 
-function crumbs_build_trail($path, $set_warning = FALSE) {
-  $finder = new _crumbs_TrailFinder;
-  if ($set_warning) {
-    $finder->setWarning();
-  }
+function crumbs_build_trail($path) {
+  $finder = _crumbs_get_finder();
   $trail = $finder->buildTrail($path);
   $trail_wrapped = array();
   foreach ($trail as $path => $extra) {
@@ -122,46 +124,25 @@ function crumbs_build_trail($path, $set_warning = FALSE) {
 }
 
 
+function _crumbs_get_finder() {
+  static $_finder;
+  if (!isset($_finder)) {
+    $_finder = new _crumbs_TrailFinder();
+  }
+  return $_finder;
+}
+
+
 
 
 class _crumbs_TrailFinder {
-  protected $_implementations = array();
-  protected $_order;
-  protected $_objects;
+  
+  protected $_pluginEngine;
   
   function __construct() {
-    $this->_order = _crumbs_get_settings();
-    $this->_objects = _crumbs_get_objects();
-    $this->_implementations = _crumbs_get_objects_by_method();
+    $this->_pluginEngine = new _crumbs_PluginEngine();
   }
   
-  function setWarning() {
-    $undefined_order_keys = array();
-    foreach ($this->_objects as $object_key => $object) {
-      if (method_exists($object, 'getRuleTitles')) {
-        $sub_keys = array_keys($object->getRuleTitles());
-        if (is_array($sub_keys)) {
-          foreach ($sub_keys as $i => $sub_key) {
-            $order_key = "$object_key:$sub_key";
-            if (!isset($this->_order[$order_key])) {
-              $undefined_order_keys[$order_key] = TRUE;
-            }
-          }
-        }
-      }
-      else if (!isset($this->_order[$object_key])) {
-        $undefined_order_keys[$object_key] = TRUE;
-      }
-    }
-    if (!empty($undefined_order_keys)) {
-      drupal_set_message(t(
-        'Crumbs: Some crumb creation rules are neither enabled nor disabled. Please visit !crumbs_config_link.<br/>(You might have to refresh the page, to make this message go away)',
-        array(
-          '!crumbs_config_link' => l('admin/build/crumbs', 'admin/build/crumbs'),
-        )
-      ), 'error', FALSE);
-    }
-  }
   
   function buildTrail($path) {
     $trail_reverse = array();
@@ -206,79 +187,18 @@ class _crumbs_TrailFinder {
     $trail = array_reverse($trail_reverse);
     $this->_decorateTrail($trail);
     return $trail;
-    return array();
   }
   
   
-  protected function _findParentPath($path, stdClass $extra) {
-    if ($extra->item) {
-      $item_wrapped = new crumbs_ItemWrapper_find($extra);
-      if ($extra->item['path']) {
-        $path_method = 'find__' . preg_replace('/[^a-z0-9]/', '_', strtolower($extra->item['path']));
-      }
-      $candidates = array();
-      foreach ($this->_order as $order_key => $enabled) {
-        if ($enabled) {
-          if (is_string($candidates[$order_key])) {
-            return drupal_get_normal_path($candidates[$order_key]);
-          }
-          list($object_key, $sub_key) = explode(':', $order_key, 2);
-          $object = $this->_objects[$object_key];
-          if ($object) {
-            $method = NULL;
-            if ($path_method && method_exists($object, $path_method)) {
-              $method = $path_method;
-            } else if (method_exists($object, 'decorate')) {
-              $method = 'decorate';
-            }
-            if ($method) {
-              $parent_path = $object->$method($path, $item_wrapped, $sub_key);
-              if (is_array($parent_path)) {
-                foreach ($parent_path as $x_sub_key => $x_parent_path) {
-                  $candidates["$object_key:$x_sub_key"] = $x_parent_path;
-                }
-              }
-              else if (is_string($parent_path)) {
-                return $candidates[$object_key] = $parent_path;
-              }
-            }
-          }
-          if (is_string($candidates[$order_key])) {
-            return drupal_get_normal_path($candidates[$order_key]);
-          }
-        }
-      }
-    }
-    // fallback: chop off the last fragment of the system path.
-    $fragments = explode('/', $path);
-    return implode('/', array_slice($fragments, 0, -1));
+  function invokeInit($trail) {
+    $invokeAction = new _crumbs_InvokeAction_simple('init', array($trail));
+    $this->_pluginEngine->invokeAll($invokeAction);
   }
   
   
-  protected function _decorateItem($path, stdClass $extra) {
-    if ($extra->item) {
-      $item_wrapped = new crumbs_ItemWrapper_find($extra);
-      if ($extra->item['path']) {
-        $path_method = 'decorate__' . preg_replace('/[^a-z0-9]/', '_', strtolower($extra->item['path']));
-      }
-      foreach (array_reverse($this->_order) as $order_key => $enabled) {
-        if ($enabled) {
-          list($object_key, $sub_key) = explode(':', $order_key, 2);
-          $object = $this->_objects[$object_key];
-          if ($object) {
-            $method = NULL;
-            if ($path_method && method_exists($object, $path_method)) {
-              $method = $path_method;
-            } else if (method_exists($object, 'decorate')) {
-              $method = 'decorate';
-            }
-            if ($method) {
-              $object->$method($path, $item_wrapped, $sub_key);
-            }
-          }
-        }
-      }
-    }
+  function invokePreprocessPage(&$vars, $trail) {
+    $invokeAction = new _crumbs_InvokeAction_simple('preprocessPage', array(&$vars, $trail));
+    $this->_pluginEngine->invokeAll($invokeAction);
   }
   
   
@@ -291,18 +211,195 @@ class _crumbs_TrailFinder {
     foreach ($trail as $path => $extra) {
       $trail_wrapped[$path] = new crumbs_ItemWrapper_decorate($extra);
     }
+    $invokeAction = new _crumbs_InvokeAction_simple('decorateTrail', array($trail_wrapped));
+    $this->_pluginEngine->invokeAll($invokeAction);
+  }
+  
+  
+  protected function _decorateItem($path, stdClass $extra) {
+    if ($extra->item) {
+      $invokeAction = new _crumbs_InvokeAction_decorate($path, $extra);
+      $this->_pluginEngine->invokeAll($invokeAction);
+    }
+  }
+  
+  
+  protected function _findParentPath($path, stdClass $extra) {
+    if ($extra->item) {
+      $invokeAction = new _crumbs_InvokeAction_find($path, $extra);
+      $this->_pluginEngine->invokeAll($invokeAction);
+      $parent_path = $invokeAction->getParentPath();
+      if ($parent_path) {
+        return $parent_path;
+      }
+    }
+    // fallback: chop off the last fragment of the system path.
+    $fragments = explode('/', $path);
+    return implode('/', array_slice($fragments, 0, -1));
+  }
+}
+
+
+class _crumbs_PluginEngine {
+  
+  protected $_order;
+  protected $_subkey_order = array();
+  protected $_objects;
+  protected $_wildcard_objects = array();
+  protected $_subkey_wildcard_objects = array();
+  
+  function __construct() {
+    $this->_order = _crumbs_get_settings();
+    foreach ($this->_order as $order_key => $enabled) {
+      list($object_key, $sub_key) = explode(':', $order_key, 2);
+      $this->_subkey_order[$object_key][$sub_key] = $enabled;
+    }
+    $this->_objects = _crumbs_get_objects();
+    foreach ($this->_objects as $object_key => $object) {
+      if (isset($this->_order[$object_key])) {
+        // do nothing
+      }
+      else if (isset($this->_order["$object_key:*"])) {
+        $this->_subkey_wildcard_objects["$object_key:*"] = $object;
+      }
+      else {
+        list($module, $instance_key) = explode('.', $object_key, 2);
+        if ($this->_order["$module.*"]) {
+          $this->_wildcard_objects["$module.*"][$instance_key] = $object;
+        }
+      }
+    }
+  }
+  
+  function invokeAll($invokeAction) {
     foreach ($this->_order as $order_key => $enabled) {
       if ($enabled) {
         list($object_key, $sub_key) = explode(':', $order_key, 2);
-        $object = $this->_objects[$object_key];
-        if ($object && method_exists($object, 'decorateTrail')) {
-          $object->decorateTrail($trail_wrapped, $sub_key);
+        list($module, $instance_key) = explode('.', $object_key, 2);
+        $subkey_order = $this->_subkey_order[$object_key];
+        if ($instance_key !== '*' && $object = $this->_objects[$object_key]) {
+          $stop = $invokeAction->invoke($object, $object_key, $order_key, $subkey_order);
+          if ($stop === TRUE) {
+            return;
+          }
+        }
+        else if ($instance_key === '*' && !isset($sub_key) && $objects = $this->_wildcard_objects[$object_key]) {
+          foreach ($objects as $instance_key => $object) {
+            $stop = $invokeAction->invoke($object, "$module.$instance_key", $order_key, $subkey_order);
+            if ($stop === TRUE) {
+              return;
+            }
+          }
         }
       }
     }
   }
 }
 
+
+class _crumbs_InvokeAction_simple {
+  
+  protected $_method;
+  protected $_args;
+  
+  function __construct($method, $args) {
+    $this->_method = $method;
+    foreach (array_keys($args) as $i => $k) {
+      $this->_args[$i] = &$args[$k];
+    }
+  }
+  
+  function invoke($object, $object_key, $order_key, $subkey_order) {
+    $args = $this->_args;
+    list($object_key, $sub_key) = explode(':', $order_key, 2);
+    list($module, $instance_key) = explode('.', $object_key, 2);
+    $args[] = $sub_key;
+    $args[] = $subkey_order;
+    $method = $this->_method;
+    if (method_exists($object, $method)) {
+      call_user_func_array(array($object, $method), $args);
+    }
+  }
+}
+
+
+class _crumbs_InvokeAction_find {
+  
+  protected $_path;
+  protected $_item;
+  protected $_method;
+  protected $_parent_path;
+  protected $_candidates = array();
+  
+  function __construct($path, $extra) {
+    $this->_path = $path;
+    $item = new crumbs_ItemWrapper_find($extra);
+    $this->_item = $item;
+    $this->_method = 'find__' . preg_replace('/[^a-z0-9]/', '_', strtolower($extra->item['path']));
+  }
+  
+  function invoke($object, $object_key, $order_key, $subkey_order) {
+    if (isset($this->_candidates[$order_key])) {
+      $this->_parent_path = $this->_candidates[$order_key];
+      return TRUE;
+    }
+    list($object_key, $sub_key) = explode(':', $order_key, 2);
+    list($module, $instance_key) = explode('.', $object_key, 2);
+    $path_method = $this->_method;
+    foreach (array($path_method, 'find') as $method) {
+      if (method_exists($object, $method)) {
+        $result = $object->$method($this->_path, $this->_item, $subkey_order);
+        if (is_array($result)) {
+          foreach ($result as $x_sub_key => $parent_path) {
+            if (!isset($subkey_order[$x_sub_key])) {
+              $this->_candidates["$object_key:*"] = $parent_path;
+            }
+            else if ($subkey_order[$x_sub_key]) {
+              $this->_candidates["$object_key:$x_sub_key"] = $parent_path;
+            }
+          }
+        }
+        else if (is_string($result)) {
+          $this->_candidates[$order_key] = $parent_path;
+        }
+      }
+    }
+    if (isset($this->_candidates[$order_key])) {
+      $this->_parent_path = $this->_candidates[$order_key];
+      return TRUE;
+    }
+  }
+  
+  function getParentPath() {
+    return $this->_parent_path;
+  }
+}
+
+
+class _crumbs_InvokeAction_decorate {
+  
+  protected $_path;
+  protected $_item;
+  protected $_method;
+  
+  function __construct($path, $extra) {
+    $this->_path = $path;
+    $item = new crumbs_ItemWrapper_find($extra);
+    $this->_item = $item;
+    $this->_method = 'decorate__' . preg_replace('/[^a-z0-9]/', '_', strtolower($extra->item['path']));
+  }
+  
+  function invoke($object, $object_key, $order_key, $subkey_order) {
+    list($object_key, $sub_key) = explode(':', $order_key, 2);
+    list($module, $instance_key) = explode('.', $object_key, 2);
+    $path_method = $this->_method;
+    foreach (array($path_method, 'decorate') as $method) {
+      if (method_exists($object, $method)) {
+        $result = $object->$method($this->_path, $this->_item, $sub_key, $subkey_order);
+      }
+    }
+  }
+}
 
 
 

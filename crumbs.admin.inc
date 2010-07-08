@@ -27,11 +27,39 @@ EOT;
   );
   
   $order = _crumbs_get_settings();
+  $lines = _crumbs_get_available_rule_lines();
+  $lines_active = array();
+  $lines_inactive = array();
+  $lines_inherit = $lines;
+  foreach ($order as $order_key => $enabled) {
+    if (isset($lines_inherit[$order_key])) {
+      if ($enabled) {
+        $lines_active[$order_key] = $lines_inherit[$order_key];
+      }
+      else {
+        $lines_inactive[$order_key] = $lines_inherit[$order_key];
+      }
+      unset($lines_inherit[$order_key]);
+    }
+  }
+  
+  $text
+    = implode("\n", $lines_active)
+    . "\n---- disabled ----\n" . implode("\n", $lines_inactive)
+    . "\n---- inherit ----\n" . implode("\n", $lines_inherit)
+  ;
+  
+  $form['settings']['#default_value'] = $text;
+  
+  return $form;
+}
+
+
+function _crumbs_get_available_rule_lines() {
   $objects = _crumbs_get_objects();
-  $lines_active = $order;
-  $lines_inactive = $order;
-  $lines_undefined = array();
+  $lines = array();
   foreach ($objects as $object_key => $object) {
+    list($module, $instance_key) = explode('.', $object_key, 2);
     $rule_titles = array();
     if (method_exists($object, 'getRuleTitles')) {
       $rule_titles = $object->getRuleTitles();
@@ -43,42 +71,25 @@ EOT;
       $rule_titles[''] = NULL;
     }
     foreach ($rule_titles as $sub_key => $rule_title) {
-      $order_key = strlen($sub_key) ? "$object_key:$sub_key" : $object_key;
+      if (strlen($sub_key)) {
+        $lines["$object_key:*"] = "$object_key:* (wildcard)";
+        $order_key = "$object_key:$sub_key";
+      }
+      else {
+        $order_key = $object_key;
+      }
+      if (strlen($instance_key)) {
+        $lines["$module.*"] = "$module.* (wildcard)";
+      }
       $line = $order_key;
       if (strlen($rule_title)) {
         $rule_title = str_replace("\n", ' ', check_plain($rule_title));
         $line .= " ($rule_title)";
       }
-      if (!isset($order[$order_key])) {
-        // make sure the value is a string, so we can use is_string() later.
-        $lines_undefined[$order_key] = $line.'';
-      } else if ($order[$order_key]) {
-        $lines_active[$order_key] = $line.'';
-      } else {
-        $lines_inactive[$order_key] = $line.'';
-      }
+      $lines[$order_key] = $line.'';
     }
   }
-  foreach ($lines_active as $order_key => $v) {
-    if ($v === TRUE || $v === FALSE) {
-      unset($lines_active[$order_key]);
-    }
-  }
-  foreach ($lines_inactive as $order_key => $v) {
-    if ($v === TRUE || $v === FALSE) {
-      unset($lines_inactive[$order_key]);
-    }
-  }
-  
-  $text =
-    implode("\n", $lines_active) .
-    "\n---- undefined ----\n" . implode("\n", $lines_undefined) .
-    "\n---- disabled ----\n" . implode("\n", $lines_inactive)
-  ;
-  
-  $form['settings']['#default_value'] = $text;
-  
-  return $form;
+  return $lines;
 }
 
 
@@ -90,9 +101,13 @@ function crumbs_admin_form_submit($form, &$form_state) {
   $enabled = TRUE;
   foreach ($lines as $line) {
     $line = trim($line);
-    if (!preg_match('/^[\w\d\.\_][\w\d\.\-\_\:]*/', $line, $m)) {
-      $enabled = FALSE;
-      continue;
+    if (!preg_match('/^[\w\d\.\_][\w\d\.\-\_\:\*]*/', $line, $m)) {
+      if ($enabled) {
+        $enabled = FALSE;
+        continue;
+      } else {
+        break;
+      }
     }
     $order[$m[0]] = $enabled;
   }
