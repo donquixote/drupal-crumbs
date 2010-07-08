@@ -44,7 +44,8 @@ class menu_class_CrumbsParentFinder {
     }
   }
   
-  function decorate($path, &$menu_item) {
+  
+  function decorate($path, $item) {
     $q = db_query($sql = "
       SELECT
         link_title
@@ -52,9 +53,9 @@ class menu_class_CrumbsParentFinder {
         {menu_links}
       WHERE link_path = '%s' AND menu_name = '%s'
     ", $path, $this->_menu_name);
-    while ($row = db_fetch_array($q)) {
-      if ($row['link_title']) {
-        $menu_item['title'] = $row['link_title'];
+    while ($row = db_fetch_object($q)) {
+      if ($row->link_title) {
+        $item->title = $row->link_title;
         break;
       }
     }

@@ -26,27 +26,50 @@ EOT;
     '#value' => 'Save',
   );
   
-  $settings = _crumbs_get_settings();
+  $order = _crumbs_get_settings();
   $objects = _crumbs_get_objects();
-  $lines_active = array();
-  $lines_inactive = array();
+  $lines_active = $order;
+  $lines_inactive = $order;
   $lines_undefined = array();
-  foreach ($objects as $key => $object) {
-    $line = $key;
-    if (method_exists($object, 'getRuleTitle')) {
-      $rule_title = str_replace("\n", ' ', check_plain($object->getRuleTitle()));
-      if ($rule_title) {
+  foreach ($objects as $object_key => $object) {
+    $rule_titles = array();
+    if (method_exists($object, 'getRuleTitles')) {
+      $rule_titles = $object->getRuleTitles();
+    }
+    else if (method_exists($object, 'getRuleTitle')) {
+      $rule_titles[''] = $object->getRuleTitle();
+    }
+    else {
+      $rule_titles[''] = NULL;
+    }
+    foreach ($rule_titles as $sub_key => $rule_title) {
+      $order_key = strlen($sub_key) ? "$object_key:$sub_key" : $object_key;
+      $line = $order_key;
+      if (strlen($rule_title)) {
+        $rule_title = str_replace("\n", ' ', check_plain($rule_title));
         $line .= " ($rule_title)";
       }
-    }
-    if (!isset($settings[$key])) {
-      $lines_undefined[] = $line;
-    } else if ($settings[$key]) {
-      $lines_active[] = $line;
-    } else {
-      $lines_inactive[] = $line;
+      if (!isset($order[$order_key])) {
+        // make sure the value is a string, so we can use is_string() later.
+        $lines_undefined[$order_key] = $line.'';
+      } else if ($order[$order_key]) {
+        $lines_active[$order_key] = $line.'';
+      } else {
+        $lines_inactive[$order_key] = $line.'';
+      }
     }
   }
+  foreach ($lines_active as $order_key => $v) {
+    if ($v === TRUE || $v === FALSE) {
+      unset($lines_active[$order_key]);
+    }
+  }
+  foreach ($lines_inactive as $order_key => $v) {
+    if ($v === TRUE || $v === FALSE) {
+      unset($lines_inactive[$order_key]);
+    }
+  }
+  
   $text =
     implode("\n", $lines_active) .
     "\n---- undefined ----\n" . implode("\n", $lines_undefined) .
@@ -63,17 +86,17 @@ function crumbs_admin_form_submit($form, &$form_state) {
   $m = array();
   $text = $form_state['values']['settings'];
   $lines = explode("\n", $text);
-  $settings = array();
+  $order = array();
   $enabled = TRUE;
   foreach ($lines as $line) {
     $line = trim($line);
-    if (!preg_match('/^[\w\d\.\_][\w\d\.\-\_]*/', $line, $m)) {
+    if (!preg_match('/^[\w\d\.\_][\w\d\.\-\_\:]*/', $line, $m)) {
       $enabled = FALSE;
       continue;
     }
-    $settings[$m[0]] = $enabled;
+    $order[$m[0]] = $enabled;
   }
-  variable_set('crumbs', $settings);
+  variable_set('crumbs', $order);
 }
 
 
