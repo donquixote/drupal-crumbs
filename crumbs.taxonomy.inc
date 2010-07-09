@@ -50,6 +50,12 @@ class _taxonomy_CrumbsParentFinder__hierarchy extends taxonomy_class_CrumbsParen
   }
   
   
+  function decorate__admin_content_taxonomy__($path, $item) {
+    $voc = $item->getArg(1);
+    $item->title = $voc->name;
+  }
+  
+  
   /**
    * Terms get their parent terms as breadcrumb parent.
    * The method name matches the router path "taxonomy/term/%".

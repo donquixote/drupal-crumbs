@@ -69,7 +69,7 @@ function crumbs_build_breadcrumb($trail) {
 
 function crumbs_preprocess_page(&$vars) {
   $trail = crumbs_get_trail();
-  $vars['crumbs_trail'] = crumbs_get_trail();
+  $vars['crumbs_trail'] = $trail = crumbs_get_trail();
   // Some modules call drupal_set_breadcrumb() with their own ideas of a
   // breadcrumb, and thus overwrite the breadcrumb set in crumbs_init(),
   // Thus, we need template_preprocess_page() to restore the crumbs crumb
@@ -166,9 +166,11 @@ class _crumbs_TrailFinder {
       );
       $parent_path = $this->_findParentPath($path, $extra);
       if ($menu_item) {
-        $this->_decorateItem($path, $extra, $trail_reverse);
-        if (!$extra->skip_in_breadcrumb && $menu_item['access']) {
-          $trail_reverse[$path] = $extra;
+        if (count(explode('/', $menu_item['path'])) == count(explode('/', $path))) {
+          $this->_decorateItem($path, $extra, $trail_reverse);
+          if (!$extra->skip_in_breadcrumb && $menu_item['access']) {
+            $trail_reverse[$path] = $extra;
+          }
         }
       }
       if ($parent_path == $path) {
