@@ -9,6 +9,7 @@ function crumbs_admin_form() {
     <p>Reorder and enable/disable crumbs rules.</p>
     <p>The title coming after the first space in each row can be ignored, it has no effect. What matters is the key before the first space.</p>
     <p>Hint: Copy+paste to edit this text to your favourite text editor, or to import, export and backup. Text editor beats tabledrag, don't you think?</p>
+    <p>If a newly installed module introduces new crumbs rules, these rules will find themselves in the "inherit" section at first. Priority and enabled/disabled status of rules in the "inherit" section is inherited from matching wildcard rules in the "enabled" or "disabled" section. The '*' wildcard rule counts a enabled, if it is in the inherit section itself.</p>
 EOT;
   $form['instructions'] = array(
     '#value' => t($text),
@@ -18,7 +19,7 @@ EOT;
     '#type' => 'textarea',
     '#title' => 'Order of rules.',
     '#description' => 'Each row is a rule',
-    '#rows' => 20,
+    '#rows' => 24,
   );
   
   $form['submit'] = array(
@@ -44,9 +45,11 @@ EOT;
   }
   
   $text
-    = implode("\n", $lines_active)
-    . "\n---- disabled ----\n" . implode("\n", $lines_inactive)
-    . "\n---- inherit ----\n" . implode("\n", $lines_inherit)
+    = "\n\n"
+    . implode("\n", $lines_active)
+    . "\n\n---- disabled ----\n" . implode("\n", $lines_inactive)
+    . "\n\n---- inherit ----\n" . implode("\n", $lines_inherit)
+    . "\n\n"
   ;
   
   $form['settings']['#default_value'] = $text;
@@ -89,11 +92,13 @@ function _crumbs_get_available_rule_lines() {
       $lines[$order_key] = $line.'';
     }
   }
+  $lines['*'] = '* (' . t("root wildcard. inherit is treated as enabled.") . ')';
   return $lines;
 }
 
 
 function crumbs_admin_form_submit($form, &$form_state) {
+  $available_lines = _crumbs_get_available_rule_lines();
   $m = array();
   $text = $form_state['values']['settings'];
   $lines = explode("\n", $text);
@@ -101,15 +106,16 @@ function crumbs_admin_form_submit($form, &$form_state) {
   $enabled = TRUE;
   foreach ($lines as $line) {
     $line = trim($line);
-    if (!preg_match('/^[\w\d\.\_][\w\d\.\-\_\:\*]*/', $line, $m)) {
+    list($key, $title) = explode(' ', $line, 2);
+    if (isset($available_lines[$key])) {
+      $order[$key] = $enabled;
+    } else if (preg_match('/^-/', $line)) {
       if ($enabled) {
         $enabled = FALSE;
-        continue;
       } else {
         break;
       }
     }
-    $order[$m[0]] = $enabled;
   }
   variable_set('crumbs', $order);
 }

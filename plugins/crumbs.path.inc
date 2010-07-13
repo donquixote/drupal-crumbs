@@ -9,7 +9,7 @@
 class path_class_CrumbsParentFinder {
   
   function getRuleTitle() {
-    return 'existing alias';
+    return 'existing alias for the given path';
   }
   
   function find($path) {

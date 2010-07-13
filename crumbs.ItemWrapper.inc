@@ -3,6 +3,7 @@
 
 
 
+
 class crumbs_ReadonlyArrayWrapper implements ArrayAccess {
   
   protected $_array;
@@ -45,38 +46,11 @@ class crumbs_ItemWrapper extends crumbs_ReadonlyArrayWrapper {
   function getArg($i) {
     return $this->_array['page_arguments'][$i];
   }
-
-  function setTitle($title) {
-    $this->_extra->title = $title;
-  }
   
   function __set($key, $value) {
     switch ($key) {
       case 'title':
         $this->_extra->$key = $value;
-    }
-  }
-}
-
-
-class crumbs_ItemWrapper_find extends crumbs_ItemWrapper {
-  
-  function skipInBreadcrumb() {
-    $this->_extra->skip_in_breadcrumb = TRUE;
-  }
-  
-  function __get($key) {
-    return $this->_extra->$key;
-  }
-  
-  /**
-   * legacy support
-   */
-  function offsetSet($offset, $value) {
-    switch ($offset) {
-      case 'skip_in_breadcrumb':
-      case 'title':
-        $this->_extra->$offset = $value;
     }
   }
 }
@@ -100,6 +74,7 @@ class crumbs_ItemWrapper_theme extends crumbs_ItemWrapper_decorate {
     return $this->_extra->title;
   }
 }
+
 
 
 

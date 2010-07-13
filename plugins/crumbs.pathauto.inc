@@ -13,7 +13,7 @@ class pathauto_class_CrumbsParentFinder {
   }
   
   function getRuleTitle() {
-    return 'path that pathauto would assign to this node.';
+    return 'the alias that pathauto would assign to this path.';
   }
   
   function find__node__($path, $menu_item) {
