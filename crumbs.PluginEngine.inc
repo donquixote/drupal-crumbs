@@ -82,20 +82,18 @@ class _crumbs_PluginEngine {
   
   
   protected function _invokeObject($invokeAction, $object, $object_key, $subkey = '*') {
-    if ($subkey !== '*') {
+    $subkey_order = $this->_wildcard_subkey_order[$object_key];
+    if ($subkey !== '*' || !is_array($subkey_order)) {
       $stop = $invokeAction->invoke($object, $object_key, $subkey);
       if ($stop === TRUE) {
         return TRUE;
       }
     }
     else {
-      $subkey_order = $this->_wildcard_subkey_order[$object_key];
-      if (is_array($subkey_order)) {
-        foreach ($subkey_order as $subkey => $enabled) {
-          $stop = $invokeAction->invoke($object, $object_key, $subkey);
-          if ($stop === TRUE) {
-            return TRUE;
-          }
+      foreach ($subkey_order as $subkey => $enabled) {
+        $stop = $invokeAction->invoke($object, $object_key, $subkey);
+        if ($stop === TRUE) {
+          return TRUE;
         }
       }
     }
