@@ -6,9 +6,7 @@
 function _crumbs_get_finder() {
   static $_finder;
   if (!isset($_finder)) {
-    $order = _crumbs_get_settings();
-    $objects = _crumbs_get_objects();
-    $pluginEngine = new _crumbs_PluginEngine($order, $objects);
+    $pluginEngine = _crumbs_load_plugin_engine();
     $_finder = new _crumbs_TrailFinder($pluginEngine);
   }
   return $_finder;

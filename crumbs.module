@@ -11,7 +11,7 @@ module_load_include('inc', 'crumbs', 'crumbs.decorateTrail');
 
 module_load_include('inc', 'crumbs', 'plugins/crumbs.menu');
 module_load_include('inc', 'crumbs', 'plugins/crumbs.views_ui');
-// module_load_include('inc', 'crumbs', 'plugins/crumbs.taxonomy');
+module_load_include('inc', 'crumbs', 'plugins/crumbs.taxonomy');
 module_load_include('inc', 'crumbs', 'plugins/crumbs.path');
 module_load_include('inc', 'crumbs', 'plugins/crumbs.pathauto');
 module_load_include('inc', 'crumbs', 'plugins/crumbs.nodereference');

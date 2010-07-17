@@ -4,101 +4,42 @@
 
 class _crumbs_PluginEngine {
   
-  protected $_order;
-  protected $_subkey_order = array();
-  protected $_objects;
-  protected $_wildcard_objects = array();
-  protected $_subkey_wildcard_objects = array();
-  protected $_wildcard_subkey_order = array();
+  protected $_x;
   
   
-  function __construct(array $order, array $objects) {
-    $this->_order = $order;
-    $this->_objects = $objects;
-    foreach ($this->_order as $order_key => $enabled) {
-      list($object_key, $subkey) = explode(':', $order_key, 2);
-      $this->_subkey_order[$object_key][$subkey] = $enabled;
-    }
-    foreach ($this->_objects as $object_key => $object) {
-      if (isset($this->_order[$object_key])) {
-        // do nothing
-      }
-      else if (isset($this->_order["$object_key:*"])) {
-        $this->_subkey_wildcard_objects["$object_key:*"] = $object;
-      }
-      else {
-        list($module, $instance_key) = explode('.', $object_key, 2);
-        if ($this->_order["$module.*"]) {
-          $this->_wildcard_objects["$module.*"][$instance_key] = $object;
-        }
-        else {
-          $this->_wildcard_objects['*'][$object_key] = $object;
-        }
-      }
-      if (method_exists($object, 'getRuleTitles')) {
-        foreach ($object->getRuleTitles() as $subkey => $title) {
-          $this->_wildcard_subkey_order[$object_key][$subkey] = TRUE;
-        }
-      }
-    }
-    if (!isset($this->_order['*'])) {
-      $this->_order['*'] = TRUE;
-    }
+  function __construct($x) {
+    $this->_x = $x;
   }
   
   
   function invokeAll($invokeAction, $reverse = FALSE) {
-    $order = $reverse ? array_reverse($this->_order) : $this->_order;
-    foreach ($this->_order as $order_key => $enabled) {
+    $x = $this->_x;
+    $order = $reverse ? array_reverse($x->order) : $x->order;
+    foreach ($order as $order_key => $enabled) {
       if ($enabled) {
-        list($object_key, $subkey) = explode(':', $order_key, 2);
-        list($module, $instance_key) = explode('.', $object_key, 2);
-        
-        if ($instance_key !== '*' && $object = $this->_objects[$object_key]) {
-          $stop = $this->_invokeObject($invokeAction, $object, $object_key, $subkey);
-          if ($stop === TRUE) {
-            return;
-          }
+        if (isset($x->rules[$order_key])) {
+          $this->_invokeRule($invokeAction, $order_key);
         }
-        else if ($instance_key === '*' && !isset($subkey) && $objects = $this->_wildcard_objects[$object_key]) {
-          foreach ($objects as $instance_key => $object) {
-            $stop = $this->_invokeObject($invokeActon, $object, "$module.$instance_key", '*');
-            if ($stop === TRUE) {
-              return;
-            }
-          }
-        }
-        else if ($order_key === '*' && $objects = $this->_wildcard_objects['*']) {
-          foreach ($objects as $object_key => $object) {
-            $stop = $this->_invokeObject($invokeAction, $object, $object_key, '*');
-            if ($stop === TRUE) {
-              return;
-            }
+        else if (isset($x->wildcard_rules[$order_key])) {
+          foreach ($x->wildcard_rules[$order_key] as $rule_key) {
+            $this->_invokeRule($invokeAction, $rule_key);
           }
         }
       }
     }
   }
   
-  
-  protected function _invokeObject($invokeAction, $object, $object_key, $subkey = '*') {
-    $subkey_order = $this->_wildcard_subkey_order[$object_key];
-    if ($subkey !== '*' || !is_array($subkey_order)) {
-      $stop = $invokeAction->invoke($object, $object_key, $subkey);
-      if ($stop === TRUE) {
-        return TRUE;
-      }
-    }
-    else {
-      foreach ($subkey_order as $subkey => $enabled) {
-        $stop = $invokeAction->invoke($object, $object_key, $subkey);
-        if ($stop === TRUE) {
-          return TRUE;
-        }
-      }
+  protected function _invokeRule($invokeAction, $rule_key) {
+    $x = $this->_x;
+    list($object_key, $subkey) = explode(':', $rule_key, 2);
+    $object = $x->objects[$object_key];
+    if ($object) {
+      return $invokeAction->invoke($object, $object_key, $subkey);
     }
   }
 }
+
+
 
 
 class _crumbs_InvokeAction_simple {
@@ -122,6 +63,174 @@ class _crumbs_InvokeAction_simple {
     }
   }
 }
+
+
+
+
+class _crumbs_PluginInstanceBasket {
+  protected $_x;
+  protected $_module;
+  protected $_objects = array();
+  protected $_order;
+  
+  function __construct($x) {
+    $this->_x = $x;
+  }
+  
+  function addPluginInstance($instance_key, $object, $title = NULL) {
+    $x = $this->_x;
+    $object_key = $x->module . '.' . $instance_key;
+    if (isset($title)) {
+      $x->titles[$object_key] = $title;
+    }
+    _crumbs_init_instance($x, $object_key, $object);
+  }
+  
+  function setDefaultInstanceStatus($default_status) {
+    $x = $this->_x;
+    $module = $x->module;
+    if (!isset($x->order["$module.*"])) {
+      if ($default_status === TRUE || $default_status === FALSE) {
+        $x->order["$module.*"] = $default_status;
+      }
+    }
+  }
+}
+
+
+
+
+class _crumbs_PluginRuleBasket {
+  protected $_x;
+  
+  function __construct($x) {
+    $this->_x = $x;
+  }
+  
+  function addRule($subkey, $title = NULL) {
+    $x = $this->_x;
+    $object_key = $x->object_key;
+    $order_key = "$object_key:$subkey";
+    $x->rules[$order_key] = $order_key;
+    if (isset($title)) {
+      $x->titles[$order_key] = $title;
+    }
+  }
+  
+  function setDefaultRuleStatus($default_status) {
+    $x = $this->_x;
+    $object_key = $x->object_key;
+    if (!isset($x->order["$object_key:*"])) {
+      if ($default_status === TRUE || $default_status === FALSE) {
+        $x->order["$object_key.*"] = $default_status;
+      }
+    }
+  }
+}
+
+
+
+function _crumbs_load_plugin_data() {
+  $x = new stdClass;
+  $x->order = _crumbs_get_settings() + array('*' => TRUE);
+  _crumbs_init_modules($x);
+  return $x;
+}
+
+
+function _crumbs_load_plugin_engine() {
+  $x = _crumbs_load_plugin_data();
+  return new _crumbs_PluginEngine($x);
+}
+
+
+
+function _crumbs_init_modules($x) {
+  $x->rules = array();
+  $x->wildcard_rules['*'] = array();
+  foreach (module_list(FALSE, TRUE) as $module) {
+    _crumbs_init_module($x, $module);
+  }
+  foreach ($x->rules as $order_key) {
+    list($object_key, $subkey) = explode(':', $order_key, 2);
+    list($module, $instance_key) = explode('.', $object_key, 2);
+    
+    if (isset($x->order[$order_key])) {
+      // don't fall back to wildcard.
+    }
+    else if ($subkey && isset($x->order["$object_key:*"])) {
+      $x->wildcard_rules["$object_key:*"][$order_key] = $order_key;
+    }
+    else if ($instance_key && isset($x->order["$module.*"])) {
+      $x->wildcard_rules["$module.*"][$order_key] = $order_key;
+    }
+    else {
+      $x->wildcard_rules["*"][$order_key] = $order_key;
+    }
+  }
+}
+
+
+
+function _crumbs_init_module($x, $module) {
+  $x->module = $module;
+  $class = $module . '_class_CrumbsParentFinder';
+  if (class_exists($class)) {
+    if (method_exists($class, 'initInstances')) {
+      $x->wildcard_rules["$module.*"] = array();
+      $instanceBasket = new _crumbs_PluginInstanceBasket($x);
+      call_user_func(array($class, 'initInstances'), $instanceBasket);
+    }
+    else if (method_exists($class, 'construct')) {
+      $x->wildcard_rules["$module.*"] = array();
+      $instanceBasket = new _crumbs_PluginInstanceBasket($x);
+      $objects = call_user_func(array($class, 'construct'));
+      foreach ($objects as $instance_key => $object) {
+        $instanceBasket->addPluginInstance($instance_key, $object);
+      }
+      if (method_exists($class, 'enabledByDefault_static')) {
+        $default_state = call_user_func(array($class, 'enabledByDefault_static'));
+        $instanceBasket->setDefaultInstanceStatus($default_state);
+      }
+    }
+    else {
+      _crumbs_init_instance($x, $module, new $class);
+    }
+  }
+}
+
+
+function _crumbs_init_instance($x, $object_key, $object) {
+  $x->objects[$object_key] = $object;
+  $x->object_key = $object_key;
+  if (!$object_key) {
+    // this should never happen..
+  }
+  else if (method_exists($object, 'initRules')) {
+    $x->wildcard_rules["$object_key:*"] = array();
+    $ruleBasket = new _crumbs_PluginRuleBasket($x);
+    $object->initRules($ruleBasket);
+  }
+  else if (method_exists($object, 'getRuleTitles')) {
+    $x->wildcard_rules["$object_key:*"] = array();
+    $titles = $object->getRuleTitles();
+    $ruleBasket = new _crumbs_PluginRuleBasket($x);
+    foreach ($titles as $subkey => $title) {
+      $ruleBasket->addRule($subkey, $title);
+    }
+    if (method_exists($object, 'enabledByDefault')) {
+      $default_state = $object->enabledByDefault();
+      $ruleBasket->setDefaultRuleStatus($default_state);
+    }
+  }
+  else {
+    $x->rules[$object_key] = $object_key;
+    if (method_exists($object, 'getRuleTitle')) {
+      $x->titles[$object_key] = $object->getRuleTitle();
+    }
+  }
+}
+
 
 
 

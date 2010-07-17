@@ -27,78 +27,61 @@ EOT;
     '#value' => 'Save',
   );
   
-  $order = _crumbs_get_settings();
-  $lines = _crumbs_get_available_rule_lines();
-  $lines_active = array();
-  $lines_inactive = array();
-  $lines_inherit = $lines;
-  foreach ($order as $order_key => $enabled) {
-    if (isset($lines_inherit[$order_key])) {
-      if ($enabled) {
-        $lines_active[$order_key] = $lines_inherit[$order_key];
-      }
-      else {
-        $lines_inactive[$order_key] = $lines_inherit[$order_key];
-      }
-      unset($lines_inherit[$order_key]);
-    }
-  }
-  
-  $text
-    = "\n\n"
-    . implode("\n", $lines_active)
-    . "\n\n---- disabled ----\n" . implode("\n", $lines_inactive)
-    . "\n\n---- inherit ----\n" . implode("\n", $lines_inherit)
-    . "\n\n"
-  ;
-  
-  $form['settings']['#default_value'] = $text;
+  $form['settings']['#default_value'] = _crumbs_get_default_text();
   
   return $form;
 }
 
 
-function _crumbs_get_available_rule_lines() {
-  $objects = _crumbs_get_objects();
-  $lines = array();
-  foreach ($objects as $object_key => $object) {
-    list($module, $instance_key) = explode('.', $object_key, 2);
-    $rule_titles = array();
-    if (method_exists($object, 'getRuleTitles')) {
-      $rule_titles = $object->getRuleTitles();
-    }
-    else if (method_exists($object, 'getRuleTitle')) {
-      $rule_titles[''] = $object->getRuleTitle();
-    }
-    else {
-      $rule_titles[''] = NULL;
-    }
-    foreach ($rule_titles as $sub_key => $rule_title) {
-      if (strlen($sub_key)) {
-        $lines["$object_key:*"] = "$object_key:* (wildcard)";
-        $order_key = "$object_key:$sub_key";
-      }
-      else {
-        $order_key = $object_key;
-      }
-      if (strlen($instance_key)) {
-        $lines["$module.*"] = "$module.* (wildcard)";
-      }
-      $line = $order_key;
-      if (strlen($rule_title)) {
-        $rule_title = str_replace("\n", ' ', check_plain($rule_title));
-        $line .= " ($rule_title)";
-      }
-      $lines[$order_key] = $line.'';
+function _crumbs_get_default_text() {
+  
+  $x = _crumbs_load_plugin_data();
+  $lines = array(
+    'inherit' => _crumbs_get_available_rule_lines($x),
+    'enabled' => array(),
+    'disabled' => array(),
+  );
+    
+  
+  foreach ($x->order as $order_key => $enabled) {
+    if (isset($lines['inherit'][$order_key])) {
+      $lines[$enabled ? 'enabled' : 'disabled'][$order_key] = $lines['inherit'][$order_key];
+      unset($lines['inherit'][$order_key]);
     }
   }
-  $lines['*'] = '* (' . t("root wildcard. inherit is treated as enabled.") . ')';
+  
+  return "\n\n"
+    . implode("\n", $lines['enabled'])
+    . "\n\n---- disabled ----\n" . implode("\n", $lines['disabled'])
+    . "\n\n---- inherit ----\n" . implode("\n", $lines['inherit'])
+    . "\n\n"
+  ;
+}
+
+
+function _crumbs_get_available_rule_lines($x) {
+  
+  $lines = array();
+  
+  foreach ($x->rules as $rule_key) {
+    $lines[$rule_key] = $rule_key;
+  }
+  foreach ($x->wildcard_rules as $order_key => $rules) {
+    $lines[$order_key] = "$order_key (wildcard)";
+  }
+  foreach ($x->titles as $rule_key => $title) {
+    $lines[$rule_key] = "$rule_key ($title)";
+  }
+  
   return $lines;
 }
 
 
 function crumbs_admin_form_submit($form, &$form_state) {
-  $available_lines = _crumbs_get_available_rule_lines();
+  
+  $x = _crumbs_load_plugin_data();
+  $available_lines = _crumbs_get_available_rule_lines($x);
+  
   $m = array();
   $text = $form_state['values']['settings'];
   $lines = explode("\n", $text);
