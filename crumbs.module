@@ -10,6 +10,7 @@ module_load_include('inc', 'crumbs', 'crumbs.findParent');
 module_load_include('inc', 'crumbs', 'crumbs.decorateTrail');
 
 module_load_include('inc', 'crumbs', 'plugins/crumbs.menu');
+module_load_include('inc', 'crumbs', 'plugins/crumbs.forum');
 module_load_include('inc', 'crumbs', 'plugins/crumbs.views_ui');
 module_load_include('inc', 'crumbs', 'plugins/crumbs.taxonomy');
 module_load_include('inc', 'crumbs', 'plugins/crumbs.path');
@@ -51,9 +52,7 @@ function _crumbs_noaccess() {
 
 
 function crumbs_init() {
-  $item = menu_get_item();
-  $link_path = $item['href'];
-  $trail = crumbs_build_trail($link_path, TRUE);
+  $trail = crumbs_build_trail($_GET['q'], TRUE);
   _crumbs_set_trail($trail);
   $breadcrumb = crumbs_build_breadcrumb($trail);
   _crumbs_set_breadcrumb($breadcrumb);

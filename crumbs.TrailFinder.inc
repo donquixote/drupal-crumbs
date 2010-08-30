@@ -48,7 +48,7 @@ class _crumbs_TrailFinder {
       $parent_path = $this->_findParentPath($path, $extra);
       $parent_path = drupal_get_normal_path($parent_path);
       if ($menu_item) {
-        if (count(explode('/', $menu_item['path'])) == count(explode('/', $path))) {
+        if (count(explode('/', $menu_item['path'])) <= count(explode('/', $path))) {
           $this->_decorateItem($path, $extra, $trail_reverse);
           if (!$extra->skip_in_breadcrumb && $menu_item['access']) {
             $trail_reverse[$path] = $extra;

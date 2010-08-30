@@ -36,10 +36,15 @@ class nodereference_class_CrumbsParentFinder {
    */
   function getRuleTitles() {
     $titles = array();
-    foreach ($this->_field_info['referenceable_types'] as $type_name) {
+    foreach ($this->_getReferenceableTypes() as $type_name) {
       $titles[$type_name] = '';
     }
     return $titles;
+  }
+  
+  protected function _getReferenceableTypes() {
+    $types = $this->_field_info['referenceable_types'];
+    return is_array($types) ? $types : array();
   }
   
   /**
