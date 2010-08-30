@@ -62,18 +62,31 @@ class crumbs_ItemWrapper extends crumbs_ReadonlyArrayWrapper {
         $this->_extra->$key = $value;
     }
   }
-}
-
-
-class crumbs_ItemWrapper_decorate extends crumbs_ItemWrapper {
   
   function __get($key) {
-    return $this->_extra->$key;
+    switch ($key) {
+      case 'route':
+      case 'router_path':
+        return $this->getRouterPath();
+      default:
+        return $this->_extra->$key;
+    }
   }
-}
-
-
-class crumbs_ItemWrapper_theme extends crumbs_ItemWrapper_decorate {
+  
+  function skipInBreadcrumb() {
+    $this->_extra->skip_in_breadcrumb = TRUE;
+  }
+  
+  /**
+   * legacy support
+   */
+  function offsetSet($offset, $value) {
+    switch ($offset) {
+      case 'skip_in_breadcrumb':
+      case 'title':
+        $this->_extra->$offset = $value;
+    }
+  }
   
   function link($options = array()) {
     return l($this->_extra->title, $this->_extra->path, $options);
@@ -82,6 +95,16 @@ class crumbs_ItemWrapper_theme extends crumbs_ItemWrapper_decorate {
   function __toString() {
     return $this->_extra->title;
   }
+}
+
+
+class crumbs_ItemWrapper_decorate extends crumbs_ItemWrapper {
+  // no changes
+}
+
+
+class crumbs_ItemWrapper_theme extends crumbs_ItemWrapper_decorate {
+  // no changes
 }
 
 

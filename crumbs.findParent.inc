@@ -62,25 +62,7 @@ class _crumbs_InvokeAction_findParent {
 
 
 class crumbs_ItemWrapper_findParent extends crumbs_ItemWrapper {
-  
-  function skipInBreadcrumb() {
-    $this->_extra->skip_in_breadcrumb = TRUE;
-  }
-  
-  function __get($key) {
-    return $this->_extra->$key;
-  }
-  
-  /**
-   * legacy support
-   */
-  function offsetSet($offset, $value) {
-    switch ($offset) {
-      case 'skip_in_breadcrumb':
-      case 'title':
-        $this->_extra->$offset = $value;
-    }
-  }
+  // no changes
 }
 
 

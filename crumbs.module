@@ -51,29 +51,9 @@ function _crumbs_noaccess() {
 }
 
 
-function crumbs_init() {
-  $trail = crumbs_build_trail($_GET['q'], TRUE);
-  _crumbs_set_trail($trail);
-  $breadcrumb = crumbs_build_breadcrumb($trail);
-  _crumbs_set_breadcrumb($breadcrumb);
-  drupal_set_breadcrumb($breadcrumb);
-  $finder = _crumbs_get_finder();
-  $finder->invokeInit($trail);
-}
-
-
-function crumbs_build_breadcrumb($trail) {
-  $breadcrumb = array();
-  foreach ($trail as $path => $item) {
-    $breadcrumb[] = $item->link();
-  }
-  return $breadcrumb;
-}
-
-
 function crumbs_preprocess_page(&$vars) {
   $trail = crumbs_get_trail();
-  $vars['crumbs_trail'] = $trail = crumbs_get_trail();
+  $vars['crumbs_trail'] = $trail;
   // Some modules call drupal_set_breadcrumb() with their own ideas of a
   // breadcrumb, and thus overwrite the breadcrumb set in crumbs_init(),
   // Thus, we need template_preprocess_page() to restore the crumbs crumb
@@ -86,34 +66,11 @@ function crumbs_preprocess_page(&$vars) {
 
 
 function crumbs_get_trail() {
-  return _crumbs_set_trail();
-}
-
-
-function _crumbs_set_trail($trail = NULL) {
   static $_trail;
-  if (is_array($trail)) {
-    $_trail = $trail;
+  if (!isset($_trail)) {
+    $_trail = crumbs_build_trail($_GET['q']);
   }
-  else {
-    return $_trail;
-  }
-}
-
-
-function crumbs_get_breadcrumb() {
-  return _crumbs_set_breadcrumb();
-}
-
-
-function _crumbs_set_breadcrumb($breadcrumb = NULL) {
-  static $_breadcrumb;
-  if (is_array($breadcrumb)) {
-    $_breadcrumb = $breadcrumb;
-  }
-  else {
-    return $_breadcrumb;
-  }
+  return $_trail;
 }
 
 
@@ -128,6 +85,25 @@ function crumbs_build_trail($path) {
 }
 
 
+function crumbs_get_breadcrumb() {
+  static $_breadcrumb;
+  if (!isset($_breadcrumb)) {
+    $trail = crumbs_get_trail();
+    $_breadcrumb = crumbs_build_breadcrumb($trail);
+  }
+  return $_breadcrumb;
+}
+
+
+function crumbs_build_breadcrumb($trail) {
+  $breadcrumb = array();
+  foreach ($trail as $path => $item) {
+    $breadcrumb[] = $item->link();
+  }
+  return $breadcrumb;
+}
+
+
 
 
 function _crumbs_get_settings() {
@@ -136,7 +112,9 @@ function _crumbs_get_settings() {
 }
 
 
-
+/**
+ * Collect plugin objects
+ */
 function _crumbs_get_objects() {
   $sort_order = _crumbs_get_settings();
   $objects = array();
@@ -178,6 +156,10 @@ function _crumbs_get_objects() {
 }
 
 
+
+/**
+ * Collect plugin objects, but sorted/keyed in a special way
+ */
 function _crumbs_get_objects_by_method() {
   $sort_order = _crumbs_get_settings();
   $objects = _crumbs_get_objects();

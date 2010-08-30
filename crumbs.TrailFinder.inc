@@ -74,12 +74,6 @@ class _crumbs_TrailFinder {
   }
   
   
-  function invokeInit($trail) {
-    $invokeAction = new _crumbs_InvokeAction_simple('init', array($trail));
-    $this->_pluginEngine->invokeAll($invokeAction);
-  }
-  
-  
   function invokePreprocessPage(&$vars, $trail) {
     $invokeAction = new _crumbs_InvokeAction_simple('preprocessPage', array(&$vars, $trail));
     $this->_pluginEngine->invokeAll($invokeAction);
