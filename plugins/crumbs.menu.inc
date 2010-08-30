@@ -11,6 +11,7 @@ class menu_class_CrumbsParentFinder {
   function construct() {
     return array(
       'hierarchy' => new menu_class_CrumbsParentFinder__hierarchy,
+      'admin' => new menu_class_CrumbsParentFinder__admin,
       // 'dummy_node_type' => new menu_class_CrumbsParentFinder__dummy,
     );
   }
@@ -22,6 +23,13 @@ class menu_class_CrumbsParentFinder {
       $titles[$row->menu_name] = $row->title;
     }
     return $titles;
+  }
+}
+
+
+class menu_class_CrumbsParentFinder__admin {
+  function find__admin_build_menu_customize__($path, $item) {
+    return "admin/build/menu";
   }
 }
 

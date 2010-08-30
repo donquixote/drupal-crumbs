@@ -9,6 +9,7 @@ class _crumbs_InvokeAction_findParent {
   protected $_path;
   protected $_item;
   protected $_method;
+  protected $_order_key;
   protected $_parent_path;
   protected $_candidates = array();
   
@@ -22,6 +23,7 @@ class _crumbs_InvokeAction_findParent {
   function invoke($object, $object_key, $subkey) {
     $order_key = "$object_key:$subkey";
     if (isset($this->_candidates[$order_key])) {
+      $this->_order_key = $order_key;
       $this->_parent_path = $this->_candidates[$order_key];
       return TRUE;
     }
@@ -41,6 +43,7 @@ class _crumbs_InvokeAction_findParent {
       }
     }
     if (isset($this->_candidates[$order_key])) {
+      $this->_order_key = $order_key;
       $this->_parent_path = $this->_candidates[$order_key];
       return TRUE;
     }
@@ -48,6 +51,10 @@ class _crumbs_InvokeAction_findParent {
   
   function getParentPath() {
     return $this->_parent_path;
+  }
+  
+  function getSuccessfulOrderKey() {
+    return $this->_order_key;
   }
 }
 

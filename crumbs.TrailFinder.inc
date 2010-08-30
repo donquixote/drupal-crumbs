@@ -25,6 +25,7 @@ class _crumbs_TrailFinder {
   
   
   function buildTrail($path) {
+    $path = drupal_get_normal_path($path);
     $trail_reverse = array();
     $front_normal_path = drupal_get_normal_path(variable_get('site_frontpage', 'node'));
     $front_menu_item = menu_get_item($front_normal_path);
@@ -45,6 +46,7 @@ class _crumbs_TrailFinder {
         'alias' => drupal_get_path_alias($path),
       );
       $parent_path = $this->_findParentPath($path, $extra);
+      $parent_path = drupal_get_normal_path($parent_path);
       if ($menu_item) {
         if (count(explode('/', $menu_item['path'])) == count(explode('/', $path))) {
           $this->_decorateItem($path, $extra, $trail_reverse);
@@ -113,12 +115,14 @@ class _crumbs_TrailFinder {
       $this->_pluginEngine->invokeAll($invokeAction);
       $parent_path = $invokeAction->getParentPath();
       if ($parent_path) {
+        $order_key = $invokeAction->getSuccessfulOrderKey();
         return $parent_path;
       }
     }
     // fallback: chop off the last fragment of the system path.
     $fragments = explode('/', $path);
-    return implode('/', array_slice($fragments, 0, -1));
+    $parent_path = implode('/', array_slice($fragments, 0, -1));
+    return $parent_path;
   }
 }
 

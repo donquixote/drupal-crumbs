@@ -45,7 +45,7 @@ class _taxonomy_CrumbsParentFinder__hierarchy extends _taxonomy_CrumbsParentFind
    * The method name matches the router path "taxonomy/term/%".
    */
   function find__taxonomy_term__($path, $item) {
-    $terms = $item->getArg(0);
+    $terms = $item->getFragment(2);
     $terms = taxonomy_terms_parse_string($terms);
     if (isset($terms['tids']) && count($terms['tids']) === 1) {
       $tid = $terms['tids'][0];
@@ -93,7 +93,7 @@ class _taxonomy_CrumbsParentFinder__term_name extends _taxonomy_CrumbsParentFind
   
   
   function decorate__taxonomy_term__($path, $item) {
-    $terms = $item->getArg(0);
+    $terms = $item->getArg(2);
     $terms = taxonomy_terms_parse_string($terms);
     if (!isset($terms['tids']) || !count($terms['tids'])) {
       return;

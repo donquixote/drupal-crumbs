@@ -47,6 +47,15 @@ class crumbs_ItemWrapper extends crumbs_ReadonlyArrayWrapper {
     return $this->_array['page_arguments'][$i];
   }
   
+  function getMapArg($i) {
+    return $this->_array['map'][$i];
+  }
+  
+  function getFragment($i) {
+    $fragments = explode('/', $this->_extra->path);
+    return $fragments[$i];
+  }
+  
   function __set($key, $value) {
     switch ($key) {
       case 'title':
