@@ -2,22 +2,6 @@
 // $Id$
 
 
-module_load_include('inc', 'crumbs', 'crumbs.TrailFinder');
-module_load_include('inc', 'crumbs', 'crumbs.ItemWrapper');
-module_load_include('inc', 'crumbs', 'crumbs.PluginEngine');
-module_load_include('inc', 'crumbs', 'crumbs.decorateItem');
-module_load_include('inc', 'crumbs', 'crumbs.findParent');
-module_load_include('inc', 'crumbs', 'crumbs.decorateTrail');
-
-module_load_include('inc', 'crumbs', 'plugins/crumbs.menu');
-module_load_include('inc', 'crumbs', 'plugins/crumbs.forum');
-module_load_include('inc', 'crumbs', 'plugins/crumbs.views_ui');
-module_load_include('inc', 'crumbs', 'plugins/crumbs.taxonomy');
-module_load_include('inc', 'crumbs', 'plugins/crumbs.path');
-module_load_include('inc', 'crumbs', 'plugins/crumbs.pathauto');
-module_load_include('inc', 'crumbs', 'plugins/crumbs.nodereference');
-module_load_include('inc', 'crumbs', 'plugins/crumbs.crumbs');
-
 function crumbs_perm() {
   return array('administer crumbs');
 }
@@ -25,12 +9,6 @@ function crumbs_perm() {
 
 function crumbs_menu() {
   $items = array();
-  $items['crumbs/node-type-dummy-path/%'] = array(
-    'title' => 'Crumbs dummy path',
-    'title callback' => 'check_plain',
-    'page callback' => '_crumbs_donothing',
-    'access callback' => '_crumbs_noaccess',
-  );
   $items['admin/build/crumbs'] = array(
     'title' => 'Crumbs',
     'page callback' => 'drupal_get_form',
@@ -42,143 +20,60 @@ function crumbs_menu() {
 }
 
 
-function _crumbs_donothing() {
-  return '';
-}
-
-function _crumbs_noaccess() {
-  return TRUE;
-}
-
-
 function crumbs_preprocess_page(&$vars) {
   $trail = crumbs_get_trail();
+  module_load_include('inc', 'crumbs', 'crumbs.breadcrumb');
+  $breadcrumb_items = crumbs_build_breadcrumb($trail);
+  $breadcrumb_html = crumbs_render_breadcrumb($breadcrumb_items);
   $vars['crumbs_trail'] = $trail;
-  // Some modules call drupal_set_breadcrumb() with their own ideas of a
-  // breadcrumb, and thus overwrite the breadcrumb set in crumbs_init(),
-  // Thus, we need template_preprocess_page() to restore the crumbs crumb
-  // for page rendering.
-  $breadcrumb = crumbs_get_breadcrumb();
-  $vars['breadcrumb'] = theme('breadcrumb', $breadcrumb);
-  $finder = _crumbs_get_finder();
-  $finder->invokePreprocessPage($vars, $trail);
+  $vars['crumbs_breadcrumb_items'] = $breadcrumb_items;
+  $vars['crumbs_breadcrumb_html'] = $breadcrumb_html;
+  $vars['breadcrumb'] = $breadcrumb_html;
+  // TODO: Invoke preprocessPage() plugin method.
+  $pluginEngine = crumbs_get_plugin_engine();
+  $invokeAction = new _crumbs_InvokeAction_preprocessPage($vars);
+  $pluginEngine->invokeAllReverse($invokeAction);
 }
 
 
 function crumbs_get_trail() {
   static $_trail;
   if (!isset($_trail)) {
+    module_load_include('inc', 'crumbs', 'crumbs.plugin_engine');
+    module_load_include('inc', 'crumbs', 'crumbs.trail');
     $_trail = crumbs_build_trail($_GET['q']);
   }
   return $_trail;
 }
 
 
-function crumbs_build_trail($path) {
-  $finder = _crumbs_get_finder();
-  $trail = $finder->buildTrail($path);
-  $trail_wrapped = array();
-  foreach ($trail as $path => $extra) {
-    $trail_wrapped[$path] = new crumbs_ItemWrapper_theme($extra);
+function crumbs_get_plugin_engine() {
+  static $_plugin_engine;
+  if (!isset($_plugin_engine)) {
+    module_load_include('inc', 'crumbs', 'crumbs.plugin_engine');
+    $_plugin_engine = _crumbs_load_plugin_engine();
   }
-  return $trail_wrapped;
+  return $_plugin_engine;
 }
 
 
-function crumbs_get_breadcrumb() {
-  static $_breadcrumb;
-  if (!isset($_breadcrumb)) {
-    $trail = crumbs_get_trail();
-    $_breadcrumb = crumbs_build_breadcrumb($trail);
+class _crumbs_InvokeAction_preprocessPage {
+
+  protected $_vars;
+
+  function __construct(array &$vars) {
+    $this->_vars = &$vars;
   }
-  return $_breadcrumb;
-}
 
-
-function crumbs_build_breadcrumb($trail) {
-  $breadcrumb = array();
-  foreach ($trail as $path => $item) {
-    $breadcrumb[] = $item->link();
-  }
-  return $breadcrumb;
-}
-
-
-
-
-function _crumbs_get_settings() {
-  $settings = variable_get('crumbs', array());
-  return is_array($settings) ? $settings : array();
-}
-
-
-/**
- * Collect plugin objects
- */
-function _crumbs_get_objects() {
-  $sort_order = _crumbs_get_settings();
-  $objects = array();
-  $objects_enabled = array();
-  $modules_enabled = array();
-  foreach ($sort_order as $order_key => $enabled) {
-    if ($enabled) {
-      list($object_key, $sub_key) = explode(':', $order_key, 2);
-      list($module, $instance_key) = explode('.', $object_key, 2);
-      $objects_enabled[$object_key] = TRUE;
-      $modules_enabled[$module] = TRUE;
+  /**
+   * The point of the preprocessPage() method hook is a guaranteed execution
+   * directly after crumbs_preprocess_page().
+   */
+  function invoke($plugin, $plugin_key) {
+    if (method_exists($plugin, 'preprocessPage')) {
+      $plugin->preprocessPage($this->_vars);
     }
   }
-  foreach (module_list(FALSE, TRUE) as $module) {
-    $class = $module . '_class_CrumbsParentFinder';
-    if (class_exists($class)) {
-      if (method_exists($class, 'construct')) {
-        // use the factory method.
-        $result = call_user_func(array($class, 'construct'));
-        if (is_object($result)) {
-          $objects[$module] = $result;
-        }
-        else if (is_array($result)) {
-          foreach ($result as $key => $object) {
-            $objects["$module.$key"] = $object;
-          }
-        }
-      } else {
-        $objects[$module] = new $class;
-      }
-    }
-  }
-  foreach ($objects as $key => $object) {
-    if (!is_object($object)) {
-      unset($objects[$key]);
-    }
-  }
-  return $objects;
-}
-
-
-
-/**
- * Collect plugin objects, but sorted/keyed in a special way
- */
-function _crumbs_get_objects_by_method() {
-  $sort_order = _crumbs_get_settings();
-  $objects = _crumbs_get_objects();
-  foreach ($sort_order as $key => $enabled) {
-    if (!$enabled) {
-      unset($objects[$key]);
-    }
-  }
-  $objects_by_method = array('.' => array(), 'find' => array());
-  foreach ($objects as $k => $object) {
-    if (!is_object($object)) {
-      continue;
-    }
-    $objects_by_method['.'][$k] = $object;
-    foreach (get_class_methods($object) as $method) {
-      $objects_by_method[$method][$k] = $object;
-    }
-  }
-  return $objects_by_method;
 }
 
 

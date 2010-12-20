@@ -1,5 +1,8 @@
 $Id$
 
+This text is horribly out of date, especially for the 2.x branch ...
+
+
 The ultimate breadcrumbs solution. Powerful, flexible, and as simple and DRY as can be.
 (code will come soon)
 
@@ -9,17 +12,20 @@ Breadcrumbs based on:
 - system path fragments
 - existing path alias fragments
 - not yet existent pathauto alias fragments
+- organic groups
+- forum paths
 
 Features:
 - easy to extend.
 - admin form to rearrange rules. no further configuration needed.
-- guaranteed consistency: If you click on one link in the breadcrumb, this item's breadcrumb trail will be the respective sub-trail of the child trail.
+- guaranteed consistency: If d's breadcrumb is "a > b > c > d", then d's breadcrumb is "a > b > c".
+- infinite loop prevention.
 
 Requirements:
-- PHP 5.x
+- PHP 5.2
 
 How it works:
-A rule is an object that takes a path and returns a parent path.
+A plugin is an object that takes a path and returns a parent path.
 If the rule returns NULL, the next rule is tried.
 
 This process is repeated with the parent path, until either

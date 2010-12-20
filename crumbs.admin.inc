@@ -34,22 +34,49 @@ EOT;
 
 
 function _crumbs_get_default_text() {
-  
-  $x = _crumbs_load_plugin_data();
+
+  module_load_include('inc', 'crumbs', 'crumbs.PluginEngine');
+
+  $available_keys = _crumbs_load_available_keys();
+  $weights = _crumbs_load_weights();
+
+  return _crumbs_build_default_text($available_keys, $weights);
+}
+
+
+function _crumbs_build_default_text(array $available_keys, array $weights) {
+
   $lines = array(
-    'inherit' => _crumbs_get_available_rule_lines($x),
+    'inherit' => $available_keys,
     'enabled' => array(),
     'disabled' => array(),
   );
-    
-  
-  foreach ($x->order as $order_key => $enabled) {
-    if (isset($lines['inherit'][$order_key])) {
-      $lines[$enabled ? 'enabled' : 'disabled'][$order_key] = $lines['inherit'][$order_key];
-      unset($lines['inherit'][$order_key]);
+
+  foreach ($weights as $key => $weight) {
+    $section = ($weight === FALSE) ? 'disabled' : 'enabled';
+    $string = $key;
+    if (isset($available_keys[$key])) {
+      $title = $available_keys[$key];
+      if (is_string($title)) {
+        $string .= ' ('. $title .')';
+      }
     }
+    else if ($key !== '*') {
+      // an orphan setting.
+      $string .= ' (orphan rule)';
+    }
+    $lines[$section][$key] = $string;
+    unset($lines['inherit'][$key]);
   }
-  
+
+  foreach ($lines['inherit'] as $key => $title) {
+    $string = $key;
+    if (is_string($title)) {
+      $string .= ' ('. $title .')';
+    }
+    $lines['inherit'][$key] = $string;
+  }
+
   return "\n\n"
     . implode("\n", $lines['enabled'])
     . "\n\n---- disabled ----\n" . implode("\n", $lines['disabled'])
@@ -59,48 +86,118 @@ function _crumbs_get_default_text() {
 }
 
 
-function _crumbs_get_available_rule_lines($x) {
-  
-  $lines = array();
-  
-  foreach ($x->rules as $rule_key) {
-    $lines[$rule_key] = $rule_key;
-  }
-  foreach ($x->wildcard_rules as $order_key => $rules) {
-    $lines[$order_key] = "$order_key (wildcard)";
-  }
-  foreach ($x->titles as $rule_key => $title) {
-    $lines[$rule_key] = "$rule_key ($title)";
-  }
-  
-  return $lines;
-}
-
-
 function crumbs_admin_form_submit($form, &$form_state) {
-  
-  $x = _crumbs_load_plugin_data();
-  $available_lines = _crumbs_get_available_rule_lines($x);
-  
-  $m = array();
+
+  module_load_include('inc', 'crumbs', 'crumbs.PluginEngine');
+
+  $weights = _crumbs_load_weights();
+  asort($weights);
+  $available_keys = _crumbs_load_available_keys();
+
+  $weights = array();
+
   $text = $form_state['values']['settings'];
   $lines = explode("\n", $text);
-  $order = array();
-  $enabled = TRUE;
+  $weight = 0;
   foreach ($lines as $line) {
     $line = trim($line);
     list($key, $title) = explode(' ', $line, 2);
-    if (isset($available_lines[$key])) {
-      $order[$key] = $enabled;
+    if (isset($available_keys[$key])) {
+      $weights[$key] = $weight;
+      ++ $weight;
     } else if (preg_match('/^-/', $line)) {
-      if ($enabled) {
-        $enabled = FALSE;
+      if ($weight !== FALSE) {
+        $weight = FALSE;
       } else {
         break;
       }
     }
   }
-  variable_set('crumbs', $order);
+  variable_set('crumbs_weights', $weights);
+}
+
+
+function _crumbs_load_available_keys() {
+  // we can't use the plugin engine,
+  // or else we would miss disabled plugins.
+  $plugins = _crumbs_load_plugins();
+  $invokeAction = new _crumbs_InvokeAction_define();
+  foreach ($plugins as $plugin_key => $plugin) {
+    $invokeAction->invoke($plugin, $plugin_key);
+  }
+  return $invokeAction->getKeys();
+}
+
+
+class _crumbs_InvokeAction_define {
+
+  protected $_keys = array();
+  protected $_plugin_key;
+  protected $_definitionHandler;
+
+  function __construct() {
+    $this->_definitionHandler = new _crumbs_PluginDefinitionHandler($this);
+  }
+
+  function invoke($plugin, $plugin_key) {
+    $this->_plugin_key = $plugin_key;
+    if (method_exists($plugin, 'define')) {
+      $plugin->define($this->_definitionHandler);
+    }
+    else {
+      $this->_addRule($plugin_key, TRUE);
+    }
+  }
+
+  function addRule($key_suffix, $title) {
+    $this->_addRule($this->_plugin_key .'.'. $key_suffix, $title);
+  }
+
+  function setTitle($title) {
+    $this->_addRule($this->_plugin_key, $title);
+  }
+
+  protected function _addRule($key, $title) {
+    $fragments = explode('.', $key);
+    $partial_key = array_shift($fragments);
+    while (TRUE) {
+      if (empty($fragments)) break;
+      $wildcard_key = $partial_key .'.*';
+      $this->_keys[$wildcard_key] = TRUE;
+      $partial_key .= '.'. array_shift($fragments);
+    }
+    $this->_keys[$key] = $title;
+  }
+
+  function enabledByDefault($enabled) {
+    // TODO: Implement this.
+  }
+
+  function getKeys() {
+    return $this->_keys;
+  }
+}
+
+
+class _crumbs_PluginDefinitionHandler {
+
+  protected $_invokeAction;
+
+  function __construct($invokeAction) {
+    $this->_invokeAction = $invokeAction;
+  }
+
+  function addRule($key_suffix, $title = TRUE) {
+    $this->_invokeAction->addRule($key_suffix, $title);
+  }
+
+  function setTitle($title) {
+    $this->_invokeAction->setTitle($title);
+  }
+
+  function enabledByDefault($enabled) {
+    $this->_invokeAction->enabledByDefault($enabled);
+  }
 }
 
 
