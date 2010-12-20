@@ -2,50 +2,34 @@
 // $Id$
 
 
-/**
- * Implementation of class hook class_CrumbsParentFinder
- * on the behalf of taxonomy module.
- */
-class taxonomy_class_CrumbsParentFinder {
-  
-  function construct() {
-    return array(
-      'admin' => new self,
-      'hierarchy' => new _taxonomy_CrumbsParentFinder__hierarchy,
-      'term_node' => new _taxonomy_CrumbsParentFinder__term_node,
-      'term_name' => new _taxonomy_CrumbsParentFinder__term_name,
-    );
-  }
-  
-  
-  function decorate__admin_content_taxonomy__($path, $item) {
-    $voc = $item->getArg(1);
-    $item->title = $voc->name;
-  }
+function taxonomy_crumbs_plugins() {
+  return array(
+    'hierarchy' => new _taxonomy_CrumbsPlugin__hierarchy(),
+    'term_node' => new _taxonomy_CrumbsPlugin__term_node(),
+    'term_name' => new _taxonomy_CrumbsPlugin__term_name(),
+    'admin'     => new _taxonomy_CrumbsPlugin__admin(),
+  );
 }
 
 
-class _taxonomy_CrumbsParentFinder {
-  
-  function getRuleTitles() {
-    $titles = array();
+class _taxonomy_CrumbsPlugin {
+
+  function define($h) {
     foreach (taxonomy_get_vocabularies() as $voc_id => $voc) {
-      $titles['voc_'.$voc_id] = "Vocabulary: " . $voc->name;
+      $h->addRule('voc_'. $voc_id, 'Vocabulary: '. $voc->name);
     }
-    return $titles;
   }
 }
 
 
+class _taxonomy_CrumbsPlugin__hierarchy extends _taxonomy_CrumbsPlugin {
 
-class _taxonomy_CrumbsParentFinder__hierarchy extends _taxonomy_CrumbsParentFinder {
-  
   /**
    * Terms get their parent terms as breadcrumb parent.
    * The method name matches the router path "taxonomy/term/%".
    */
-  function find__taxonomy_term__($path, $item) {
-    $terms = $item->getFragment(2);
+  function findParent__taxonomy_term__($path, $item) {
+    $terms = $item['fragments'][2];
     $terms = taxonomy_terms_parse_string($terms);
     if (isset($terms['tids']) && count($terms['tids']) === 1) {
       $tid = $terms['tids'][0];
@@ -68,14 +52,14 @@ class _taxonomy_CrumbsParentFinder__hierarchy extends _taxonomy_CrumbsParentFind
 }
 
 
-class _taxonomy_CrumbsParentFinder__term_node extends _taxonomy_CrumbsParentFinder {
-  
+class _taxonomy_CrumbsPlugin__term_node extends _taxonomy_CrumbsPlugin {
+
   /**
    * Nodes get their terms as breadcrumb parents.
    * The method name matches the router path "node/%".
    */
-  function find__node__($path, $item) {
-    $node = $item->getArg(0);
+  function findParent__node__($path, $item) {
+    $node = $item['map'][0];
     if (is_array($node->taxonomy)) {
       $result = array();
       foreach ($node->taxonomy as $tid => $term) {
@@ -89,19 +73,17 @@ class _taxonomy_CrumbsParentFinder__term_node extends _taxonomy_CrumbsParentFind
 }
 
 
-class _taxonomy_CrumbsParentFinder__term_name extends _taxonomy_CrumbsParentFinder {
-  
-  
-  function decorate__taxonomy_term__($path, $item) {
-    $terms = $item->getFragment(2);
+class _taxonomy_CrumbsPlugin__term_name {
+
+  function findTitle__taxonomy_term__($path, $item) {
+    $terms = $item['fragments'][2];
     $terms = taxonomy_terms_parse_string($terms);
     if (!isset($terms['tids']) || !count($terms['tids'])) {
       return;
     }
-    $item->title = $this->_buildTermsTitle($terms['tids']);
+    return $this->_buildTermsTitle($terms['tids']);
   }
-  
-  
+
   /**
    * Terms get their parent terms as breadcrumb parent.
    * The method name matches the router path "taxonomy/term/%".
@@ -119,6 +101,15 @@ class _taxonomy_CrumbsParentFinder__term_name extends _taxonomy_CrumbsParentFind
       $names[$term->tid] = $term->name;
     }
     return implode(', ', $names);
+  }
+}
+
+
+class _taxonomy_CrumbsPlugin__admin {
+
+  function findTitle__admin_content_taxonomy__($path, $item) {
+    $voc = $item['map'][1];
+    return $voc->name;
   }
 }
 

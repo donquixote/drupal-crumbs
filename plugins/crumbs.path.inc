@@ -2,17 +2,22 @@
 // $Id$
 
 
+function path_crumbs_plugins() {
+  return new _path_CrumbsPlugin();
+}
+
+
 /**
  * Implementation of class hook class_CrumbsParentFinder
  * on the behalf of path module.
  */
-class path_class_CrumbsParentFinder {
+class _path_CrumbsPlugin {
   
-  function getRuleTitle() {
-    return 'existing alias for the given path';
+  function define($h) {
+    $h->setTitle(t('existing alias for the given path'));
   }
   
-  function find($path) {
+  function findParent($path) {
     $alias = drupal_get_path_alias($path);
     $fragments = explode('/', $alias);
     if (count($fragments) > 1) {

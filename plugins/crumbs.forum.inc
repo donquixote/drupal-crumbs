@@ -2,30 +2,35 @@
 // $Id$
 
 
-class forum_class_CrumbsParentFinder {
-  function construct() {
+/**
+ * Implementation of hook_crumbs_plugins()
+ */
+function forum_crumbs_plugins() {
+  $forum_vid = variable_get('forum_nav_vocabulary', NULL);
+  if ($forum_vid) {
     return array(
-      'hierarchy' => new _forum_CrumbsParentFinder__hierarchy,
-      'term_node' => new _forum_CrumbsParentFinder__term_node,
-      'term_name' => new _forum_CrumbsParentFinder__term_name,
+      'hierarchy' => new _forum_CrumbsPlugin__hierarchy(),
+      'term_node' => new _forum_CrumbsPlugin__term_node($forum_vid),
+      'term_name' => new _forum_CrumbsPlugin__term_name(),
+      'admin' => new _forum_CrumbsPlugin__admin(),
     );
   }
 }
 
 
-class _forum_CrumbsParentFinder__hierarchy {
-  
+class _forum_CrumbsPlugin__hierarchy {
+
   /**
    * Terms get their parent terms as breadcrumb parent.
    * The method name matches the router path "taxonomy/term/%".
    */
-  function find__forum($path, $item) {
-    if (preg_match('/^forum\/(\d+)$/', $path, $m)) {
+  function findParent__forum($path, $item) {
+    if (preg_match('#^forum/(\d+)$#', $path, $m)) {
       list(,$tid) = $m;
       $q = db_query($sql = "SELECT parent FROM {term_hierarchy} WHERE tid = %d", $tid);
       while ($row = db_fetch_object($q)) {
         if ($row->parent) {
-          return 'forum/'.$row->parent;
+          return 'forum/'. $row->parent;
         }
       }
     }
@@ -33,40 +38,87 @@ class _forum_CrumbsParentFinder__hierarchy {
 }
 
 
-class _forum_CrumbsParentFinder__term_node {
-  
+class _forum_CrumbsPlugin__term_node {
+
+  protected $_forum_vid;
+
+  function __construct($forum_vid) {
+    $this->_forum_vid = $forum_vid;
+  }
+
   /**
    * Forum nodes get their forum terms as breadcrumb parents.
    * The method name matches the router path "node/%".
    */
-  function find__node__($path, $item) {
-    $node = $item->getArg(0);
-    if ($node->type == 'forum' && is_array($node->taxonomy) && $vid = $this->_getForumVid()) {
+  function findParent__node__($path, $item) {
+    $node = $item['map'][0];
+    if ($node->type == 'forum' && is_array($node->taxonomy)) {
       $result = array();
       foreach ($node->taxonomy as $tid => $term) {
-        if ($term->vid == $vid) {
-          return 'forum/'.$tid;
+        if ($term->vid == $this->_forum_vid) {
+          return 'forum/'. $tid;
         }
       }
     }
   }
-  
-  function _getForumVid() {
-    return variable_get('forum_nav_vocabulary', NULL);
+}
+
+
+class _forum_CrumbsPlugin__term_name {
+
+  function findTitle__forum($path, $item) {
+    if (preg_match('#^forum/(\d+)$#', $path, $m)) {
+      list(,$tid) = $m;
+      $q = db_query($sql = "SELECT name FROM {term_data} WHERE tid = %d", $tid);
+      if ($row = db_fetch_object($q)) {
+        return $row->name;
+      }
+    }
   }
 }
 
 
-class _forum_CrumbsParentFinder__term_name {
-  
-  function decorate__forum($path, $item) {
-    if (preg_match('/^forum\/(\d+)$/', $path, $m)) {
-      list(,$tid) = $m;
-      $q = db_query($sql = "SELECT name FROM {term_data} WHERE tid = %d", $tid);
-      if ($row = db_fetch_object($q)) {
-        $item->title = $row->name;
+class _forum_CrumbsPlugin__admin {
+
+  protected $_containers;
+
+  function findParent__admin_content_forum_edit_forum__($path, $item) {
+    $tid = $item['fragments'][5];
+    $q = db_query($sql = "SELECT parent FROM {term_hierarchy} WHERE tid = %d", $tid);
+    while ($row = db_fetch_object($q)) {
+      if ($row->parent) {
+        $type = $this->_isContainer($row->parent) ? 'container' : 'forum';
+        return 'admin/content/forum/edit/'. $type .'/'. $row->parent;
       }
     }
+  }
+
+  function findParent__admin_content_forum_edit_container__($path, $item) {
+    return $this->findParent__admin_content_forum_edit_forum__($path, $item);
+  }
+
+  function findTitle__admin_content_forum($path, $item) {
+    if ($path === 'admin/content/forum/edit') {
+      return t('Edit');
+    }
+  }
+
+  function findTitle__admin_content_forum_edit_forum__($path, $item) {
+    $term = $item['map'][5];
+    return $term['name'];
+  }
+
+  function findTitle__admin_content_forum_edit_container__($path, $item) {
+    $term = $item['map'][5];
+    return $term['name'];
+  }
+
+  protected function _isContainer($tid) {
+    if (!isset($this->_containers)) {
+      $containers = variable_get('forum_containers', array());
+      $this->_containers = array_combine($containers, $containers);
+    }
+    return isset($this->_containers[$tid]) ? TRUE : FALSE;
   }
 }
 
