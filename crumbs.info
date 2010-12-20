@@ -3,11 +3,5 @@ name = "Crumbs"
 description = "The ultimate breadcrumbs module"
 package = menu
 core = 6.x
-php = 5.1
-
-; Information added by drupal.org packaging script on 2010-08-30
-version = "6.x-1.0-unstable10"
-core = "6.x"
-project = "crumbs"
-datestamp = "1283182309"
+php = 5.2
 
