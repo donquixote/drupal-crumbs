@@ -20,19 +20,36 @@ function crumbs_menu() {
 }
 
 
+function crumbs_theme() {
+  return array(
+    'crumbs_breadcrumb' => array('breadcrumb_items' => NULL),
+  );
+}
+
+
 function crumbs_preprocess_page(&$vars) {
-  $trail = crumbs_get_trail();
-  module_load_include('inc', 'crumbs', 'crumbs.breadcrumb');
-  $breadcrumb_items = crumbs_build_breadcrumb($trail);
-  $breadcrumb_html = crumbs_render_breadcrumb($breadcrumb_items);
-  $vars['crumbs_trail'] = $trail;
-  $vars['crumbs_breadcrumb_items'] = $breadcrumb_items;
-  $vars['crumbs_breadcrumb_html'] = $breadcrumb_html;
-  $vars['breadcrumb'] = $breadcrumb_html;
+  $breadcrumb_data = crumbs_get_breadcrumb_data();
+  $vars['crumbs_trail'] = $breadcrumb_data['trail'];
+  $vars['crumbs_breadcrumb_items'] = $breadcrumb_data['items'];
+  $vars['crumbs_breadcrumb_html'] = $breadcrumb_data['html'];
+  $vars['breadcrumb'] = $breadcrumb_data['html'];
   // TODO: Invoke preprocessPage() plugin method.
   $pluginEngine = crumbs_get_plugin_engine();
   $invokeAction = new _crumbs_InvokeAction_preprocessPage($vars);
   $pluginEngine->invokeAllReverse($invokeAction);
+}
+
+
+function crumbs_get_breadcrumb_data() {
+  static $_data;
+  if (!isset($_data)) {
+    $trail = crumbs_get_trail();
+    module_load_include('inc', 'crumbs', 'crumbs.breadcrumb');
+    $items = crumbs_build_breadcrumb($trail);
+    $html = theme('crumbs_breadcrumb', $items);
+    $_data = compact('trail', 'items', 'html');
+  }
+  return $_data;
 }
 
 

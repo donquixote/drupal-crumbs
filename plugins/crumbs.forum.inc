@@ -12,7 +12,7 @@ function forum_crumbs_plugins() {
       'hierarchy' => new _forum_CrumbsPlugin__hierarchy(),
       'term_node' => new _forum_CrumbsPlugin__term_node($forum_vid),
       'term_name' => new _forum_CrumbsPlugin__term_name(),
-      'admin' => new _forum_CrumbsPlugin__admin(),
+      'admin'     => new _forum_CrumbsPlugin__admin(),
     );
   }
 }
@@ -33,7 +33,9 @@ class _forum_CrumbsPlugin__hierarchy {
           return 'forum/'. $row->parent;
         }
       }
+      return 'forum';
     }
+    return '<front>';
   }
 }
 
@@ -74,6 +76,7 @@ class _forum_CrumbsPlugin__term_name {
         return $row->name;
       }
     }
+    return t('Forums');
   }
 }
 
@@ -82,26 +85,16 @@ class _forum_CrumbsPlugin__admin {
 
   protected $_containers;
 
-  function findParent__admin_content_forum_edit_forum__($path, $item) {
-    $tid = $item['fragments'][5];
-    $q = db_query($sql = "SELECT parent FROM {term_hierarchy} WHERE tid = %d", $tid);
-    while ($row = db_fetch_object($q)) {
-      if ($row->parent) {
-        $type = $this->_isContainer($row->parent) ? 'container' : 'forum';
-        return 'admin/content/forum/edit/'. $type .'/'. $row->parent;
-      }
-    }
-  }
-
-  function findParent__admin_content_forum_edit_container__($path, $item) {
-    return $this->findParent__admin_content_forum_edit_forum__($path, $item);
-  }
-
   function findTitle__admin_content_forum($path, $item) {
-    if ($path === 'admin/content/forum/edit') {
-      return t('Edit');
+    switch ($path) {
+      case 'admin/content/forum/edit':
+      case 'admin/content/forum/add':
+        // skip
+        return FALSE;
     }
   }
+
+
 
   function findTitle__admin_content_forum_edit_forum__($path, $item) {
     $term = $item['map'][5];
