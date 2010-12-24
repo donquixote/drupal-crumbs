@@ -35,7 +35,7 @@ EOT;
 
 function _crumbs_get_default_text() {
 
-  module_load_include('inc', 'crumbs', 'crumbs.PluginEngine');
+  module_load_include('inc', 'crumbs', 'crumbs.plugin_engine');
 
   $available_keys = _crumbs_load_available_keys();
   $weights = _crumbs_load_weights();
@@ -88,7 +88,7 @@ function _crumbs_build_default_text(array $available_keys, array $weights) {
 
 function crumbs_admin_form_submit($form, &$form_state) {
 
-  module_load_include('inc', 'crumbs', 'crumbs.PluginEngine');
+  module_load_include('inc', 'crumbs', 'crumbs.plugin_engine');
 
   $weights = _crumbs_load_weights();
   asort($weights);
