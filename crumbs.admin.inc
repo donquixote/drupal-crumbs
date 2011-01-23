@@ -5,8 +5,8 @@
 function crumbs_admin_form() {
   $form = array();
   
-  drupal_add_js(drupal_get_path('module', 'crumbs') .'/crumbs.admin.js');
-  drupal_add_css(drupal_get_path('module', 'crumbs') .'/crumbs.admin.css');
+  // drupal_add_js(drupal_get_path('module', 'crumbs') .'/crumbs.admin.js');
+  // drupal_add_css(drupal_get_path('module', 'crumbs') .'/crumbs.admin.css');
   
   $text = <<<EOT
     <p>Reorder and enable/disable crumbs rules.</p>
@@ -196,7 +196,6 @@ function _crumbs_load_available_keys(array $plugins) {
 class _crumbs_InvokeAction_define {
 
   protected $_keys = array();
-  protected $_disabledKeys = array();
   protected $_keysByPlugin = array();
   protected $_pluginKey;
   protected $_definitionHandler;
@@ -237,15 +236,6 @@ class _crumbs_InvokeAction_define {
       $this->_keysByPlugin[$this->_pluginKey][$key] = $title;
   }
 
-  function disabledByDefault($key) {
-    if (!isset($key)) {
-      $this->_disabledKeys[$this->_pluginKey] = TRUE;
-    }
-    else {
-      $this->_disabledKeys[$this->_pluginKey .'.'. $key] = TRUE;
-    }
-  }
-
   function getKeys() {
     return $this->_keys;
   }
@@ -276,10 +266,6 @@ class _crumbs_PluginDefinitionHandler {
 
   function setTitle($title) {
     $this->_invokeAction->setTitle($title);
-  }
-
-  function disabledByDefault($key = NULL) {
-    $this->_invokeAction->disabledByDefault($key);
   }
 }
 
