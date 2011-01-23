@@ -1,0 +1,10 @@
+<?php
+
+
+function crumbs_uninstall() {
+  variable_del('crumbs');
+  variable_del('crumbs_weights');
+}
+
+
+
