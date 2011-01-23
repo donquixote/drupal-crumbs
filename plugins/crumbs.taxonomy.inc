@@ -24,11 +24,15 @@ class _taxonomy_CrumbsPlugin {
 
 class _taxonomy_CrumbsPlugin__hierarchy extends _taxonomy_CrumbsPlugin {
 
+  function disabledByDefault() {
+    return array('*');
+  }
+
   /**
    * Terms get their parent terms as breadcrumb parent.
    * The method name matches the router path "taxonomy/term/%".
    */
-  function findParent__taxonomy_term__($path, $item) {
+  function findParent__taxonomy_term_x($path, $item) {
     $terms = $item['fragments'][2];
     $terms = taxonomy_terms_parse_string($terms);
     if (isset($terms['tids']) && count($terms['tids']) === 1) {
@@ -54,11 +58,15 @@ class _taxonomy_CrumbsPlugin__hierarchy extends _taxonomy_CrumbsPlugin {
 
 class _taxonomy_CrumbsPlugin__term_node extends _taxonomy_CrumbsPlugin {
 
+  function disabledByDefault() {
+    return array('*');
+  }
+
   /**
    * Nodes get their terms as breadcrumb parents.
    * The method name matches the router path "node/%".
    */
-  function findParent__node__($path, $item) {
+  function findParent__node_x($path, $item) {
     $node = $item['map'][0];
     if (is_array($node->taxonomy)) {
       $result = array();
@@ -75,7 +83,7 @@ class _taxonomy_CrumbsPlugin__term_node extends _taxonomy_CrumbsPlugin {
 
 class _taxonomy_CrumbsPlugin__term_name {
 
-  function findTitle__taxonomy_term__($path, $item) {
+  function findTitle__taxonomy_term_x($path, $item) {
     $terms = $item['fragments'][2];
     $terms = taxonomy_terms_parse_string($terms);
     if (!isset($terms['tids']) || !count($terms['tids'])) {
@@ -107,7 +115,7 @@ class _taxonomy_CrumbsPlugin__term_name {
 
 class _taxonomy_CrumbsPlugin__admin {
 
-  function findTitle__admin_content_taxonomy__($path, $item) {
+  function findTitle__admin_content_taxonomy_x($path, $item) {
     $voc = $item['map'][1];
     return $voc->name;
   }

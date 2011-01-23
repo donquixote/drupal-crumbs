@@ -2,6 +2,11 @@
 // $Id$
 
 
+function crumbs_init() {
+  // $data = crumbs_get_breadcrumb_data();
+}
+
+
 function crumbs_perm() {
   return array('administer crumbs');
 }
@@ -34,9 +39,9 @@ function crumbs_preprocess_page(&$vars) {
   $vars['crumbs_breadcrumb_html'] = $breadcrumb_data['html'];
   $vars['breadcrumb'] = $breadcrumb_data['html'];
   // TODO: Invoke preprocessPage() plugin method.
-  $pluginEngine = crumbs_get_plugin_engine();
-  $invokeAction = new _crumbs_InvokeAction_preprocessPage($vars);
-  $pluginEngine->invokeAllReverse($invokeAction);
+  $plugin_engine = crumbs_get_plugin_engine();
+  $action = new _crumbs_InvokeAction_preprocessPage($vars);
+  $plugin_engine->invokeAll_alter($action);
 }
 
 
@@ -53,14 +58,66 @@ function crumbs_get_breadcrumb_data() {
 }
 
 
-function crumbs_get_trail() {
-  static $_trail;
-  if (!isset($_trail)) {
+function crumbs_get_trail($path = NULL) {
+  static $_trails = array();
+  if (!isset($path)) {
+    $path = $_GET['q'];
+  }
+  $path = drupal_get_normal_path($path);
+  if (!isset($_trails[$path])) {
     module_load_include('inc', 'crumbs', 'crumbs.plugin_engine');
     module_load_include('inc', 'crumbs', 'crumbs.trail');
-    $_trail = crumbs_build_trail($_GET['q']);
+    $_trails[$path] = crumbs_build_trail($path);
   }
-  return $_trail;
+  return $_trails[$path];
+}
+
+
+function crumbs_match_pattern($patterns, $path = NULL) {
+  if (is_string($patterns)) {
+    $patterns = explode("\n", $patterns);
+  }
+  if (!isset($path)) {
+    $path = $_GET['q'];
+  }
+  $trail = crumbs_get_trail($path);
+  $patterns = array_fill_keys($patterns, TRUE);
+  foreach (array_reverse($trail) as $item) {
+    $alias = $item['alias'];
+    if (isset($patterns[$alias])) {
+      return TRUE;
+    }
+    else if (isset($patterns['! '. $alias])) {
+      return FALSE;
+    }
+    else if (isset($patterns[$alias .'/+'])) {
+      return TRUE;
+    }
+    else if (isset($patterns['! '. $alias .'/+'])) {
+      return FALSE;
+    }
+  }
+  $alias = drupal_get_path_alias($path);
+  $fragments = explode('/', $alias);
+  $partial_alias = array_shift($fragments);
+  $match = NULL;
+  while (TRUE) {
+    if (empty($fragments)) break;
+    if (isset($patterns[$partial_alias .'/*'])) {
+      $match = TRUE;
+    }
+    else if (isset($patterns['! '. $partial_alias .'/*'])) {
+      $match = FALSE;
+    }
+    $partial_alias .= '/'. array_shift($fragments);
+  }
+  if (isset($match)) {
+    return $match;
+  }
+  if (isset($patterns['*'])) {
+    return TRUE;
+  }
+  return FALSE;
 }
 
 
@@ -74,7 +131,34 @@ function crumbs_get_plugin_engine() {
 }
 
 
-class _crumbs_InvokeAction_preprocessPage {
+/**
+ * This function has exactly one possible input value for
+ * each possible return value, except the return value FALSE.
+ * 
+ * @param $router_path :string
+ *   The router path can contain any character, but will typically
+ *   have a format like "node/%/edit".
+ * @return :string or FALSE
+ *   A string that can be used as a method suffix,
+ *   or FALSE, where that is not possible.
+ *   The route "node/%/edit" will resolve as "node_x_edit".
+ */
+function crumbs_build_method_suffix($router_path) {
+  $method_suffix = strtolower($router_path);
+  $method_suffix = preg_replace('#[^a-z0-9\%]#', '_', $method_suffix);
+  $method_suffix = strtr($method_suffix, array('%' => 'x'));
+  $reverse = strtr($method_suffix, array('_' => '/'));
+  $reverse = preg_replace(array('#/x/#', '#/x$#'), array('/%/', '/%'), $reverse);
+  // we need to do this two time to catch things like "/x/x/x/x".
+  $reverse = strtr($reverse, array('/x/' => '/%/'));
+  if ($reverse === $router_path) {
+    return $method_suffix;
+  }
+  return FALSE;
+}
+
+
+class _crumbs_InvokeAction_preprocessPage implements crumbs_InvokeActionInterface_alter {
 
   protected $_vars;
 
@@ -93,6 +177,18 @@ class _crumbs_InvokeAction_preprocessPage {
   }
 }
 
+
+// ============================================ interfaces =====================
+
+
+interface crumbs_InvokeActionInterface_find {
+  function invoke($plugin, $plugin_key, $weight_keeper);
+}
+
+
+interface crumbs_InvokeActionInterface_alter {
+  function invoke($plugin, $plugin_key);
+}
 
 
 

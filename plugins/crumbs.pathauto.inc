@@ -20,8 +20,12 @@ class _pathauto_CrumbsPlugin {
   function define($h) {
     $h->setTitle(t('the alias that pathauto would assign to this path.'));
   }
+
+  function disabledByDefault() {
+    return array('');
+  }
   
-  function findParent__node__($path, $item) {
+  function findParent__node_x($path, $item) {
     $node = $item['page_arguments'][0];
     if (is_object($node)) {
       $placeholders = pathauto_get_placeholders('node', $node);

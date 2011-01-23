@@ -8,14 +8,14 @@ function blog_crumbs_plugins() {
 
 class _blog_CrumbsPlugin {
 
-  function findParent__node__($path, $item) {
+  function findParent__node_x($path, $item) {
     $node = $item['map'][1];
     if ($node->type === 'blog') {
       return 'blog/'. $node->uid;
     }
   }
 
-  function findTitle__blog__($path, $item) {
+  function findTitle__blog_x($path, $item) {
     $user = $item['map'][1];
     return t("!name's blog", array('!name' => $user->name));
   }

@@ -24,6 +24,10 @@ class _menu_CrumbsPlugin__hierarchy {
     }
   }
 
+  function disabledByDefault() {
+    return array('*');
+  }
+
   function findParent($path, $item) {
     $q = db_query($sql = "
       SELECT
@@ -54,6 +58,10 @@ class _menu_CrumbsPlugin__link_title {
     }
   }
 
+  function disabledByDefault() {
+    return array('*');
+  }
+
   function findTitle($path, $item) {
     $q = db_query($sql = "
       SELECT
@@ -78,7 +86,7 @@ class _menu_CrumbsPlugin__admin {
   /**
    * Router path 'admin/build/menu-customize/%'.
    */
-  function findParent__admin_build_menu_customize__($path, $item) {
+  function findParent__admin_build_menu_customize_x($path, $item) {
     return "admin/build/menu";
   }
 }

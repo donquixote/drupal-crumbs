@@ -18,22 +18,22 @@ class _views_ui_CrumbsPlugin {
     $h->setTitle(t('Define more meaningful breadcrumb titles for views_ui pages.'));
   }
   
-  function findTitle__admin_build_views_export__($path, $item) {
+  function findTitle__admin_build_views_export_x($path, $item) {
     $view = $item['map'][4];
     return t('Export view "@view"', array('@view' => $view->name));
   }
   
-  function findTitle__admin_build_views_clone__($path, $item) {
+  function findTitle__admin_build_views_clone_x($path, $item) {
     $view = $item['map'][4];
     return t('Clone view "@view"', array('@view' => $view->name));
   }
   
-  function findTitle__admin_build_views_edit__($path, $item) {
+  function findTitle__admin_build_views_edit_x($path, $item) {
     $view = $item['map'][4];
     return t('Edit view "@view"', array('@view' => $view->name));
   }
   
-  function findTitle__admin_build_views_delete__($path, $item) {
+  function findTitle__admin_build_views_delete_x($path, $item) {
     $view = $item['map'][4];
     return t('Delete view "@view"', array('@view' => $view->name));
   }

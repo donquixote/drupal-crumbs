@@ -16,12 +16,18 @@ function crumbs_crumbs_plugins() {
 
 class _crumbs_CrumbsPlugin__home_title {
 
+  protected $_front_normal_path;
+
+  function __construct() {
+    $this->_front_normal_path = drupal_get_normal_path(variable_get('site_frontpage', 'node'));
+  }
+
   function define($h) {
     return $h->setTitle(t('Set "Home" as the title for the root item.'));
   }
 
-  function findTitle($path, array $item, array $breadcrumb_parents) {
-    if (!count($breadcrumb_parents)) {
+  function findTitle($path, array $item) {
+    if ($path === $this->_front_normal_path) {
       return t('Home');
     }
   }

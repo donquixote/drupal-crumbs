@@ -19,7 +19,7 @@ class _og_CrumbsPlugin__group_post {
     }
   }
 
-  function findParent__node__($path, $item) {
+  function findParent__node_x($path, $item) {
     $node = $item['map'][1];
     if (is_array($node->og_groups)) {
       foreach ($node->og_groups as $group_nid) {
@@ -39,7 +39,7 @@ class _og_CrumbsPlugin__groups_overview {
     }
   }
 
-  function findParent__node__($path, $item) {
+  function findParent__node_x($path, $item) {
     $node = $item['map'][1];
     if (isset($node->og_selective)) {
       return array($node->type => 'og');
@@ -57,7 +57,7 @@ class _og_CrumbsPlugin__my_groups_overview {
     }
   }
 
-  function findParent__node__($path, $item) {
+  function findParent__node_x($path, $item) {
     $node = $item['map'][1];
     if (isset($node->og_selective)) {
       if (isset($GLOBALS['user']->og_groups[$node->nid])) {

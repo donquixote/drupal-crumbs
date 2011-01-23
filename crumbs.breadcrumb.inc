@@ -10,7 +10,6 @@
  * the default imp.
  */
 function theme_crumbs_breadcrumb(array $breadcrumb_items) {
-
   $original_page_title = drupal_get_title();
   $last_item = array_pop($breadcrumb_items);
 
@@ -61,7 +60,6 @@ class _crumbs_BreadcrumbBuilder {
         }
         // The item will be skipped, if $title === FALSE.
         if (isset($title) && $title !== FALSE) {
-          $item['link_path'] = $path;
           $item['link_title'] = $title;
           $item['link_options'] = array();
           $breadcrumb[] = $item;
@@ -74,24 +72,24 @@ class _crumbs_BreadcrumbBuilder {
 
   protected function _findTitle($path, array $item, array $breadcrumb_parents) {
     $invokeAction = new _crumbs_InvokeAction_findTitle($path, $item, $breadcrumb_parents);
-    $this->_pluginEngine->invokeAll($invokeAction);
+    $this->_pluginEngine->invokeAll_find($invokeAction);
     return $invokeAction->getValue();
   }
 
   protected function _decorateBreadcrumb(array &$breadcrumb) {
     $invokeAction = new _crumbs_InvokeAction_decorateBreadcrumb($breadcrumb);
-    $this->_pluginEngine->invokeAllReverse($invokeAction);
+    $this->_pluginEngine->invokeAll_alter($invokeAction);
   }
 }
 
 
-class _crumbs_InvokeAction_findTitle extends crumbs_InvokeAction_findSomething {
+class _crumbs_InvokeAction_findTitle extends crumbs_InvokeAction_findForPath {
 
   protected $_method = 'findTitle';
   protected $_breadcrumb_parents;
 
   function __construct($path, array $item, array $breadcrumb_parents) {
-    crumbs_InvokeAction_findSomething::__construct($path, $item);
+    crumbs_InvokeAction_findForPath::__construct($path, $item);
     $this->_breadcrumb_parents = $breadcrumb_parents;
   }
 
@@ -101,7 +99,7 @@ class _crumbs_InvokeAction_findTitle extends crumbs_InvokeAction_findSomething {
 }
 
 
-class _crumbs_InvokeAction_decorateBreadcrumb {
+class _crumbs_InvokeAction_decorateBreadcrumb implements crumbs_InvokeActionInterface_alter {
 
   protected $_breadcrumb;
 

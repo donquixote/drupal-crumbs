@@ -37,11 +37,15 @@ class _nodereference_CrumbsPlugin {
       $h->addRule($type_name);
     }
   }
+
+  function disabledByDefault() {
+    return array('*');
+  }
   
   /**
    * Match "node/%" router path
    */
-  function findParent__node__($path, $item) {
+  function findParent__node_x($path, $item) {
     $node = $item['map'][0];
     $result = array();
     if ($ref_nid = $this->_readParentNodeReference($node)) {

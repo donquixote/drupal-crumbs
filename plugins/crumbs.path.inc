@@ -16,6 +16,10 @@ class _path_CrumbsPlugin {
   function define($h) {
     $h->setTitle(t('existing alias for the given path'));
   }
+
+  function disabledByDefault() {
+    return array('');
+  }
   
   function findParent($path) {
     $alias = drupal_get_path_alias($path);

@@ -52,7 +52,7 @@ class _forum_CrumbsPlugin__term_node {
    * Forum nodes get their forum terms as breadcrumb parents.
    * The method name matches the router path "node/%".
    */
-  function findParent__node__($path, $item) {
+  function findParent__node_x($path, $item) {
     $node = $item['map'][0];
     if ($node->type == 'forum' && is_array($node->taxonomy)) {
       $result = array();
@@ -96,12 +96,12 @@ class _forum_CrumbsPlugin__admin {
 
 
 
-  function findTitle__admin_content_forum_edit_forum__($path, $item) {
+  function findTitle__admin_content_forum_edit_forum_x($path, $item) {
     $term = $item['map'][5];
     return $term['name'];
   }
 
-  function findTitle__admin_content_forum_edit_container__($path, $item) {
+  function findTitle__admin_content_forum_edit_container_x($path, $item) {
     $term = $item['map'][5];
     return $term['name'];
   }

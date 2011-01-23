@@ -14,7 +14,7 @@ function comment_crumbs_plugins() {
  */
 class _comment_CrumbsPlugin__reply {
 
-  function findParent__comment_reply__($path, $item) {
+  function findParent__comment_reply_x($path, $item) {
     $nid = $item['fragments'][2];
     return 'node/'. $nid;
   }
