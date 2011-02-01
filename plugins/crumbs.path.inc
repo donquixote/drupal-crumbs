@@ -3,7 +3,7 @@
 
 
 function path_crumbs_plugins() {
-  return new _path_CrumbsPlugin();
+  return  new _path_CrumbsPlugin();
 }
 
 
@@ -14,19 +14,20 @@ function path_crumbs_plugins() {
 class _path_CrumbsPlugin {
   
   function define($h) {
-    $h->setTitle(t('existing alias for the given path'));
+    $h->addRule('alias', t('existing alias for the given path'));
   }
 
   function disabledByDefault() {
-    return array('');
+    return array('*');
   }
   
   function findParent($path) {
-    $alias = drupal_get_path_alias($path);
-    $fragments = explode('/', $alias);
-    if (count($fragments) > 1) {
-      array_pop($fragments);
-      return implode('/', $fragments);
+    if ($alias = drupal_lookup_path($path)) {
+      $fragments = explode('/', $alias);
+      if (count($fragments) > 1) {
+        array_pop($fragments);
+        return array('alias' => implode('/', $fragments));
+      }
     }
   }
 }

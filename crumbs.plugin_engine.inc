@@ -296,6 +296,7 @@ abstract class crumbs_InvokeAction_findForPath implements crumbs_InvokeActionInt
   protected $_candidate_key;
   protected $_candidate_value;
   protected $_candidate_weight;
+  protected $_log;
 
   function __construct($path, $item) {
     $this->_path = $path;
@@ -331,14 +332,22 @@ abstract class crumbs_InvokeAction_findForPath implements crumbs_InvokeActionInt
       }
     }
     if (is_array($result)) {
-      foreach ($result as $key => $value) {
-        $weight = $weight_keeper->findWeight($key);
-        $this->_setValue($plugin_key .'.'. $key, $value, $weight);
+      if (!empty($result)) {
+        foreach ($result as $key => $value) {
+          $weight = $weight_keeper->findWeight($key);
+          $this->_setValue($plugin_key .'.'. $key, $value, $weight);
+        }
+      }
+      else {
+        $this->_log[$plugin_key .'.*'] = array(NULL, NULL);
       }
     }
     else if (isset($result)) {
       $weight = $weight_keeper->findWeight();
       $this->_setValue($plugin_key, $result, $weight);
+    }
+    else {
+      $this->_log[$plugin_key .'.*'] = array(NULL, NULL);
     }
   }
 
@@ -354,6 +363,10 @@ abstract class crumbs_InvokeAction_findForPath implements crumbs_InvokeActionInt
     return $this->_candidate_key;
   }
 
+  function getLoggedCandidates() {
+    return $this->_log;
+  }
+
   protected function _setValue($key, $value, $weight) {
     if ($weight !== FALSE) {
       if (!isset($this->_candidate_weight) || $weight < $this->_candidate_weight) {
@@ -362,6 +375,7 @@ abstract class crumbs_InvokeAction_findForPath implements crumbs_InvokeActionInt
         $this->_candidate_key = $key;
       }
     }
+    $this->_log[$key] = array($value, $weight);
   }
 
   protected function _getMethods($method) {

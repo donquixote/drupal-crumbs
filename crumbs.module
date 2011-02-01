@@ -21,6 +21,12 @@ function crumbs_menu() {
     'access arguments' => array('administer crumbs'),
     'file' => 'crumbs.admin.inc',
   );
+  $items['admin/build/crumbs/debug'] = array(
+    'title' => 'Debug',
+    'page callback' => 'crumbs_debug_page',
+    'access arguments' => array('administer crumbs'),
+    'file' => 'crumbs.debug.inc',
+  );
   return $items;
 }
 

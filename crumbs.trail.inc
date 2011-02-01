@@ -8,28 +8,51 @@ function crumbs_build_trail($path) {
 }
 
 
+function crumbs_get_trail_finder() {
+  return _crumbs_get_finder();
+}
+
+
 function _crumbs_get_finder() {
-  static $_finder;
-  if (!isset($_finder)) {
-    $pluginEngine = crumbs_get_plugin_engine();
-    $_finder = new _crumbs_TrailFinder($pluginEngine);
+  static $_trailFinder;
+  if (!isset($_trailFinder)) {
+    $parent_finder = crumbs_get_parent_finder();
+    $_trailFinder = new _crumbs_TrailFinder($parent_finder);
   }
-  return $_finder;
+  return $_trailFinder;
+}
+
+
+function crumbs_get_parent_finder() {
+  static $_parentFinder;
+  if (!isset($_parentFinder)) {
+    $plugin_engine = crumbs_get_plugin_engine();
+    $_parentFinder = new crumbs_ParentFinder($plugin_engine);
+  }
+  return $_parentFinder;
+}
+
+
+function crumbs_get_router_item($path) {
+  $item = menu_get_item($path);
+  // 'route' is a less ambiguous name for a router path than 'path'.
+  $item['route'] = $item['path'];
+  // 'href' sounds more like it had already run through url().
+  $item['link_path'] = $item['href'];
+  $item['alias'] = drupal_get_path_alias($path);
+  $item['fragments'] = explode('/', $path);
+  return $item;
 }
 
 
 class _crumbs_TrailFinder {
 
-  protected $_pluginEngine;
-
-  // cached parent paths
-  protected $_parents = array();
-
+  protected $_parent_finder;
   protected $_front_menu_path;
   protected $_front_menu_item;
 
-  function __construct($pluginEngine) {
-    $this->_pluginEngine = $pluginEngine;
+  function __construct($parent_finder) {
+    $this->_parent_finder = $parent_finder;
     $this->_front_normal_path = drupal_get_normal_path(variable_get('site_frontpage', 'node'));
     $this->_front_menu_item = menu_get_item($front_normal_path);
   }
@@ -42,7 +65,7 @@ class _crumbs_TrailFinder {
     $path = drupal_get_normal_path($path);
     $trail_reverse = array();
     $front_normal_path = drupal_get_normal_path(variable_get('site_frontpage', 'node'));
-    $front_menu_item = menu_get_item($front_normal_path);
+    $front_menu_item = crumbs_get_router_item($front_normal_path);
     while (strlen($path) && $path !== '<front>' && $path !== $front_normal_path) {
       if (isset($trail_reverse[$path])) {
         // We found a loop! To prevent infinite recursion, we
@@ -52,13 +75,13 @@ class _crumbs_TrailFinder {
         }
         break;
       }
-      $item = $this->_getRouterItem($path);
+      $item = crumbs_get_router_item($path);
       // if menu_get_item() does not resolve as a valid router item,
       // we skip this path.
       if ($item) {
         $trail_reverse[$path] = $item;
       }
-      $parent_path = $this->_getParentPath($path, $item);
+      $parent_path = $this->_parent_finder->getParentPath($path, $item);
       if ($parent_path === $path) {
         // This is again a loop, but with just one step.
         // Not as evil as the other kind of loop.
@@ -70,33 +93,50 @@ class _crumbs_TrailFinder {
     $trail_reverse[$front_normal_path] = $front_menu_item;
     return array_reverse($trail_reverse);
   }
+}
 
-  protected function _getRouterItem($path) {
-    $item = menu_get_item($path);
-    // 'route' is a less ambiguous name for a router path than 'path'.
-    $item['route'] = $item['path'];
-    // 'href' sounds more like it had already run through url().
-    $item['link_path'] = $item['href'];
-    $item['alias'] = drupal_get_path_alias($path);
-    $item['fragments'] = explode('/', $path);
-    return $item;
+
+/**
+ * Can find a parent path for a given path.
+ * Contains a cache.
+ */
+class crumbs_ParentFinder {
+
+  protected $_pluginEngine;
+
+  // cached parent paths
+  protected $_parents = array();
+  protected $_log = array();
+
+  function __construct($pluginEngine) {
+    $this->_pluginEngine = $pluginEngine;
   }
 
-  protected function _getParentPath($path, &$item) {
+  function getParentPath($path, &$item) {
     if (!isset($this->_parents[$path])) {
-      $parent_path = $this->_findParentPath($path, $item);
+      $parent_path = $this->findParentPath($path, $item);
       $this->_parents[$path] = drupal_get_normal_path($parent_path);
     }
     return $this->_parents[$path];
   }
 
-  protected function _findParentPath($path, &$item) {
+  function getLoggedCandidates($path) {
+    if (is_array($this->_log[$path])) {
+      return $this->_log[$path];
+    }
+    else {
+      return array();
+    }
+  }
+
+  function findParentPath($path, &$item) {
     if ($item) {
-      $invokeAction = new _crumbs_InvokeAction_findParent($path, $item);
-      $this->_pluginEngine->invokeAll_find($invokeAction);
-      $parent_path = $invokeAction->getValue();
+      $invoke_action = new _crumbs_InvokeAction_findParent($path, $item);
+      $this->_pluginEngine->invokeAll_find($invoke_action);
+      $parent_path = $invoke_action->getValue();
+      $this->_log[$path] = $invoke_action->getLoggedCandidates();
       if ($parent_path) {
-        $item['crumbs_candidate_key'] = $invokeAction->getCandidateKey();
+        $item['crumbs_candidate_key'] = $invoke_action->getCandidateKey();
         return $parent_path;
       }
     }
