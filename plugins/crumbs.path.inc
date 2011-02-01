@@ -3,7 +3,7 @@
 
 
 function path_crumbs_plugins() {
-  return  new _path_CrumbsPlugin();
+  return new _path_CrumbsPlugin();
 }
 
 

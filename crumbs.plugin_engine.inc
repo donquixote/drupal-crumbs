@@ -245,7 +245,7 @@ class crumbs_RuleWeightKeeper {
       $weights['*'] = $this->_rule_weights[$prefix .'.*'];
     }
     foreach ($this->_rule_weights as $key => $weight) {
-      if (strlen($key) > $k && substr_compare($key, $prefix .'.', 0, $k+1)) {
+      if (strlen($key) > $k && substr($key, 0, $k+1) === ($prefix .'.')) {
         $weights[substr($key, $k+1)] = $weight;
       }
     }

@@ -5,7 +5,7 @@ function og_crumbs_plugins() {
   return array(
     'group_post' => new _og_CrumbsPlugin__group_post(),
     'groups_overview' => new _og_CrumbsPlugin__groups_overview(),
-    'groups_overview' => new _og_CrumbsPlugin__my_groups_overview(),
+    'my_groups_overview' => new _og_CrumbsPlugin__my_groups_overview(),
   );
 }
 
@@ -60,7 +60,7 @@ class _og_CrumbsPlugin__my_groups_overview {
   function findParent__node_x($path, $item) {
     $node = $item['map'][1];
     if (isset($node->og_selective)) {
-      if (isset($GLOBALS['user']->og_groups[$node->nid])) {
+      if (og_is_group_member($node->nid, FALSE)) {
         return array($node->type => 'og/my');
       }
     }
