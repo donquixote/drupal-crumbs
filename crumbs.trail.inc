@@ -33,15 +33,40 @@ function crumbs_get_parent_finder() {
 }
 
 
+/**
+ * Very similar to menu_get_item(),
+ * but with some little extra info stored in the result array.
+ */
 function crumbs_get_router_item($path) {
   $item = menu_get_item($path);
   // 'route' is a less ambiguous name for a router path than 'path'.
   $item['route'] = $item['path'];
   // 'href' sounds more like it had already run through url().
-  $item['link_path'] = $item['href'];
+  $item['link_path'] = drupal_get_normal_path($path);
   $item['alias'] = drupal_get_path_alias($path);
   $item['fragments'] = explode('/', $path);
   return $item;
+}
+
+
+/**
+ * Chop off path fragments until we find a valid path.
+ * @param $path
+ *   starting path or alias
+ * @param $depth
+ *   max number of fragments we try to chop off. -1 means no limit.
+ */
+function crumbs_reduce_path($path, $depth = -1) {
+  $fragments = explode('/', $path);
+  while (count($fragments) > 1 && $depth !== 0) {
+    array_pop($fragments);
+    $parent_path = implode($fragments);
+    $parent_item = crumbs_get_router_item($parent_path);
+    if ($parent_item['href'] === $parent_item['link_path']) {
+      return $parent_item['link_path'];
+    }
+    --$depth;
+  }
 }
 
 
@@ -114,7 +139,7 @@ class crumbs_ParentFinder {
 
   function getParentPath($path, &$item) {
     if (!isset($this->_parents[$path])) {
-      $parent_path = $this->findParentPath($path, $item);
+      $parent_path = $this->_findParentPath($path, $item);
       $this->_parents[$path] = drupal_get_normal_path($parent_path);
     }
     return $this->_parents[$path];
@@ -129,21 +154,20 @@ class crumbs_ParentFinder {
     }
   }
 
-  function findParentPath($path, &$item) {
+  protected function _findParentPath($path, &$item) {
     if ($item) {
       $invoke_action = new _crumbs_InvokeAction_findParent($path, $item);
       $this->_pluginEngine->invokeAll_find($invoke_action);
       $parent_path = $invoke_action->getValue();
       $this->_log[$path] = $invoke_action->getLoggedCandidates();
-      if ($parent_path) {
+      if (isset($parent_path)) {
         $item['crumbs_candidate_key'] = $invoke_action->getCandidateKey();
         return $parent_path;
       }
     }
     // fallback: chop off the last fragment of the system path.
-    $fragments = explode('/', $path);
-    $parent_path = implode('/', array_slice($fragments, 0, -1));
-    return $parent_path;
+    $parent_path = crumbs_reduce_path($path);
+    return isset($parent_path) ? $parent_path : FALSE;
   }
 }
 

@@ -23,11 +23,8 @@ class _path_CrumbsPlugin {
   
   function findParent($path) {
     if ($alias = drupal_lookup_path($path)) {
-      $fragments = explode('/', $alias);
-      if (count($fragments) > 1) {
-        array_pop($fragments);
-        return array('alias' => implode('/', $fragments));
-      }
+      $parent_path = crumbs_reduce_path($alias, 1);
+      return isset($parent_path) ? array('alias' => $parent_path) : NULL;
     }
   }
 }

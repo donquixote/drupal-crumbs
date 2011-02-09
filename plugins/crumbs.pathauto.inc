@@ -30,11 +30,8 @@ class _pathauto_CrumbsPlugin {
     if (is_object($node)) {
       $placeholders = pathauto_get_placeholders('node', $node);
       $alias = pathauto_create_alias('node', 'return', $placeholders, $path, $node->nid, $node->type, $node->language);
-      $fragments = explode('/', $alias);
-      if (count($fragments) > 1) {
-        array_pop($fragments);
-        return implode('/', $fragments);
-      }
+      $parent_path = crumbs_reduce_path($alias, 1);
+      return isset($parent_path) ? $parent_path : NULL;
     }
   }
 }
