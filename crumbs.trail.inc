@@ -60,7 +60,7 @@ function crumbs_reduce_path($path, $depth = -1) {
   $fragments = explode('/', $path);
   while (count($fragments) > 1 && $depth !== 0) {
     array_pop($fragments);
-    $parent_path = implode($fragments);
+    $parent_path = implode('/', $fragments);
     $parent_item = crumbs_get_router_item($parent_path);
     if ($parent_item['href'] === $parent_item['link_path']) {
       return $parent_item['link_path'];

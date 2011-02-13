@@ -19,7 +19,7 @@ EOT;
     $benchtime = microtime(TRUE);
     $item = crumbs_get_router_item($path);
     $duration = number_format(1000 * (microtime(TRUE) - $benchtime), 3);
-    $parent_path = $parent_finder->findParentPath($path, $item);
+    $parent_path = $parent_finder->getParentPath($path, $item);
     $log = $parent_finder->getLoggedCandidates($path);
     $rows = array();
     $sort = array();
