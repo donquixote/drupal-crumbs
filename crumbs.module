@@ -87,7 +87,14 @@ function crumbs_match_pattern($patterns, $path = NULL) {
     $path = $_GET['q'];
   }
   $trail = crumbs_get_trail($path);
-  $patterns = array_fill_keys($patterns, TRUE);
+  $patterns_normalized = array();
+  foreach ($patterns as $pattern) {
+    $pattern = trim(strtolower($pattern));
+    if (strlen($pattern)) {
+      $patterns_normalized[$pattern] = TRUE;
+    }
+  }
+  $patterns = $patterns_normalized;
   foreach (array_reverse($trail) as $item) {
     $alias = $item['alias'];
     if (isset($patterns[$alias])) {
