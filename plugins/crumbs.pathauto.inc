@@ -3,7 +3,9 @@
 
 
 function pathauto_crumbs_plugins() {
-  return new _pathauto_CrumbsPlugin();
+  return array(
+    'alias' => new _pathauto_CrumbsPlugin(),
+  );
 }
 
 
@@ -17,8 +19,8 @@ class _pathauto_CrumbsPlugin {
     module_load_include('inc', 'pathauto', 'pathauto');
   }
   
-  function define($h) {
-    $h->setTitle(t('the alias that pathauto would assign to this path.'));
+  function defineOne($h) {
+    $h->setTitle(t('the alias that pathauto would assign to this path. Warning: Poor performance.'));
   }
 
   function disabledByDefault() {
@@ -30,8 +32,7 @@ class _pathauto_CrumbsPlugin {
     if (is_object($node)) {
       $placeholders = pathauto_get_placeholders('node', $node);
       $alias = pathauto_create_alias('node', 'return', $placeholders, $path, $node->nid, $node->type, $node->language);
-      $parent_path = crumbs_reduce_path($alias, 1);
-      return isset($parent_path) ? $parent_path : NULL;
+      return crumbs_reduce_path($alias, 1);
     }
   }
 }

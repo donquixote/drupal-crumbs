@@ -38,13 +38,14 @@ function crumbs_get_parent_finder() {
  * but with some little extra info stored in the result array.
  */
 function crumbs_get_router_item($path) {
-  $item = menu_get_item($path);
+  $normalpath = drupal_get_normal_path($path);
+  $item = menu_get_item($normalpath);
   // 'route' is a less ambiguous name for a router path than 'path'.
   $item['route'] = $item['path'];
   // 'href' sounds more like it had already run through url().
-  $item['link_path'] = drupal_get_normal_path($path);
-  $item['alias'] = drupal_get_path_alias($path);
-  $item['fragments'] = explode('/', $path);
+  $item['link_path'] = $normalpath;
+  $item['alias'] = drupal_get_path_alias($normalpath);
+  $item['fragments'] = explode('/', $normalpath);
   return $item;
 }
 
@@ -62,7 +63,7 @@ function crumbs_reduce_path($path, $depth = -1) {
     array_pop($fragments);
     $parent_path = implode('/', $fragments);
     $parent_item = crumbs_get_router_item($parent_path);
-    if ($parent_item['href'] === $parent_item['link_path']) {
+    if ($parent_item && $parent_item['href'] === $parent_item['link_path']) {
       return $parent_item['link_path'];
     }
     --$depth;

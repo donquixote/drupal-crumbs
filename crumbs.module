@@ -191,6 +191,20 @@ class _crumbs_InvokeAction_preprocessPage implements crumbs_InvokeActionInterfac
 }
 
 
+function crumbs_benchmark($label = NULL, $dpm = FALSE) {
+  static $_t;
+  $t = microtime(TRUE);
+  if (isset($_t) && isset($label)) {
+    $str = 'Duration: ' . number_format(1000 * ($t-$_t), 3) . ' ms for '. $label;
+    if ($dpm) {
+      dpm($str);
+    }
+  }
+  $_t = $t;
+  return $str;
+}
+
+
 // ============================================ interfaces =====================
 
 

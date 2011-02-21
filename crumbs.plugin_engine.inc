@@ -168,20 +168,37 @@ class crumbs_PluginEngine {
 
   function __construct(array $plugins, array $weights) {
     $this->_plugins = $plugins;
+    foreach ($plugins as $plugin_key => $plugin) {
+      if (!method_exists($plugin, 'defineOne')) {
+        $weights[$plugin_key] = FALSE;
+      }
+      if (!method_exists($plugin, 'defineMany') && !method_exists($plugin, 'define')) {
+        $weights[$plugin_key . '.*'] = FALSE;
+      }
+    }
     $this->_weightKeeper = new crumbs_RuleWeightKeeper($weights);
 
     foreach ($plugins as $plugin_key => $plugin) {
       $keeper = $this->_weightKeeper->prefixedWeightKeeper($plugin_key);
-      $this->_pluginOrder_alter[$plugin_key] = $keeper->getSmallestWeight();
-      $this->_pluginOrder_find[$plugin_key] = $keeper->findWeight();
+      $w_find = $keeper->getSmallestWeight();
+      if ($w_find !== FALSE) {
+        $this->_pluginOrder_find[$plugin_key] = $w_find;
+      }
+      $w_alter = $keeper->findWeight();
+      if ($w_alter !== FALSE) {
+        $this->_pluginOrder_alter[$plugin_key] = $w_alter;
+      }
     }
-    // lowest weight last = highest priority last
-    arsort($this->_pluginOrder_alter);
     // lowest weight first = highest priority first
     asort($this->_pluginOrder_find);
-    foreach ($plugins as $plugin_key => $plugin) {
-      $this->_pluginOrder_alter[$plugin_key] = $plugin;
-      $this->_pluginOrder_find[$plugin_key] = $plugin;
+    // lowest weight last = highest priority last
+    arsort($this->_pluginOrder_alter);
+
+    foreach ($this->_pluginOrder_find as $plugin_key => $weight) {
+      $this->_pluginOrder_find[$plugin_key] = $plugins[$plugin_key];
+    }
+    foreach ($this->_pluginOrder_alter as $plugin_key => $weight) {
+      $this->_pluginOrder_alter[$plugin_key] = $plugins[$plugin_key];
     }
   }
 
@@ -254,10 +271,16 @@ class crumbs_RuleWeightKeeper {
 
   function getSmallestWeight() {
     foreach ($this->_rule_weights as $weight) {
-      return $weight;
+      if ($weight !== FALSE) {
+        return $weight;
+      }
     }
+    return FALSE;
   }
 
+  /**
+   * Determine the weight for the rule specified by the key.
+   */
   function findWeight($key = NULL) {
     if (!isset($key)) {
       return $this->_rule_weights[''];
@@ -331,8 +354,10 @@ abstract class crumbs_InvokeAction_findForPath implements crumbs_InvokeActionInt
         break;
       }
     }
-    if (is_array($result)) {
-      if (!empty($result)) {
+
+    if (method_exists($plugin, 'defineMany') || method_exists($plugin, 'define')) {
+      // we expect an array result.
+      if (is_array($result) && !empty($result)) {
         foreach ($result as $key => $value) {
           $weight = $weight_keeper->findWeight($key);
           $this->_setValue($plugin_key .'.'. $key, $value, $weight);
@@ -342,12 +367,15 @@ abstract class crumbs_InvokeAction_findForPath implements crumbs_InvokeActionInt
         $this->_log[$plugin_key .'.*'] = array(NULL, NULL);
       }
     }
-    else if (isset($result)) {
-      $weight = $weight_keeper->findWeight();
-      $this->_setValue($plugin_key, $result, $weight);
-    }
     else {
-      $this->_log[$plugin_key .'.*'] = array(NULL, NULL);
+      // we expect a simple value as a result
+      if (isset($result)) {
+        $weight = $weight_keeper->findWeight();
+        $this->_setValue($plugin_key, $result, $weight);
+      }
+      else {
+        $this->_log[$plugin_key] = array(NULL, NULL);
+      }
     }
   }
 

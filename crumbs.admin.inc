@@ -195,22 +195,27 @@ function _crumbs_load_available_keys(array $plugins) {
  */
 class _crumbs_InvokeAction_define {
 
-  protected $_keys = array();
+  protected $_keys = array('*' => TRUE);
   protected $_keysByPlugin = array();
   protected $_pluginKey;
-  protected $_definitionHandler;
+  protected $_definitionHandler_one;
+  protected $_definitionHandler_many;
 
   function __construct() {
-    $this->_definitionHandler = new _crumbs_PluginDefinitionHandler($this);
+    $this->_definitionHandler_one = new _crumbs_PluginDefinitionHandler_one($this);
+    $this->_definitionHandler_many = new _crumbs_PluginDefinitionHandler_many($this);
   }
 
   function invoke($plugin, $plugin_key) {
     $this->_pluginKey = $plugin_key;
-    if (method_exists($plugin, 'define')) {
-      $plugin->define($this->_definitionHandler);
+    if (method_exists($plugin, 'defineOne')) {
+      $plugin->defineOne($this->_definitionHandler_one);
     }
-    else {
-      $this->_addRule($plugin_key, TRUE);
+    if (method_exists($plugin, 'define')) {
+      $plugin->define($this->_definitionHandler_many);
+    }
+    if (method_exists($plugin, 'defineMany')) {
+      $plugin->defineMany($this->_definitionHandler_many);
     }
   }
 
@@ -233,7 +238,7 @@ class _crumbs_InvokeAction_define {
       $partial_key .= '.'. array_shift($fragments);
     }
     $this->_keys[$key] = $title;
-      $this->_keysByPlugin[$this->_pluginKey][$key] = $title;
+    $this->_keysByPlugin[$this->_pluginKey][$key] = $title;
   }
 
   function getKeys() {
@@ -252,7 +257,7 @@ class _crumbs_InvokeAction_define {
  * It wraps the invoke action, to make sure that the plugin does not call the
  * action's invoke() method.
  */
-class _crumbs_PluginDefinitionHandler {
+class _crumbs_PluginDefinitionHandler_one {
 
   protected $_invokeAction;
 
@@ -260,12 +265,22 @@ class _crumbs_PluginDefinitionHandler {
     $this->_invokeAction = $invoke_action;
   }
 
-  function addRule($key_suffix, $title = TRUE) {
-    $this->_invokeAction->addRule($key_suffix, $title);
-  }
-
   function setTitle($title) {
     $this->_invokeAction->setTitle($title);
+  }
+}
+
+
+/**
+ * This class is used solely for arguments passed to the "define()" method
+ * on plugin objects.
+ * It wraps the invoke action, to make sure that the plugin does not call the
+ * action's invoke() method.
+ */
+class _crumbs_PluginDefinitionHandler_many extends _crumbs_PluginDefinitionHandler_one {
+
+  function addRule($key_suffix, $title = TRUE) {
+    $this->_invokeAction->addRule($key_suffix, $title);
   }
 }
 
