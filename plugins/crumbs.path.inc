@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 
 function path_crumbs_plugins() {

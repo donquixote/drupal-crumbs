@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 
 function _crumbs_load_plugin_engine() {

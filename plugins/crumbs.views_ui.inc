@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 
 function views_ui_crumbs_plugins() {

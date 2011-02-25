@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 
 function taxonomy_crumbs_plugins() {

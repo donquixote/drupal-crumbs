@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 
 function nodereference_crumbs_plugins() {

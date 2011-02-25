@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 
 function crumbs_build_trail($path) {

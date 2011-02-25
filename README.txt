@@ -1,4 +1,3 @@
-$Id$
 
 This text is horribly out of date, especially for the 2.x branch ...
 

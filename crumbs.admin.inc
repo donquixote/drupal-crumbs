@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 
 function crumbs_admin_form() {
