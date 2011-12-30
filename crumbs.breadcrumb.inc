@@ -1,34 +1,6 @@
 <?php
 
 
-/**
- * Default theme implementation for theme('crumbs_breadcrumb').
- * The default implementation uses the theme's implementation of
- * theme('breadcrumb').
- * Themes that are crumbs-aware can override this theme hook to ignore
- * theme('breadcrumb'). Such a theme implementation will look much simpler than
- * the default imp.
- */
-function theme_crumbs_breadcrumb(array $breadcrumb_items) {
-  $original_page_title = drupal_get_title();
-  $last_item = array_pop($breadcrumb_items);
-
-  $breadcrumb_items_html = array();
-  foreach ($breadcrumb_items as $item) {
-    $breadcrumb_items_html[] = crumbs_render_breadcrumb_item($item);
-  }
-
-  // Some themes (Zen, in particular) use drupal_get_title() to
-  // display the last breadcrumb item.
-  // We use drupal_set_title() to temporarily override this value.
-  drupal_set_title($last_item['link_title']);
-  $breadcrumb_html = theme('breadcrumb', $breadcrumb_items_html);
-  drupal_set_title($original_page_title);
-
-  return $breadcrumb_html;
-}
-
-
 function crumbs_render_breadcrumb_item(array $item) {
   $options = $item['link_options'];
   return l($item['link_title'], $item['link_path'], $options);

@@ -18,7 +18,7 @@ class _menu_CrumbsPlugin__hierarchy {
   function define($h) {
     $q = db_query($sql = "SELECT menu_name, title FROM {menu_custom}");
     $titles = array();
-    while ($row = db_fetch_object($q)) {
+    while ($row = $q->fetchObject()) {
       $h->addRule($row->menu_name, $row->title);
     }
   }
@@ -39,7 +39,7 @@ class _menu_CrumbsPlugin__hierarchy {
       GROUP BY menu_name
     ", $path);
     $candidates = array();
-    while ($row = db_fetch_object($q)) {
+    while ($row = $q->fetchObject()) {
       $candidates[$row->menu_name] = $row->parent_path;
     }
     return $candidates;
@@ -52,7 +52,7 @@ class _menu_CrumbsPlugin__link_title {
   function define($h) {
     $q = db_query($sql = "SELECT menu_name, title FROM {menu_custom}");
     $titles = array();
-    while ($row = db_fetch_object($q)) {
+    while ($row = $q->fetchObject()) {
       $h->addRule($row->menu_name, $row->title);
     }
   }
@@ -72,7 +72,7 @@ class _menu_CrumbsPlugin__link_title {
       GROUP BY menu_name
     ", $path);
     $titles = array();
-    while ($row = db_fetch_object($q)) {
+    while ($row = $q->fetchObject()) {
       $titles[$row->menu_name] = $row->link_title;
     }
     return $titles;

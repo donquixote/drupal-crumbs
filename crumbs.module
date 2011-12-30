@@ -11,16 +11,19 @@ function crumbs_perm() {
 }
 
 
+/**
+ * Implements hook_menu()
+ */
 function crumbs_menu() {
   $items = array();
-  $items['admin/build/crumbs'] = array(
+  $items['admin/config/crumbs'] = array(
     'title' => 'Crumbs',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('crumbs_admin_form'),
     'access arguments' => array('administer crumbs'),
     'file' => 'crumbs.admin.inc',
   );
-  $items['admin/build/crumbs/debug'] = array(
+  $items['admin/config/crumbs/debug'] = array(
     'title' => 'Debug',
     'page callback' => 'crumbs_debug_page',
     'access arguments' => array('administer crumbs'),
@@ -32,16 +35,31 @@ function crumbs_menu() {
 
 function crumbs_theme() {
   return array(
-    'crumbs_breadcrumb' => array('breadcrumb_items' => NULL),
+    'crumbs_breadcrumb_link' => array(
+      'item' => NULL,
+    ),
   );
+}
+
+
+/**
+ * Default theme implementation for theme('crumbs_breadcrumb').
+ * The default implementation uses the theme's implementation of
+ * theme('breadcrumb').
+ * Themes that are crumbs-aware can override this theme hook to ignore
+ * theme('breadcrumb'). Such a theme implementation will look much simpler than
+ * the default imp.
+ */
+function theme_crumbs_breadcrumb_link(array $item) {
+  return l($item['link_title'], $item['link_path'], $item['link_options']);
 }
 
 
 function crumbs_preprocess_page(&$vars) {
   $breadcrumb_data = crumbs_get_breadcrumb_data();
   $vars['crumbs_trail'] = $breadcrumb_data['trail'];
-  $vars['crumbs_breadcrumb_items'] = $breadcrumb_data['items'];
-  $vars['crumbs_breadcrumb_html'] = $breadcrumb_data['html'];
+  // $vars['crumbs_breadcrumb_items'] = $breadcrumb_data['items'];
+  // $vars['crumbs_breadcrumb_html'] = $breadcrumb_data['html'];
   $vars['breadcrumb'] = $breadcrumb_data['html'];
   // TODO: Invoke preprocessPage() plugin method.
   $plugin_engine = crumbs_get_plugin_engine();
@@ -50,13 +68,41 @@ function crumbs_preprocess_page(&$vars) {
 }
 
 
+function crumbs_process_page(&$vars) {
+  // we just let this hook sit here..
+}
+
+
 function crumbs_get_breadcrumb_data() {
   static $_data;
   if (!isset($_data)) {
     $trail = crumbs_get_trail();
     module_load_include('inc', 'crumbs', 'crumbs.breadcrumb');
-    $items = crumbs_build_breadcrumb($trail);
-    $html = theme('crumbs_breadcrumb', $items);
+    $breadcrumb_items = crumbs_build_breadcrumb($trail);
+    $router_item = crumbs_get_router_item($_GET['q']);
+
+    // Support for core's breadcrumb api.
+
+    // Allow modules to alter the breadcrumb, if possible, as that is much
+    // faster than rebuilding an entirely new active trail.
+    drupal_alter('menu_breadcrumb', $breadcrumb_items, $router_item);
+
+    // Don't show a link to the current page in the breadcrumb trail.
+    $end = end($breadcrumb_items);
+    if ($router_item['href'] == $end['href']) {
+      array_pop($breadcrumb_items);
+    }
+
+    $links = array();
+    foreach ($breadcrumb_items as $i => $item) {
+      $links[$i] = theme('crumbs_breadcrumb_link', $item);
+    }
+    $html = theme('breadcrumb', array(
+      'breadcrumb' => $links,
+      'crumbs_breadcrumb_items' => $breadcrumb_items,
+      'crumbs_trail' => $trail,
+    ));
+    $items = $breadcrumb_items;
     $_data = compact('trail', 'items', 'html');
   }
   return $_data;

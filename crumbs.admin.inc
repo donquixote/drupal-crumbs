@@ -104,7 +104,7 @@ function _crumbs_build_default_text(array $available_keys, array $keys_by_plugin
 
   ksort($lines['inherit']);
   foreach ($lines['inherit'] as $key => $line) {
-    if ($prev === '' && $line === '') {
+    if (isset($prev) && $prev === '' && $line === '') {
       unset($lines['inherit'][$key]);
     }
     $prev = $line;

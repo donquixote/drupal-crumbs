@@ -353,10 +353,9 @@ abstract class crumbs_InvokeAction_findForPath implements crumbs_InvokeActionInt
         break;
       }
     }
-
     if (method_exists($plugin, 'defineMany') || method_exists($plugin, 'define')) {
       // we expect an array result.
-      if (is_array($result) && !empty($result)) {
+      if (!empty($result) && is_array($result)) {
         foreach ($result as $key => $value) {
           $weight = $weight_keeper->findWeight($key);
           $this->_setValue($plugin_key .'.'. $key, $value, $weight);

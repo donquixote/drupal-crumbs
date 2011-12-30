@@ -38,14 +38,24 @@ function crumbs_get_parent_finder() {
  */
 function crumbs_get_router_item($path) {
   $normalpath = drupal_get_normal_path($path);
-  $item = menu_get_item($normalpath);
-  // 'route' is a less ambiguous name for a router path than 'path'.
-  $item['route'] = $item['path'];
-  // 'href' sounds more like it had already run through url().
-  $item['link_path'] = $normalpath;
-  $item['alias'] = drupal_get_path_alias($normalpath);
-  $item['fragments'] = explode('/', $normalpath);
-  return $item;
+  try {
+    $item = menu_get_item($normalpath);
+  }
+  catch (Exception $e) {
+    // Some modules throw an exception, if a path has unloadable arguments.
+    // We don't care, because we don't actually load this page.
+    // drupal_set_message('Ehm...', 'error');
+    return NULL;
+  }
+  if (!empty($item) && is_array($item)) {
+    // 'route' is a less ambiguous name for a router path than 'path'.
+    $item['route'] = $item['path'];
+    // 'href' sounds more like it had already run through url().
+    $item['link_path'] = $normalpath;
+    $item['alias'] = drupal_get_path_alias($normalpath);
+    $item['fragments'] = explode('/', $normalpath);
+    return $item;
+  }
 }
 
 
@@ -79,7 +89,7 @@ class _crumbs_TrailFinder {
   function __construct($parent_finder) {
     $this->_parent_finder = $parent_finder;
     $this->_front_normal_path = drupal_get_normal_path(variable_get('site_frontpage', 'node'));
-    $this->_front_menu_item = menu_get_item($front_normal_path);
+    $this->_front_menu_item = menu_get_item($this->_front_normal_path);
   }
 
   /**

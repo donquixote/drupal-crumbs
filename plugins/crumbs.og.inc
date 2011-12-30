@@ -6,6 +6,7 @@ function og_crumbs_plugins() {
     'group_post' => new _og_CrumbsPlugin__group_post(),
     'groups_overview' => new _og_CrumbsPlugin__groups_overview(),
     'my_groups_overview' => new _og_CrumbsPlugin__my_groups_overview(),
+    'groups_overview_title' => new _og_CrumbsPlugin__groups_overview_title(),
   );
 }
 
@@ -13,17 +14,25 @@ function og_crumbs_plugins() {
 class _og_CrumbsPlugin__group_post {
 
   function define($h) {
-    $types = og_get_types('group_post');
+    $types = node_type_get_types();
     foreach ($types as $type) {
-      $h->addRule($type);
+      if (og_is_group_content_type('node', $type->type)) {
+        $h->addRule($type->type);
+      }
     }
   }
 
   function findParent__node_x($path, $item) {
     $node = $item['map'][1];
-    if (is_array($node->og_groups)) {
-      foreach ($node->og_groups as $group_nid) {
-        return array($node->type => 'node/'. $group_nid);
+    if (isset($node->group_audience['und'])) {
+      foreach ($node->group_audience['und'] as $group_info) {
+        // Just pick the first one..
+        $gid = $group_info['gid'];
+        $row = db_query("SELECT * FROM {og} WHERE gid = :gid", array(':gid' => $gid))->fetchObject();
+        if ($row && $row->entity_type === 'node') {
+          $etid = $row->etid;
+          return array($node->type => "node/$etid");
+        }
       }
     }
   }
@@ -33,16 +42,32 @@ class _og_CrumbsPlugin__group_post {
 class _og_CrumbsPlugin__groups_overview {
 
   function define($h) {
-    $types = og_get_types('group');
+    $types = node_type_get_types();
     foreach ($types as $type) {
-      $h->addRule($type);
+      if (og_is_group_type('node', $type->type)) {
+        $h->addRule($type->type);
+      }
     }
   }
 
   function findParent__node_x($path, $item) {
     $node = $item['map'][1];
-    if (isset($node->og_selective)) {
-      return array($node->type => 'og');
+    if (isset($node->group_group['und'][0]['value'])) {
+      return array($node->type => 'group-list');
+    }
+  }
+}
+
+
+class _og_CrumbsPlugin__groups_overview_title {
+
+  function defineOne($h) {
+    return $h->setTitle(t('Set "Group" as the title for item for "group-list".'));
+  }
+
+  function findTitle($path, $item) {
+    if ($item['route'] === 'group-list') {
+      return t('Groups');
     }
   }
 }
@@ -51,9 +76,11 @@ class _og_CrumbsPlugin__groups_overview {
 class _og_CrumbsPlugin__my_groups_overview {
 
   function define($h) {
-    $types = og_get_types('group');
+    $types = node_type_get_types();
     foreach ($types as $type) {
-      $h->addRule($type);
+      if (og_is_group_type('node', $type->type)) {
+        $h->addRule($type->type);
+      }
     }
   }
 

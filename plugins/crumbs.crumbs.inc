@@ -21,7 +21,7 @@ class _crumbs_CrumbsPlugin__home_title {
     $this->_front_normal_path = drupal_get_normal_path(variable_get('site_frontpage', 'node'));
   }
 
-  function define($h) {
+  function defineOne($h) {
     return $h->setTitle(t('Set "Home" as the title for the root item.'));
   }
 
