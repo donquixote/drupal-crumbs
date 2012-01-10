@@ -16,18 +16,25 @@ function crumbs_perm() {
  */
 function crumbs_menu() {
   $items = array();
-  $items['admin/config/crumbs'] = array(
+  $items['admin/structure/crumbs'] = array(
     'title' => 'Crumbs',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('crumbs_admin_form'),
     'access arguments' => array('administer crumbs'),
     'file' => 'crumbs.admin.inc',
   );
-  $items['admin/config/crumbs/debug'] = array(
+  $items['admin/structure/crumbs/settings'] = array(
+    'title' => 'Settings',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0,
+  );
+  $items['admin/structure/crumbs/debug'] = array(
     'title' => 'Debug',
     'page callback' => 'crumbs_debug_page',
     'access arguments' => array('administer crumbs'),
     'file' => 'crumbs.debug.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
   );
   return $items;
 }

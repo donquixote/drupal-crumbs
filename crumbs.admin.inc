@@ -22,6 +22,8 @@ EOT;
     '#title' => 'Order of rules.',
     '#description' => 'Each row is a rule',
     '#rows' => 24,
+    // TODO: Add a CSS file? Or totally revamp this settings form?
+    '#attributes' => array('style' => 'font-family:"Courier new", monospace;'),
   );
   
   $form['submit'] = array(

@@ -1,18 +1,18 @@
 <?php
 
 
-function crumbs_debug_page() {// return 'TEST';
+function crumbs_debug_page() {
   drupal_set_title('Crumbs debug');
-  $path = $_GET['path_to_test'];
+  $path = isset($_GET['path_to_test']) ? $_GET['path_to_test'] : '';
   $path_checked = check_plain($path);
-  $form_action = url('admin/build/crumbs/debug');
+  $form_action = url('admin/structure/crumbs/debug');
   $html = <<<EOT
     <form method="get" action="$form_action">
       <p>Path:
       <input size="40" name="path_to_test" value="$path_checked"/></p>
     </form>
 EOT;
-  if (isset($path)) {
+  if (strlen($path)) {
     module_load_include('inc', 'crumbs', 'crumbs.plugin_engine');
     module_load_include('inc', 'crumbs', 'crumbs.trail');
     
