@@ -1,10 +1,13 @@
 <?php
 
 
-function pathauto_crumbs_plugins() {
-  return array(
-    'alias' => new _pathauto_CrumbsPlugin(),
-  );
+/**
+ * Implements hook_crumbs_plugins()
+ */
+function pathauto_crumbs_plugins($api) {
+  // TODO: Port to D7, or drop it.
+  return;
+  $api->monoPlugin();
 }
 
 
@@ -12,20 +15,20 @@ function pathauto_crumbs_plugins() {
  * Implementation of class hook class_CrumbsParentFinder
  * on the behalf of path module.
  */
-class _pathauto_CrumbsPlugin {
-  
+class pathauto_CrumbsMonoPlugin implements crumbs_MonoPlugin {
+
   function __construct() {
     module_load_include('inc', 'pathauto', 'pathauto');
   }
-  
-  function defineOne($h) {
-    $h->setTitle(t('the alias that pathauto would assign to this path. Warning: Poor performance.'));
+
+  function describe($api) {
+    return t('Chop off the last fragment from the alias that pathauto would assign to this path. Warning: Poor performance.'));
   }
 
   function disabledByDefault() {
     return array('');
   }
-  
+
   function findParent__node_x($path, $item) {
     $node = $item['page_arguments'][0];
     if (is_object($node)) {

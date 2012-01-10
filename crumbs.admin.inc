@@ -2,11 +2,14 @@
 
 
 function crumbs_admin_form() {
+
+  _crumbs_include();
+
   $form = array();
-  
+
   // drupal_add_js(drupal_get_path('module', 'crumbs') .'/crumbs.admin.js');
   // drupal_add_css(drupal_get_path('module', 'crumbs') .'/crumbs.admin.css');
-  
+
   $text = <<<EOT
     <p>Reorder and enable/disable crumbs rules.</p>
     <p>The title coming after the first space in each row can be ignored, it has no effect. What matters is the key before the first space.</p>
@@ -16,7 +19,7 @@ EOT;
   $form['instructions'] = array(
     '#value' => t($text),
   );
-  
+
   $form['settings'] = array(
     '#type' => 'textarea',
     '#title' => 'Order of rules.',
@@ -25,14 +28,14 @@ EOT;
     // TODO: Add a CSS file? Or totally revamp this settings form?
     '#attributes' => array('style' => 'font-family:"Courier new", monospace;'),
   );
-  
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => 'Save',
   );
-  
+
   $form['settings']['#default_value'] = _crumbs_get_default_text();
-  
+
   return $form;
 }
 
@@ -57,7 +60,7 @@ function _crumbs_build_default_text(array $available_keys, array $keys_by_plugin
     $key_lengths[] = strlen($key);
   }
   $ideal_length = _crumbs_admin_find_ideal_length($key_lengths);
-  
+
   foreach ($available_keys as $key => $title) {
     $string = $key;
     if (is_string($title)) {
@@ -181,108 +184,11 @@ function crumbs_admin_form_submit($form, &$form_state) {
 function _crumbs_load_available_keys(array $plugins) {
   // we can't use the plugin engine,
   // or else we would miss disabled plugins.
-  $invokeAction = new _crumbs_InvokeAction_define();
+  $invokeAction = new crumbs_InvokeAction_describe();
   foreach ($plugins as $plugin_key => $plugin) {
     $invokeAction->invoke($plugin, $plugin_key);
   }
   return array($invokeAction->getKeys(), $invokeAction->getKeysByPlugin());
-}
-
-
-/**
- * This class uses the InvokeAction pattern, but it does not implement any of
- * the InvokeAction interfaces. This is because it is not supposed to be used
- * with the PluginEngine, but rather from a custom function (see above).
- */
-class _crumbs_InvokeAction_define {
-
-  protected $_keys = array('*' => TRUE);
-  protected $_keysByPlugin = array();
-  protected $_pluginKey;
-  protected $_definitionHandler_one;
-  protected $_definitionHandler_many;
-
-  function __construct() {
-    $this->_definitionHandler_one = new _crumbs_PluginDefinitionHandler_one($this);
-    $this->_definitionHandler_many = new _crumbs_PluginDefinitionHandler_many($this);
-  }
-
-  function invoke($plugin, $plugin_key) {
-    $this->_pluginKey = $plugin_key;
-    if (method_exists($plugin, 'defineOne')) {
-      $plugin->defineOne($this->_definitionHandler_one);
-    }
-    if (method_exists($plugin, 'define')) {
-      $plugin->define($this->_definitionHandler_many);
-    }
-    if (method_exists($plugin, 'defineMany')) {
-      $plugin->defineMany($this->_definitionHandler_many);
-    }
-  }
-
-  function addRule($key_suffix, $title) {
-    $this->_addRule($this->_pluginKey .'.'. $key_suffix, $title);
-  }
-
-  function setTitle($title) {
-    $this->_addRule($this->_pluginKey, $title);
-  }
-
-  protected function _addRule($key, $title) {
-    $fragments = explode('.', $key);
-    $partial_key = array_shift($fragments);
-    while (TRUE) {
-      if (empty($fragments)) break;
-      $wildcard_key = $partial_key .'.*';
-      $this->_keys[$wildcard_key] = TRUE;
-      $this->_keysByPlugin[$this->_pluginKey][$wildcard_key] = TRUE;
-      $partial_key .= '.'. array_shift($fragments);
-    }
-    $this->_keys[$key] = $title;
-    $this->_keysByPlugin[$this->_pluginKey][$key] = $title;
-  }
-
-  function getKeys() {
-    return $this->_keys;
-  }
-
-  function getKeysByPlugin() {
-    return $this->_keysByPlugin;
-  }
-}
-
-
-/**
- * This class is used solely for arguments passed to the "define()" method
- * on plugin objects.
- * It wraps the invoke action, to make sure that the plugin does not call the
- * action's invoke() method.
- */
-class _crumbs_PluginDefinitionHandler_one {
-
-  protected $_invokeAction;
-
-  function __construct($invoke_action) {
-    $this->_invokeAction = $invoke_action;
-  }
-
-  function setTitle($title) {
-    $this->_invokeAction->setTitle($title);
-  }
-}
-
-
-/**
- * This class is used solely for arguments passed to the "define()" method
- * on plugin objects.
- * It wraps the invoke action, to make sure that the plugin does not call the
- * action's invoke() method.
- */
-class _crumbs_PluginDefinitionHandler_many extends _crumbs_PluginDefinitionHandler_one {
-
-  function addRule($key_suffix, $title = TRUE) {
-    $this->_invokeAction->addRule($key_suffix, $title);
-  }
 }
 
 

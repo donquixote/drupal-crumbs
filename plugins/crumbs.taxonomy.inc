@@ -1,27 +1,35 @@
 <?php
 
 
-function taxonomy_crumbs_plugins() {
-  return array(
-    'hierarchy' => new _taxonomy_CrumbsPlugin__hierarchy(),
-    'term_node' => new _taxonomy_CrumbsPlugin__term_node(),
-    'term_name' => new _taxonomy_CrumbsPlugin__term_name(),
-    'admin'     => new _taxonomy_CrumbsPlugin__admin(),
-  );
+/**
+ * Implements hook_crumbs_plugins()
+ */
+function taxonomy_crumbs_plugins($api) {
+  // TODO: Port to D7 and test.
+  return;
+  $api->multiPlugin('hierarchy');
+  $api->multiPlugin('term_node');
+  $api->monoPlugin('term_name');
 }
 
 
-class _taxonomy_CrumbsPlugin {
+class _taxonomy_CrumbsMultiPlugin implements crumbs_MultiPlugin {
 
-  function define($h) {
+  function describe($api) {
     foreach (taxonomy_get_vocabularies() as $voc_id => $voc) {
-      $h->addRule('voc_'. $voc_id, 'Vocabulary: '. $voc->name);
+      $api->addRule('voc_'. $voc_id, 'Vocabulary: '. $voc->name);
     }
   }
 }
 
 
-class _taxonomy_CrumbsPlugin__hierarchy extends _taxonomy_CrumbsPlugin {
+class taxonomy_CrumbsMultiPlugin_hierarchy extends _taxonomy_CrumbsMultiPlugin {
+
+  function describe($api) {
+    parent::describe($api);
+    // Now set a generic title for the entire plugin.
+    $api->addRule('*', t('Set taxonomy/term/% as the parent for node/%, if the node is tagged with a term.'));
+  }
 
   function disabledByDefault() {
     return array('*');
@@ -55,7 +63,13 @@ class _taxonomy_CrumbsPlugin__hierarchy extends _taxonomy_CrumbsPlugin {
 }
 
 
-class _taxonomy_CrumbsPlugin__term_node extends _taxonomy_CrumbsPlugin {
+class taxonomy_CrumbsMultiPlugin_term_node extends _taxonomy_CrumbsMultiPlugin {
+
+  function describe($api) {
+    parent::describe($api);
+    // Now set a generic title for the entire plugin.
+    $api->addRule('*', t('Set taxonomy/term/% as the parent for node/%, if the node is tagged with a term.'));
+  }
 
   function disabledByDefault() {
     return array('*');
@@ -80,7 +94,11 @@ class _taxonomy_CrumbsPlugin__term_node extends _taxonomy_CrumbsPlugin {
 }
 
 
-class _taxonomy_CrumbsPlugin__term_name {
+class taxonomy_CrumbsMonoPlugin_term_name implements crumbs_MonoPlugin {
+
+  function describe($api) {
+    return t('Set a title for taxonomy/term/% breadcrumb items.');
+  }
 
   function findTitle__taxonomy_term_x($path, $item) {
     $terms = $item['fragments'][2];
@@ -108,15 +126,6 @@ class _taxonomy_CrumbsPlugin__term_name {
       $names[$term->tid] = $term->name;
     }
     return implode(', ', $names);
-  }
-}
-
-
-class _taxonomy_CrumbsPlugin__admin {
-
-  function findTitle__admin_content_taxonomy_x($path, $item) {
-    $voc = $item['map'][1];
-    return $voc->name;
   }
 }
 

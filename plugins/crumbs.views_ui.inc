@@ -2,6 +2,8 @@
 
 
 function views_ui_crumbs_plugins() {
+  // TODO: Port to D7 or drop.
+  return;
   return new _views_ui_CrumbsPlugin();
 }
 

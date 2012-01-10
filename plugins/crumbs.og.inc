@@ -1,23 +1,21 @@
 <?php
 
 
-function og_crumbs_plugins() {
-  return array(
-    'group_post' => new _og_CrumbsPlugin__group_post(),
-    'groups_overview' => new _og_CrumbsPlugin__groups_overview(),
-    'my_groups_overview' => new _og_CrumbsPlugin__my_groups_overview(),
-    'groups_overview_title' => new _og_CrumbsPlugin__groups_overview_title(),
-  );
+function og_crumbs_plugins($api) {
+  $api->multiPlugin('group_post');
+  $api->multiPlugin('groups_overview');
+  $api->monoPlugin('groups_overview_title');
+  $api->multiPlugin('my_groups_overview');
 }
 
 
-class _og_CrumbsPlugin__group_post {
+class og_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin {
 
-  function define($h) {
+  function describe($api) {
     $types = node_type_get_types();
     foreach ($types as $type) {
       if (og_is_group_content_type('node', $type->type)) {
-        $h->addRule($type->type);
+        $api->addRule($type->type);
       }
     }
   }
@@ -39,13 +37,13 @@ class _og_CrumbsPlugin__group_post {
 }
 
 
-class _og_CrumbsPlugin__groups_overview {
+class og_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin {
 
-  function define($h) {
+  function describe($api) {
     $types = node_type_get_types();
     foreach ($types as $type) {
       if (og_is_group_type('node', $type->type)) {
-        $h->addRule($type->type);
+        $api->addRule($type->type);
       }
     }
   }
@@ -59,10 +57,10 @@ class _og_CrumbsPlugin__groups_overview {
 }
 
 
-class _og_CrumbsPlugin__groups_overview_title {
+class og_CrumbsMonoPlugin_groups_overview_title implements crumbs_MonoPlugin {
 
-  function defineOne($h) {
-    return $h->setTitle(t('Set "Group" as the title for item for "group-list".'));
+  function describe($api) {
+    return t('Set "Group" as the title for item for "group-list".');
   }
 
   function findTitle($path, $item) {
@@ -73,13 +71,13 @@ class _og_CrumbsPlugin__groups_overview_title {
 }
 
 
-class _og_CrumbsPlugin__my_groups_overview {
+class og_CrumbsMultiPlugin_my_groups_overview implements crumbs_MultiPlugin {
 
-  function define($h) {
+  function describe($api) {
     $types = node_type_get_types();
     foreach ($types as $type) {
       if (og_is_group_type('node', $type->type)) {
-        $h->addRule($type->type);
+        $api->addRule($type->type);
       }
     }
   }

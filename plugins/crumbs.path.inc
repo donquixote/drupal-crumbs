@@ -1,10 +1,12 @@
 <?php
 
 
-function path_crumbs_plugins() {
-  return array(
-    'alias' => new _path_CrumbsPlugin(),
-  );
+/**
+ * Implements hook_crumbs_plugins()
+ */
+function path_crumbs_plugins($api) {
+  // Just one plugin for the entire module.
+  $api->monoPlugin();
 }
 
 
@@ -12,16 +14,16 @@ function path_crumbs_plugins() {
  * Implementation of class hook class_CrumbsParentFinder
  * on the behalf of path module.
  */
-class _path_CrumbsPlugin {
-  
-  function defineOne($h) {
-    $h->setTitle(t('existing alias for the given path'));
+class path_CrumbsMonoPlugin implements crumbs_MonoPlugin {
+
+  function describe($api) {
+    return t('Chop off the last fragment of the path alias, consider the result as the parent path.');
   }
 
   function disabledByDefault() {
-    return array('');
+    return TRUE;
   }
-  
+
   function findParent($path, $item) {
     if ($alias = $item['alias']) {
       return crumbs_reduce_path($alias, 1);

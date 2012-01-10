@@ -1,20 +1,42 @@
 <?php
 
 
-function blog_crumbs_plugins() {
-  return new _blog_CrumbsPlugin();
+/**
+ * Implements hook_crumbs_plugins()
+ */
+function blog_crumbs_plugins($api) {
+  $api->monoPlugin('author_page');
+  $api->monoPlugin('author_name');
 }
 
 
-class _blog_CrumbsPlugin {
+class blog_CrumbsMonoPlugin_author_page implements crumbs_MonoPlugin {
 
+  function describe($api) {
+    return t("Use the blog author's user account as the parent page, and 'Blog' as the title.");
+  }
+
+  /**
+   * Still under constructon..
+   */
   function findParent__node_x($path, $item) {
     $node = $item['map'][1];
     if ($node->type === 'blog') {
       return 'blog/'. $node->uid;
     }
   }
+}
 
+
+class blog_CrumbsMonoPlugin_author_name implements crumbs_MonoPlugin {
+
+  function describe($api) {
+    return t("Set '!name's blog' as the blog title, where !name is the author's username");
+  }
+
+  /**
+   * Still under constructon..
+   */
   function findTitle__blog_x($path, $item) {
     $user = $item['map'][1];
     return t("!name's blog", array('!name' => $user->name));

@@ -4,7 +4,9 @@
 /**
  * Implementation of hook_crumbs_plugins()
  */
-function forum_crumbs_plugins() {
+function forum_crumbs_plugins($apio) {
+  // TODO: Port the forum plugins to D7.
+  return;
   $forum_vid = variable_get('forum_nav_vocabulary', NULL);
   if ($forum_vid) {
     return array(

@@ -1,8 +1,9 @@
 <?php
 
 
-function nodereference_crumbs_plugins() {
-  $plugins = array();
+function nodereference_crumbs_plugins($api) {
+  // TODO: Port this to D7, using entityreference module.
+  return;
   foreach (content_fields() as $key => $info) {
     if ($info['type'] === 'nodereference' && $info['multiple'] === 0) {
       $plugins[$key] = new _nodereference_CrumbsPlugin($key, $info);
