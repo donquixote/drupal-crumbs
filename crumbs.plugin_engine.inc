@@ -28,7 +28,7 @@ function crumbs_get_plugins() {
 function _crumbs_load_plugins() {
   foreach (array(
     'crumbs', 'menu', 'forum', 'views_ui', 'og', 'clickpath',
-    'taxonomy', 'path', 'pathauto', 'nodereference', 'comment',
+    'taxonomy', 'path', 'pathauto', 'entityreference', 'comment',
   ) as $module) {
     if (module_exists($module)) {
       module_load_include('inc', 'crumbs', 'plugins/crumbs.'. $module);
