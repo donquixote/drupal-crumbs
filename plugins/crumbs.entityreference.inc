@@ -11,11 +11,12 @@ function entityreference_crumbs_plugins($api) {
         $class = '_entityreference_CrumbsMultiPlugin_' . $entity_type;
         if (class_exists($class)) {
           $plugin = new $class($key, $bundles);
-          $api->multiPlugin($key, $plugin);
+          $api->multiPlugin("$key.$entity_type", $plugin);
         }
       }
     }
   }
+  $api->disabledByDefault('*');
 }
 
 
@@ -30,10 +31,6 @@ abstract class _entityreference_CrumbsMultiPlugin implements crumbs_MultiPlugin 
   function __construct($field_key, $bundles) {
     $this->fieldKey = $field_key;
     $this->bundles = $bundles;
-  }
-
-  function disabledByDefault() {
-    return array('*');
   }
 
   function describe($api) {

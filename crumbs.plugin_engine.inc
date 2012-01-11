@@ -2,9 +2,8 @@
 
 
 function _crumbs_load_plugin_engine() {
-  $plugins = crumbs_get_plugins();
+  list($plugins, $disabled_keys) = crumbs_get_plugins();
   $weights = _crumbs_load_weights();
-  $disabled_keys = _crumbs_get_disabled_keys($plugins);
   foreach ($disabled_keys as $key => $disabled) {
     if (!isset($weights[$key])) {
       $weights[$key] = FALSE;
@@ -16,12 +15,11 @@ function _crumbs_load_plugin_engine() {
 
 function crumbs_get_plugins() {
   static $_plugins;
+  static $_disabled_keys;
   if (!isset($_plugins)) {
-    $_plugins = _crumbs_load_plugins();
-    // $key_weights = _crumbs_load_weights();
-    // _crumbs_sort_plugins($_plugins, $key_weights);
+    list($_plugins, $_disabled_keys) = _crumbs_load_plugins();
   }
-  return $_plugins;
+  return array($_plugins, $_disabled_keys);
 }
 
 
@@ -35,13 +33,14 @@ function _crumbs_load_plugins() {
     }
   }
   $plugins = array();
-  $api = new crumbs_InjectedAPI_hookCrumbsPlugins($plugins);
+  $disabled_keys = array();
+  $api = new crumbs_InjectedAPI_hookCrumbsPlugins($plugins, $disabled_keys);
   foreach (module_implements('crumbs_plugins') as $module) {
     $function = $module .'_crumbs_plugins';
     $api->setModule($module);
     $function($api);
   }
-  return $plugins;
+  return array($plugins, $disabled_keys);
 }
 
 
@@ -72,42 +71,6 @@ function _crumbs_load_weights_1_x() {
     }
   }
   return $weights;
-}
-
-
-function _crumbs_get_disabled_keys(array $plugins) {
-  $disabled_keys = array();
-  foreach ($plugins as $plugin_key => $plugin) {
-    if (method_exists($plugin, 'disabledByDefault')) {
-      $result = $plugin->disabledByDefault();
-      if (!isset($result)) {
-        continue;
-      }
-      $class = get_class($plugin);
-      if (is_a($plugin, 'crumbs_MultiPlugin')) {
-        if (!is_array($result)) {
-          throw new Exception("$class::disabledByDefault() must return an array or NULL.");
-        }
-        foreach ($result as $suffix) {
-          if (!isset($suffix) || $suffix === '') {
-            throw new Exception("$class::disabledByDefault() - returned array contains an empty key.");
-          }
-          else {
-            $disabled_keys[$plugin_key . '.' . $suffix] = TRUE;
-          }
-        }
-      }
-      elseif (is_a($plugin, 'crumbs_MonoPlugin')) {
-        if ($result === TRUE) {
-          $disabled_keys[$plugin_key] = TRUE;
-        }
-        elseif ($result !== FALSE) {
-          throw new Exception("$class::disabledByDefault() must return TRUE, FALSE or NULL.");
-        }
-      }
-    }
-  }
-  return $disabled_keys;
 }
 
 

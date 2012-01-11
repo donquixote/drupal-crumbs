@@ -5,34 +5,113 @@
  * Implements hook_crumbs_plugins()
  */
 function taxonomy_crumbs_plugins($api) {
-  // TODO: Port to D7 and test.
-  return;
-  $api->multiPlugin('hierarchy');
-  $api->multiPlugin('term_node');
-  $api->monoPlugin('term_name');
+
+  $api->multiPlugin('termParent');
+
+  foreach (field_info_fields() as $key => $info) {
+    if ($info['type'] == 'taxonomy_term_reference') {
+      foreach ($info['bundles'] as $entity_type => $bundles) {
+        $class = '_taxonomy_CrumbsMultiPlugin_termReference_' . $entity_type;
+        if (class_exists($class)) {
+          $plugin = new $class($key, $bundles);
+          $api->multiPlugin("termReference.$key.$entity_type", $plugin);
+        }
+      }
+    }
+  }
+
+  $api->disabledByDefault('termReference.*');
 }
 
 
-class _taxonomy_CrumbsMultiPlugin implements crumbs_MultiPlugin {
+// -----------------------------------------------------------------------------
+
+
+class _taxonomy_CrumbsMultiPlugin_termReference implements crumbs_MultiPlugin {
+
+  protected $fieldKey;
+  protected $bundles;
+
+  // To be defined by the child class
+  protected $entityType;
+
+  function __construct($field_key, $bundles) {
+    $this->fieldKey = $field_key;
+    $this->bundles = $bundles;
+  }
 
   function describe($api) {
-    foreach (taxonomy_get_vocabularies() as $voc_id => $voc) {
-      $api->addRule('voc_'. $voc_id, 'Vocabulary: '. $voc->name);
+    foreach ($this->bundles as $bundle) {
+      $api->addRule($bundle, $bundle);
+    }
+  }
+
+  protected function _findParentPath($entity) {
+    if (isset($entity->{$this->fieldKey})) {
+      foreach ($entity->{$this->fieldKey} as $lang => $terms) {
+        foreach ($terms as $term_info) {
+          return 'taxonomy/term/' . $term_info['tid'];
+        }
+      }
+    }
+  }
+
+  protected function _getPath_node($nid) {
+    return 'node/' . $nid;
+  }
+
+  protected function _getPath_user($uid) {
+    return 'user/' . $uid;
+  }
+}
+
+
+class _taxonomy_CrumbsMultiPlugin_termReference_node extends _taxonomy_CrumbsMultiPlugin_termReference {
+
+  protected $entityType = 'node';
+
+  /**
+   * Match "node/%" router path
+   */
+  function findParent__node_x($path, $item) {
+    $node = $item['map'][1];
+    $parent_path = $this->_findParentPath($node);
+    if ($parent_path) {
+      return array($node->type => $parent_path);
     }
   }
 }
 
 
-class taxonomy_CrumbsMultiPlugin_hierarchy extends _taxonomy_CrumbsMultiPlugin {
+class _taxonomy_CrumbsMultiPlugin_termReference_user extends _taxonomy_CrumbsMultiPlugin_termReference {
+
+  protected $entityType = 'user';
+
+  /**
+   * Match "user/%" router path
+   */
+  function findParent__user_x($path, $item) {
+    $user = $item['map'][1];
+    $parent_path = $this->_findParentCandidates($user);
+    if ($parent_path) {
+      // TODO: Is 'user' the correct bundle name?
+      return array('user' => $user);
+    }
+  }
+}
+
+
+// -----------------------------------------------------------------------------
+
+
+class taxonomy_CrumbsMultiPlugin_termParent implements crumbs_MultiPlugin {
 
   function describe($api) {
-    parent::describe($api);
+    foreach (taxonomy_get_vocabularies() as $voc_id => $voc) {
+      $api->addRule($voc->machine_name, 'Vocabulary: '. $voc->name);
+    }
     // Now set a generic title for the entire plugin.
     $api->addRule('*', t('Set taxonomy/term/% as the parent for node/%, if the node is tagged with a term.'));
-  }
-
-  function disabledByDefault() {
-    return array('*');
   }
 
   /**
@@ -40,92 +119,15 @@ class taxonomy_CrumbsMultiPlugin_hierarchy extends _taxonomy_CrumbsMultiPlugin {
    * The method name matches the router path "taxonomy/term/%".
    */
   function findParent__taxonomy_term_x($path, $item) {
-    $terms = $item['fragments'][2];
-    $terms = taxonomy_terms_parse_string($terms);
-    if (isset($terms['tids']) && count($terms['tids']) === 1) {
-      $tid = $terms['tids'][0];
-      $q = db_query($sql = "
-        SELECT h.parent, d.vid
-        FROM {term_hierarchy} h
-        LEFT JOIN {term_data} d ON (h.tid = d.tid)
-        WHERE d.tid = %d
-        GROUP BY d.vid
-      ", $tid);
-      $result = array();
-      while ($row = db_fetch_object($q)) {
-        if ($row->parent) {
-          $result['voc_'.$row->vid] = 'taxonomy/term/'.$row->parent;
-        }
+    $term = $item['map'][2];
+    $parents = taxonomy_get_parents($term->tid);
+    $result = array();
+    foreach ($parents as $parent_tid => $parent_term) {
+      if ($parent_term->vocabulary_machine_name == $term->vocabulary_machine_name) {
+        $path = 'taxonomy/term/' . $parent_tid;
+        return array($term->vocabulary_machine_name => $path);
       }
-      return $result;
     }
-  }
-}
-
-
-class taxonomy_CrumbsMultiPlugin_term_node extends _taxonomy_CrumbsMultiPlugin {
-
-  function describe($api) {
-    parent::describe($api);
-    // Now set a generic title for the entire plugin.
-    $api->addRule('*', t('Set taxonomy/term/% as the parent for node/%, if the node is tagged with a term.'));
-  }
-
-  function disabledByDefault() {
-    return array('*');
-  }
-
-  /**
-   * Nodes get their terms as breadcrumb parents.
-   * The method name matches the router path "node/%".
-   */
-  function findParent__node_x($path, $item) {
-    $node = $item['map'][0];
-    if (is_array($node->taxonomy)) {
-      $result = array();
-      foreach ($node->taxonomy as $tid => $term) {
-        if (!isset($result['voc_'.$term->vid])) {
-          $result['voc_'.$term->vid] = "taxonomy/term/$tid";
-        }
-      }
-      return $result;
-    }
-  }
-}
-
-
-class taxonomy_CrumbsMonoPlugin_term_name implements crumbs_MonoPlugin {
-
-  function describe($api) {
-    return t('Set a title for taxonomy/term/% breadcrumb items.');
-  }
-
-  function findTitle__taxonomy_term_x($path, $item) {
-    $terms = $item['fragments'][2];
-    $terms = taxonomy_terms_parse_string($terms);
-    if (!isset($terms['tids']) || !count($terms['tids'])) {
-      return;
-    }
-    return $this->_buildTermsTitle($terms['tids']);
-  }
-
-  /**
-   * Terms get their parent terms as breadcrumb parent.
-   * The method name matches the router path "taxonomy/term/%".
-   */
-  protected function _buildTermsTitle($tids) {
-    $db_placeholders = db_placeholders($tids);
-    $q = db_query($sql_r = db_rewrite_sql($sql = "
-      SELECT t.tid, t.name
-      FROM {term_data} t
-      WHERE t.tid IN ($db_placeholders)
-    ", 't', 'tid'), $tids);
-    // we rebuild the $names-array so it only contains terms the user has access to.
-    $names = array();
-    while ($term = db_fetch_object($q)) {
-      $names[$term->tid] = $term->name;
-    }
-    return implode(', ', $names);
   }
 }
 

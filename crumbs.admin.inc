@@ -44,10 +44,9 @@ function _crumbs_get_default_text() {
 
   module_load_include('inc', 'crumbs', 'crumbs.plugin_engine');
 
-  $plugins = _crumbs_load_plugins();
+  list($plugins, $disabled_keys) = _crumbs_load_plugins();
   list($available_keys, $keys_by_plugin) = _crumbs_load_available_keys($plugins);
   $weights = _crumbs_load_weights();
-  $disabled_keys = _crumbs_get_disabled_keys($plugins);
 
   return _crumbs_build_default_text($available_keys, $keys_by_plugin, $weights, $disabled_keys);
 }
