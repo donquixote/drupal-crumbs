@@ -1,7 +1,22 @@
 <?php
 
 
-// ============================================ interfaces =====================
+/**
+ * A hook to register crumbs plugins.
+ *
+ * @param $api
+ *   :crumbs_InjectedAPI_hookCrumbsPlugins
+ *   An object with methods to register plugins.
+ *   See the class definition of crumbs_InjectedAPI_hookCrumbsPlugins, which
+ *   methods are available.
+ */
+function hook_crumbs_plugins($api) {
+  $api->monoPlugin('something');
+  $api->multiPlugin('somethingElse');
+}
+
+
+// ===================================== pseudo-interfaces =====================
 
 
 /**

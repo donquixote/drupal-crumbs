@@ -10,20 +10,63 @@ function crumbs_admin_form() {
   // drupal_add_js(drupal_get_path('module', 'crumbs') .'/crumbs.admin.js');
   // drupal_add_css(drupal_get_path('module', 'crumbs') .'/crumbs.admin.css');
 
+  $text_sections = '';
+  foreach (array(
+    '(enabled)' => 'This section does not have a label, it is just anything at
+the top. Criteria in here are considered explicitly enabled, and can be
+prioritized by moving them up and down. Criteria that are further up, have a
+higher priority. By default, only the asterisk * wildcard is in this section.',
+    'disabled' => 'Criteria in this section are considered explicitly
+disabled. By default, this section is empty.<br/>(*)',
+    'disabled by default' => 'Criteria in this section are implicitly
+disabled. New critera end up here, if the plugin code says so.<br/>(**)',
+    'inherit' => 'Criteria in this section "inherit" their weight and
+enabled/disabled status from the best matching wildcard criterion. See the
+documentation for details. New criteria end up in this section by default.<br/>(**)',
+  ) as $title => $desc) {
+    $desc = t($desc);
+    $text_sections .= <<<EOT
+<dt><pre>---- $title ----</pre></dt>
+<dd>$desc</dd>
+EOT;
+  }
+  $text_placeholders['!text_sections'] = '<dl>' . $text_sections . '</dl>';
+
+  $text_footnotes = '';
+  foreach (array(
+    '*' => 'The order of criteria in this section has no meaning, and is not saved.
+Instead, whenever the form is displayed, these criteria are sorted by name.',
+    '**' => 'Whatever you put in these sections, is not saved. Instead, whenever
+the form is displayed, the section will be filled with any criteria that are
+not already in "enabled" or "disabled", sorted by name.',
+  ) as $title => $desc) {
+    $desc = t($desc);
+    $text_footnotes .= <<<EOT
+<p>($title) $desc</p>
+EOT;
+  }
+  $text_placeholders['!text_footnotes'] = '<dl>' . $text_footnotes . '</dl>';
+
   $text = <<<EOT
-    <p>Reorder and enable/disable crumbs rules.</p>
-    <p>The title coming after the first space in each row can be ignored, it has no effect. What matters is the key before the first space.</p>
-    <p>Hint: Copy+paste to edit this text to your favourite text editor, or to import, export and backup. Text editor beats tabledrag, don't you think?</p>
-    <p>If a newly installed module introduces new crumbs rules, these rules will find themselves either in the "inherit" section or in the "disabled by default" section at first. Priority and enabled/disabled status of rules in the "inherit" section is inherited from matching wildcard rules in the "enabled" or "disabled" or "disabled by default" section. The '*' wildcard rule counts as enabled, if it is in the inherit section itself.</p>
+<p>To build a breadcrumb trail, Crumbs takes the system path of the current
+page, and determines a "parent path". This process is repeated with the parent,
+until it arrives at the front page path, or until a loop is detected.</p>
+<p>There are plenty of criteria available, that Crumbs can use to find a parent
+path. This settings form allows to enable, disable and prioritize these
+criteria, by moving (cut+paste) lines of text up and down.</p>
+<p>The textarea has these sections:</p>
+!text_sections
+!text_footnotes
+<p>Labels on the criteria have no meaning when you save the form, and are reset
+whenever the form is displayed.</p>
 EOT;
   $form['instructions'] = array(
-    '#value' => t($text),
+    '#markup' => t($text, $text_placeholders),
   );
 
   $form['settings'] = array(
     '#type' => 'textarea',
-    '#title' => 'Order of rules.',
-    '#description' => 'Each row is a rule',
+    '#title' => t('Order of criteria for parent-finding.'),
     '#rows' => 24,
     // TODO: Add a CSS file? Or totally revamp this settings form?
     '#attributes' => array('style' => 'font-family:"Courier new", monospace;'),
@@ -41,8 +84,6 @@ EOT;
 
 
 function _crumbs_get_default_text() {
-
-  module_load_include('inc', 'crumbs', 'crumbs.plugin_engine');
 
   list($plugins, $disabled_keys) = _crumbs_load_plugins();
   list($available_keys, $keys_by_plugin) = _crumbs_load_available_keys($plugins);
@@ -154,7 +195,7 @@ function crumbs_admin_form_submit($form, &$form_state) {
 
   $weights = _crumbs_load_weights();
   asort($weights);
-  $plugins = _crumbs_load_plugins();
+  list($plugins, $disabled_keys) = _crumbs_load_plugins();
   list($available_keys, $keys_by_plugin) = _crumbs_load_available_keys($plugins);
 
   $weights = array();
@@ -167,7 +208,7 @@ function crumbs_admin_form_submit($form, &$form_state) {
     list($key, $title) = explode(' ', $line, 2);
     if (isset($available_keys[$key])) {
       $weights[$key] = $weight;
-      ++ $weight;
+      ++$weight;
     } else if (preg_match('/^-/', $line)) {
       if ($weight !== FALSE) {
         $weight = FALSE;
@@ -176,6 +217,7 @@ function crumbs_admin_form_submit($form, &$form_state) {
       }
     }
   }
+
   variable_set('crumbs_weights', $weights);
 }
 
