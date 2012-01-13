@@ -22,7 +22,7 @@ class pathauto_CrumbsMonoPlugin implements crumbs_MonoPlugin {
   }
 
   function describe($api) {
-    return t('Chop off the last fragment from the alias that pathauto would assign to this path. Warning: Poor performance.'));
+    return t('Chop off the last fragment from the alias that pathauto would assign to this path. Warning: Poor performance.');
   }
 
   function disabledByDefault() {
