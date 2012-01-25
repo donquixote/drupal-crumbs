@@ -6,8 +6,15 @@ function crumbs_init() {
 }
 
 
-function crumbs_perm() {
-  return array('administer crumbs');
+/**
+ * Implements hook_permission().
+ */
+function crumbs_permission() {
+  return array(
+    'administer crumbs' => array(
+      'title' => t('Administer Crumbs'),
+    ),
+  );
 }
 
 
