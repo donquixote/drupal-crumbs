@@ -84,9 +84,12 @@ class og_CrumbsMultiPlugin_my_groups_overview implements crumbs_MultiPlugin {
 
   function findParent__node_x($path, $item) {
     $node = $item['map'][1];
-    if (isset($node->og_selective)) {
-      if (og_is_group_member($node->nid, FALSE)) {
-        return array($node->type => 'og/my');
+    if (og_is_group_type('node', $node->type)) {
+      $group = og_get_group('node', $node->nid);
+      if (!empty($group)) {
+        if (og_is_member($group->gid)) {
+          return array($node->type => 'user-groups');
+        }
       }
     }
   }
