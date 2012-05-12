@@ -1,11 +1,6 @@
 <?php
 
 
-function crumbs_init() {
-  // $data = crumbs_get_breadcrumb_data();
-}
-
-
 /**
  * Implements hook_permission()
  */
@@ -259,10 +254,14 @@ function crumbs_benchmark($label = NULL, $dpm = FALSE) {
  * Include basic files, and get the autoload to work.
  */
 function _crumbs_include() {
-  module_load_include('inc', 'crumbs', 'crumbs.plugin_engine');
-  module_load_include('inc', 'crumbs', 'crumbs.trail');
-  if (!module_exists('xautoload')) {
-    spl_autoload_register('_crumbs_autoload');
+  static $_first_run = TRUE;
+  if ($_first_run) {
+    if (!module_exists('xautoload')) {
+      spl_autoload_register('_crumbs_autoload');
+    }
+    module_load_include('plugin_engine.inc', 'crumbs');
+    module_load_include('trail.inc', 'crumbs');
+    $_first_run = FALSE;
   }
 }
 
