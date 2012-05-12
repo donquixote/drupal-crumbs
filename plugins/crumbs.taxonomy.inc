@@ -48,9 +48,38 @@ class _taxonomy_CrumbsMultiPlugin_termReference implements crumbs_MultiPlugin {
 
   protected function _findParentPath($entity) {
     if (isset($entity->{$this->fieldKey})) {
-      foreach ($entity->{$this->fieldKey} as $lang => $terms) {
-        foreach ($terms as $term_info) {
-          return 'taxonomy/term/' . $term_info['tid'];
+      $field = $entity->{$this->fieldKey};
+      $terms = array();
+      foreach (array(
+        'und',
+        $GLOBALS['language']->language,
+      ) as $lang) {
+        if (!empty($lang) && isset($field[$lang])) {
+          foreach ($field[$lang] as $term_info) {
+            $terms[$term_info['tid']] = TRUE;
+          }
+        }
+      }
+      if (count($terms) > 1) {
+        $walk = $terms;
+        $visited = array();
+        while (!empty($walk)) {
+          $visited += $walk;
+          foreach ($walk as $tid => $true) {
+            $parents = taxonomy_get_parents($tid);
+            unset($walk[$tid]);
+            foreach ($parents as $tid => $parent) {
+              unset($terms[$tid]);
+              if (!isset($visited[$tid])) {
+                $walk[$tid] = $parent;
+              }
+            }
+          }
+        }
+      }
+      if (!empty($terms)) {
+        foreach ($terms as $tid => $term_info) {
+          return 'taxonomy/term/' . $tid;
         }
       }
     }
