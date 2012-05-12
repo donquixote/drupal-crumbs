@@ -205,7 +205,7 @@ function crumbs_admin_form_submit($form, &$form_state) {
   $weight = 0;
   foreach ($lines as $line) {
     $line = trim($line);
-    list($key, $title) = explode(' ', $line, 2) + array(NULL, NULL);
+    list($key, $title) = explode(' ', $line, 2);
     if (isset($available_keys[$key])) {
       $weights[$key] = $weight;
       ++$weight;
