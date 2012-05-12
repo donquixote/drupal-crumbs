@@ -25,11 +25,23 @@ class menu_CrumbsMultiPlugin_hierarchy implements crumbs_MultiPlugin {
     $q->innerJoin('menu_links', 'child', 'parent.mlid = child.plid');
     $q->addExpression('parent.link_path', 'parent_path');
     $q->addExpression('parent.menu_name', 'menu_name');
+    $q->addExpression('parent.depth', 'depth');
     $q->condition('child.link_path', $path);
-    $q->groupBy('parent.menu_name');
+    // If we'd use both GROUP BY and parent.link_path, sqlsrv would complain,
+    // because it would not know which row's link path to return in case of
+    // duplicate.
+    // There is no useful aggregate function for strings, unfortunately.
+    // $q->groupBy('parent.menu_name');
     $candidates = array();
     foreach ($q->execute() as $row) {
-      $candidates[$row->menu_name] = $row->parent_path;
+      $candidates[$row->menu_name][$row->depth][] = $row->parent_path;
+    }
+    foreach ($candidates as &$menu_candidates) {
+      ksort($menu_candidates);
+      // pick the first array value, two times.
+      // $menu_candidates is already a reference, so here we use it without '&'.
+      foreach ($menu_candidates as $menu_candidates) break;
+      foreach ($menu_candidates as $menu_candidates) break;
     }
     return $candidates;
   }
