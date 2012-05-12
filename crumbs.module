@@ -7,7 +7,7 @@ function crumbs_init() {
 
 
 /**
- * Implements hook_permission().
+ * Implements hook_permission()
  */
 function crumbs_permission() {
   return array(
@@ -47,6 +47,9 @@ function crumbs_menu() {
 }
 
 
+/**
+ * Implements hook_theme()
+ */
 function crumbs_theme() {
   return array(
     'crumbs_breadcrumb_link' => array(
@@ -69,6 +72,9 @@ function theme_crumbs_breadcrumb_link(array $item) {
 }
 
 
+/**
+ * Implements hook_preprocess_page()
+ */
 function crumbs_preprocess_page(&$vars) {
   $breadcrumb_data = crumbs_get_breadcrumb_data();
   $vars['crumbs_trail'] = $breadcrumb_data['trail'];
@@ -82,6 +88,9 @@ function crumbs_preprocess_page(&$vars) {
 }
 
 
+/**
+ * Implements hook_process_page()
+ */
 function crumbs_process_page(&$vars) {
   // we just let this hook sit here..
 }
