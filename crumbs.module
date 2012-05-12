@@ -28,7 +28,7 @@ function crumbs_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('crumbs_admin_form'),
     'access arguments' => array('administer crumbs'),
-    'file' => 'crumbs.admin.inc',
+    'file' => 'admin/crumbs.admin.inc',
   );
   $items['admin/structure/crumbs/settings'] = array(
     'title' => 'Settings',
@@ -39,7 +39,7 @@ function crumbs_menu() {
     'title' => 'Debug',
     'page callback' => 'crumbs_debug_page',
     'access arguments' => array('administer crumbs'),
-    'file' => 'crumbs.debug.inc',
+    'file' => 'admin/crumbs.debug.inc',
     'type' => MENU_LOCAL_TASK,
     'weight' => 1,
   );
