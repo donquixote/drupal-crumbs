@@ -91,6 +91,41 @@ function crumbs_process_page(&$vars) {
 }
 
 
+/**
+ * Implements hook_themekey_properties()
+ */
+function crumbs_themekey_properties() {
+
+  $attributes = array();
+  $attributes['crumbs:trail_paths'] = array(
+    'description' => t('Crumbs trail paths'),
+    'validator' => '',
+    'page cache' => THEMEKEY_PAGECACHE_SUPPORTED,
+  );
+
+  $maps = array();
+  $maps[] = array(
+    'src' => 'drupal:get_q',
+    'dst' => 'crumbs:trail_paths',
+    'callback' => '_crumbs_themekey_path2trailpaths',
+  );
+
+  return array('attributes' => $attributes, 'maps' => $maps);
+}
+
+
+function _crumbs_themekey_path2trailpaths($path) {
+  $trail = crumbs_get_trail($path);
+  $paths = array();
+  foreach ($trail as $k => $item) {
+    $paths[$item['alias']] = TRUE;
+    $paths[$item['route']] = TRUE;
+    $paths[$k] = TRUE;
+  }
+  return array_keys($paths);
+}
+
+
 function crumbs_get_breadcrumb_data() {
   static $_data;
   if (!isset($_data)) {
