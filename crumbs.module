@@ -252,7 +252,7 @@ function crumbs_benchmark($label = NULL, $dpm = FALSE) {
 function _crumbs_include() {
   module_load_include('inc', 'crumbs', 'crumbs.plugin_engine');
   module_load_include('inc', 'crumbs', 'crumbs.trail');
-  if (!module_exists('autoload')) {
+  if (!module_exists('xautoload')) {
     spl_autoload_register('_crumbs_autoload');
   }
 }
@@ -261,7 +261,7 @@ function _crumbs_include() {
 function _crumbs_autoload($class) {
   if (preg_match('#^crumbs_(.*)$#', $class, $m)) {
     $path = strtr($m[1], '_', '/');
-    module_load_include('inc', 'crumbs', "lib/$path");
+    module_load_include('php', 'crumbs', "lib/$path");
   }
 }
 
