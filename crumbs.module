@@ -131,32 +131,41 @@ function crumbs_get_breadcrumb_data() {
   if (!isset($_data)) {
     $trail = crumbs_get_trail();
     module_load_include('inc', 'crumbs', 'crumbs.breadcrumb');
-    $breadcrumb_items = crumbs_build_breadcrumb($trail);
+    $breadcrumb_items_full = crumbs_build_breadcrumb($trail);
     $router_item = crumbs_get_router_item($_GET['q']);
 
     // Support for core's breadcrumb api.
 
     // Allow modules to alter the breadcrumb, if possible, as that is much
     // faster than rebuilding an entirely new active trail.
-    drupal_alter('menu_breadcrumb', $breadcrumb_items, $router_item);
+    drupal_alter('menu_breadcrumb', $breadcrumb_items_full, $router_item);
 
-    // Don't show a link to the current page in the breadcrumb trail.
-    $end = end($breadcrumb_items);
+    $links_full = array();
+    foreach ($breadcrumb_items_full as $i => $item) {
+      $links_full[$i] = theme('crumbs_breadcrumb_link', $item);
+    }
+
+    // By default, don't show a link to the current page in the breadcrumb.
+    $links = $links_full;
+    $breadcrumb_items = $breadcrumb_items_full;
+    $end = end($breadcrumb_items_full);
     if ($router_item['href'] == $end['href']) {
+      array_pop($links);
       array_pop($breadcrumb_items);
     }
 
-    $links = array();
-    foreach ($breadcrumb_items as $i => $item) {
-      $links[$i] = theme('crumbs_breadcrumb_link', $item);
-    }
     $html = theme('breadcrumb', array(
       'breadcrumb' => $links,
-      'crumbs_breadcrumb_items' => $breadcrumb_items,
+      'breadcrumb_full' => $links_full,
+      'crumbs_breadcrumb_items' => $breadcrumb_items_full,
       'crumbs_trail' => $trail,
     ));
-    $items = $breadcrumb_items;
-    $_data = compact('trail', 'items', 'html');
+    $_data = array(
+      'trail' => $trail,
+      'items' => $breadcrumb_items,
+      'items_full' => $breadcrumb_items_full,
+      'html' => $html,
+    );
   }
   return $_data;
 }
