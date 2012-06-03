@@ -210,7 +210,7 @@ function crumbs_admin_form_submit($form, &$form_state) {
       $weights[$key] = $weight;
       ++$weight;
     }
-    else if (preg_match('/^-/', $line)) {
+    elseif (preg_match('/^-/', $line)) {
       if ($weight !== FALSE) {
         $weight = FALSE;
       }

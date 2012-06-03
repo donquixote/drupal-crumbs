@@ -30,13 +30,22 @@ function crumbs_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 0,
   );
+  $items['admin/structure/crumbs/node-parent'] = array(
+    'title' => 'Node parent',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('crumbs_admin_node_parent_form'),
+    'access arguments' => array('administer crumbs'),
+    'file' => 'admin/crumbs.node_parent.inc',
+    'weight' => 1,
+    'type' => MENU_LOCAL_TASK,
+  );
   $items['admin/structure/crumbs/debug'] = array(
     'title' => 'Debug',
     'page callback' => 'crumbs_debug_page',
     'access arguments' => array('administer crumbs'),
     'file' => 'admin/crumbs.debug.inc',
+    'weight' => 2,
     'type' => MENU_LOCAL_TASK,
-    'weight' => 1,
   );
   return $items;
 }
@@ -316,6 +325,30 @@ function _crumbs_autoload($class) {
     module_load_include('php', 'crumbs', "lib/$path");
   }
 }
+
+
+/**
+ * Clean tokens so they are URL friendly.
+ * Taken directly from pathauto_clean_token_values()
+ *
+ * @param $replacements
+ *   An array of token replacements that need to be "cleaned" for use in the URL.
+ * @param $data
+ *   An array of objects used to generate the replacements.
+ * @param $options
+ *   An array of options used to generate the replacements.
+ */
+function crumbs_clean_token_values(&$replacements, $data = array(), $options = array()) {
+  foreach ($replacements as $token => &$value) {
+    // Only clean non-path tokens.
+    if (!preg_match('/(path|alias|url|url-brief)\]$/', $token)) {
+      // We use a simple regex instead of pathauto_cleanstring().
+      $value = preg_replace('#[^a-z0-9/]+#', '-', strtolower($value));
+    }
+  }
+}
+
+
 
 
 // ============================================ interfaces =====================
