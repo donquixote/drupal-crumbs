@@ -30,7 +30,7 @@ class crumbs_TrailFinder {
       $item = crumbs_get_router_item($path);
       // if menu_get_item() does not resolve as a valid router item,
       // we skip this path.
-      if ($item) {
+      if ($item && $item['access']) {
         $trail_reverse[$path] = $item;
       }
       $parent_path = $this->parentFinder->getParentPath($path, $item);

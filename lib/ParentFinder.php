@@ -36,6 +36,10 @@ class crumbs_ParentFinder {
 
   protected function _findParentPath($path, &$item) {
     if ($item) {
+      if (!$item['access']) {
+        // Parent should be the front page.
+        return FALSE;
+      }
       $invoke_action = new crumbs_InvokeAction_findParent($path, $item);
       $this->pluginEngine->invokeAll_find($invoke_action);
       $parent_path = $invoke_action->getValue();
