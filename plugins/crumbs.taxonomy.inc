@@ -121,10 +121,29 @@ class _taxonomy_CrumbsMultiPlugin_termReference_user extends _taxonomy_CrumbsMul
    */
   function findParent__user_x($path, $item) {
     $user = $item['map'][1];
-    $parent_path = $this->_findParentCandidates($user);
+    $parent_path = $this->_findParentPath($user);
     if ($parent_path) {
       // TODO: Is 'user' the correct bundle name?
-      return array('user' => $user);
+      return array('user' => $parent_path);
+    }
+  }
+}
+
+
+class _taxonomy_CrumbsMultiPlugin_termReference_commerce_product extends _taxonomy_CrumbsMultiPlugin_termReference {
+
+  protected $entityType = 'commerce_product';
+
+  /**
+   * Match "product/%" router path.
+   * This works only in combination with commerce_product_page module.
+   */
+  function findParent__product_x($path, $item) {
+    $product = $item['map'][1];
+    $parent_path = $this->_findParentPath($product);
+    if ($parent_path) {
+      // TODO: Is 'user' the correct bundle name?
+      return array($product->type => $parent_path);
     }
   }
 }
