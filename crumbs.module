@@ -247,62 +247,6 @@ function crumbs_get_trail($path = NULL) {
   return $_trails[$path];
 }
 
-
-function crumbs_match_pattern($patterns, $path = NULL) {
-  if (is_string($patterns)) {
-    $patterns = explode("\n", $patterns);
-  }
-  if (!isset($path)) {
-    $path = $_GET['q'];
-  }
-  $trail = crumbs_get_trail($path);
-  $patterns_normalized = array();
-  foreach ($patterns as $pattern) {
-    $pattern = trim(strtolower($pattern));
-    if (strlen($pattern)) {
-      $patterns_normalized[$pattern] = TRUE;
-    }
-  }
-  $patterns = $patterns_normalized;
-  foreach (array_reverse($trail) as $item) {
-    $alias = $item['alias'];
-    if (isset($patterns[$alias])) {
-      return TRUE;
-    }
-    else if (isset($patterns['! '. $alias])) {
-      return FALSE;
-    }
-    else if (isset($patterns[$alias .'/+'])) {
-      return TRUE;
-    }
-    else if (isset($patterns['! '. $alias .'/+'])) {
-      return FALSE;
-    }
-  }
-  $alias = drupal_get_path_alias($path);
-  $fragments = explode('/', $alias);
-  $partial_alias = array_shift($fragments);
-  $match = NULL;
-  while (TRUE) {
-    if (empty($fragments)) break;
-    if (isset($patterns[$partial_alias .'/*'])) {
-      $match = TRUE;
-    }
-    else if (isset($patterns['! '. $partial_alias .'/*'])) {
-      $match = FALSE;
-    }
-    $partial_alias .= '/'. array_shift($fragments);
-  }
-  if (isset($match)) {
-    return $match;
-  }
-  if (isset($patterns['*'])) {
-    return TRUE;
-  }
-  return FALSE;
-}
-
-
 function crumbs_get_plugin_engine() {
   static $_plugin_engine;
   if (!isset($_plugin_engine)) {
