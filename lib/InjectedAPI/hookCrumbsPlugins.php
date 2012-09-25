@@ -55,7 +55,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
       $class = get_class($plugin);
       $key = $this->module . '.' . $key;
     }
-    if (!is_a($plugin, 'crumbs_MonoPlugin')) {
+    if (!($plugin instanceof crumbs_MonoPlugin)) {
       throw new Exception("$class must implement class_MonoPlugin.");
     }
     $this->plugins[$key] = $plugin;
@@ -96,7 +96,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
       $class = get_class($plugin);
       $plugin_key = $this->module . '.' . $key;
     }
-    if (!is_a($plugin, 'crumbs_MultiPlugin')) {
+    if (!($plugin instanceof crumbs_MultiPlugin)) {
       throw new Exception("$class must implement class_MultiPlugin.");
     }
     $this->plugins[$plugin_key] = $plugin;

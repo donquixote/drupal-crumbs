@@ -24,13 +24,13 @@ class crumbs_InvokeAction_describe {
    */
   function invoke($plugin, $plugin_key) {
     $this->pluginKey = $plugin_key;
-    if (is_a($plugin, 'crumbs_MonoPlugin')) {
+    if ($plugin instanceof crumbs_MonoPlugin) {
       $result = $plugin->describe($this->injectedAPI_mono);
       if (is_string($result)) {
         $this->setTitle($result);
       }
     }
-    elseif (is_a($plugin, 'crumbs_MultiPlugin')) {
+    elseif ($plugin instanceof crumbs_MultiPlugin) {
       // That's a multi plugin.
       $result = $plugin->describe($this->injectedAPI_multi);
       if (is_array($result)) {

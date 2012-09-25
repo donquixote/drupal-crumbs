@@ -50,7 +50,7 @@ abstract class crumbs_InvokeAction_findForPath implements crumbs_InvokeActionInt
         break;
       }
     }
-    if (is_a($plugin, 'crumbs_MultiPlugin')) {
+    if ($plugin instanceof crumbs_MultiPlugin) {
       // we expect an array result.
       if (!empty($result) && is_array($result)) {
         foreach ($result as $key => $value) {
@@ -62,7 +62,7 @@ abstract class crumbs_InvokeAction_findForPath implements crumbs_InvokeActionInt
         $this->log[$plugin_key .'.*'] = array(NULL, NULL);
       }
     }
-    elseif (is_a($plugin, 'crumbs_MonoPlugin')) {
+    elseif ($plugin instanceof crumbs_MonoPlugin) {
       // we expect a simple value as a result
       if (isset($result)) {
         $weight = $weight_keeper->findWeight();
