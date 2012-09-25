@@ -2,7 +2,7 @@
 
 
 /**
- * Implements hook_crumbs_plugins()
+ * Implements hook_crumbs_plugins().
  */
 function forum_crumbs_plugins($api) {
   // TODO: Port the forum plugins to D7.
@@ -115,10 +115,3 @@ class _forum_CrumbsPlugin__admin {
     return isset($this->_containers[$tid]) ? TRUE : FALSE;
   }
 }
-
-
-
-
-
-
-

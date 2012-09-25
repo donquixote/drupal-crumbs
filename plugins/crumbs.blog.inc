@@ -2,7 +2,7 @@
 
 
 /**
- * Implements hook_crumbs_plugins()
+ * Implements hook_crumbs_plugins().
  */
 function blog_crumbs_plugins($api) {
   $api->monoPlugin('authorPage');

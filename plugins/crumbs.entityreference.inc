@@ -2,7 +2,7 @@
 
 
 /**
- * Implements hook_crumbs_plugins()
+ * Implements hook_crumbs_plugins().
  */
 function entityreference_crumbs_plugins($api) {
   foreach (field_info_fields() as $key => $info) {
@@ -96,10 +96,3 @@ class _entityreference_CrumbsMultiPlugin_user extends _entityreference_CrumbsMul
     }
   }
 }
-
-
-
-
-
-
-

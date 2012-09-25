@@ -78,8 +78,3 @@ function crumbs_reduce_path($path, $depth = -1) {
     --$depth;
   }
 }
-
-
-
-
-

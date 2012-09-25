@@ -2,7 +2,7 @@
 
 
 /**
- * Implements hook_crumbs_plugins()
+ * Implements hook_crumbs_plugins().
  */
 function pathauto_crumbs_plugins($api) {
   // TODO: Port to D7, or drop it.
@@ -38,10 +38,3 @@ class pathauto_CrumbsMonoPlugin implements crumbs_MonoPlugin {
     }
   }
 }
-
-
-
-
-
-
-

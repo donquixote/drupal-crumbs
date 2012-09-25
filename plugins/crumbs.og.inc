@@ -1,6 +1,9 @@
 <?php
 
 
+/**
+ * Implements hook_crumbs_plugins().
+ */
 function og_crumbs_plugins($api) {
   $api->multiPlugin('group_post');
   $api->multiPlugin('groups_overview');

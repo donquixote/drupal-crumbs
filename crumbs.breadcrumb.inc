@@ -12,6 +12,3 @@ function crumbs_build_breadcrumb(array $trail) {
   $breadcrumbBuilder = new crumbs_BreadcrumbBuilder($pluginEngine);
   return $breadcrumbBuilder->buildBreadcrumb($trail);
 }
-
-
-

@@ -125,7 +125,3 @@ function _crumbs_sort_plugins___DISABLED(array &$plugins, array $key_weights) {
     }
   }
 }
-
-
-
-

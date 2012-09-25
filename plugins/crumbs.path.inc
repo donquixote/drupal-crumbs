@@ -2,7 +2,7 @@
 
 
 /**
- * Implements hook_crumbs_plugins()
+ * Implements hook_crumbs_plugins().
  */
 function path_crumbs_plugins($api) {
   // Just one plugin for the entire module.
@@ -30,10 +30,3 @@ class path_CrumbsMonoPlugin implements crumbs_MonoPlugin {
     }
   }
 }
-
-
-
-
-
-
-

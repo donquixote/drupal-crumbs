@@ -172,7 +172,3 @@ class taxonomy_CrumbsMultiPlugin_termParent implements crumbs_MultiPlugin {
     }
   }
 }
-
-
-
-

@@ -32,27 +32,27 @@ EOT;
   if (strlen($path)) {
     module_load_include('inc', 'crumbs', 'crumbs.plugin_engine');
     module_load_include('inc', 'crumbs', 'crumbs.trail');
-    
+
     crumbs_benchmark();
     $log = array();
-    
+
     $path = drupal_get_normal_path($path);
-    
+
     $log[] = crumbs_benchmark('drupal_get_normal_path()');
-    
+
     $item = crumbs_get_router_item($path);
-    
+
     $log[] = crumbs_benchmark('crumbs_get_router_item("' . $path . '")');
-    
+
     $parent_finder = crumbs_get_parent_finder();
-    
+
     $log[] = crumbs_benchmark('crumbs_get_parent_finder()');
-    
+
     $parent_path = $parent_finder->getParentPath($path, $item);
-    
+
     $log[] = crumbs_benchmark('$finder->getParentPath()');
     $log_html = implode('<br/>', $log);
-    
+
     $log = $parent_finder->getLoggedCandidates($path);
     $rows = array();
     $sort = array();
@@ -106,6 +106,3 @@ EOT;
   }
   return $html;
 }
-
-
-

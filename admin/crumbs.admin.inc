@@ -239,5 +239,3 @@ function _crumbs_load_available_keys(array $plugins) {
   }
   return array($invokeAction->getKeys(), $invokeAction->getKeysByPlugin());
 }
-
-

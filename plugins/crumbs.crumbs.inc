@@ -2,7 +2,7 @@
 
 
 /**
- * Implementation of hook_crumbs_plugins()
+ * Implements hook_crumbs_plugins().
  */
 function crumbs_crumbs_plugins($api) {
   $api->monoPlugin('home_title');
