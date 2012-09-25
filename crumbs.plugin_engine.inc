@@ -24,10 +24,19 @@ function crumbs_get_plugins() {
 
 
 function _crumbs_load_plugins() {
-  foreach (array(
-    'crumbs', 'menu', 'forum', 'views_ui', 'og', 'clickpath', 'menu_position',
-    'taxonomy', 'path', 'pathauto', 'entityreference', 'comment', 'blog',
-  ) as $module) {
+  $modules = array(
+    'blog',
+    'comment',
+    'crumbs',
+    'entityreference',
+    'menu',
+    'og',
+    'path',
+    'taxonomy',
+    // Unported: 'menu_position', 'pathauto', 'forum', 'views_ui'
+  );
+
+  foreach ($modules as $module) {
     if (module_exists($module)) {
       module_load_include('inc', 'crumbs', 'plugins/crumbs.'. $module);
     }
