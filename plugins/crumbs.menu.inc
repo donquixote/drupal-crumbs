@@ -27,6 +27,8 @@ class menu_CrumbsMultiPlugin_hierarchy implements crumbs_MultiPlugin {
     $q->addExpression('parent.menu_name', 'menu_name');
     $q->addExpression('parent.depth', 'depth');
     $q->condition('child.link_path', $path);
+    // Ignore placeholder or separator menu items added by special_menu_items.
+    $q->condition('parent.link_path', array('<nolink>', '<separator>'), 'NOT IN');
     // If we'd use both GROUP BY and parent.link_path, sqlsrv would complain,
     // because it would not know which row's link path to return in case of
     // duplicate.
