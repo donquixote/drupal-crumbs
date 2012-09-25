@@ -40,9 +40,12 @@ abstract class _entityreference_CrumbsMultiPlugin implements crumbs_MultiPlugin 
   }
 
   protected function _findParentPath($entity) {
-    if (isset($entity->{$this->fieldKey}['und'][0])) {
-      $target_id = $entity->{$this->fieldKey}['und'][0]['target_id'];
-      $target_type = $entity->{$this->fieldKey}['und'][0]['target_type'];
+    $items = field_get_items($this->entityType, $entity, $this->fieldKey);
+    if ($items) {
+      $field = field_info_field($this->fieldKey);
+      $item = $items[0];
+      $target_id = $item['target_id'];
+      $target_type = $field['settings']['target_type'];
       $method = '_getPath_' . $target_type;
       if (method_exists($this, $method)) {
         return $this->$method($target_id);

@@ -22,11 +22,10 @@ class og_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin {
 
   function findParent__node_x($path, $item) {
     $node = $item['map'][1];
-    if (isset($node->group_audience['und'])) {
-      foreach ($node->group_audience['und'] as $group_info) {
-        // Just pick the first one..
-        $gid = $group_info['gid'];
-        $row = db_query("SELECT * FROM {og} WHERE gid = :gid", array(':gid' => $gid))->fetchObject();
+    $items = field_get_items('node', $node, 'group_audience');
+    if ($items) {
+      foreach ($items as $item) {
+        $row = db_query("SELECT * FROM {og} WHERE gid = :gid", array(':gid' => $item['gid']))->fetchObject();
         if ($row && $row->entity_type === 'node') {
           $etid = $row->etid;
           return array($node->type => "node/$etid");
@@ -50,7 +49,8 @@ class og_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin {
 
   function findParent__node_x($path, $item) {
     $node = $item['map'][1];
-    if (isset($node->group_group['und'][0]['value'])) {
+    $items = field_get_items('node', $node, 'group_group');
+    if ($items) {
       return array($node->type => 'group-list');
     }
   }
