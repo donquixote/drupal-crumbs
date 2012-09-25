@@ -84,15 +84,18 @@ function theme_crumbs_breadcrumb_current_page(array $item) {
  * Implements hook_preprocess_page()
  */
 function crumbs_preprocess_page(&$vars) {
+  $vars['crumbs_trail'] = array();
+  $vars['breadcrumb'] = '';
+
   $breadcrumb_data = crumbs_get_breadcrumb_data();
-  $vars['crumbs_trail'] = $breadcrumb_data['trail'];
-  // $vars['crumbs_breadcrumb_items'] = $breadcrumb_data['items'];
-  // $vars['crumbs_breadcrumb_html'] = $breadcrumb_data['html'];
-  $vars['breadcrumb'] = $breadcrumb_data['html'];
-  // TODO: Invoke preprocessPage() plugin method.
-  $plugin_engine = crumbs_get_plugin_engine();
-  $action = new crumbs_InvokeAction_preprocessPage($vars);
-  $plugin_engine->invokeAll_alter($action);
+  if ($breadcrumb_data) {
+    $vars['crumbs_trail'] = $breadcrumb_data['trail'];
+    $vars['breadcrumb'] = $breadcrumb_data['html'];
+    // TODO: Invoke preprocessPage() plugin method.
+    $plugin_engine = crumbs_get_plugin_engine();
+    $action = new crumbs_InvokeAction_preprocessPage($vars);
+    $plugin_engine->invokeAll_alter($action);
+  }
 }
 
 
@@ -108,7 +111,6 @@ function crumbs_process_page(&$vars) {
  * Implements hook_themekey_properties()
  */
 function crumbs_themekey_properties() {
-
   $attributes = array();
   $attributes['crumbs:trail_paths'] = array(
     'description' => t('Crumbs trail paths'),
@@ -138,21 +140,46 @@ function _crumbs_themekey_path2trailpaths($path) {
   return array_keys($paths);
 }
 
-
+/**
+ * Returns the breadcrumb data for the current page.
+ *
+ * Gets the menu trail for the current page, and then uses it to build the
+ * breadcrumb. Each link is themed separately, and then the links are passed
+ * to theme('breadcrumb'), which returns the final rendered breadcrumb.
+ *
+ * Note: If the existing Drupal-provided breadcrumb is empty, then Crumbs
+ * makes no effort to calculate its own, since it means that a module has
+ * intentionally removed it.
+ *
+ * Breadcrumbs with one item are also ignored, to prevent the breadcrumb
+ * from being shown on the frontpage.
+ *
+ * @return
+ *   An associative array with the following keys:
+ *   - trail: An array containing the menu trail of the current page.
+ *   - items: An array containing the build breadcrumb.
+ *   - html: The rendered breadcrumb received from theme('breadcrumb').
+ *   or FALSE if the breadcrumb could not be determined.
+ */
 function crumbs_get_breadcrumb_data() {
   static $_data;
   if (!isset($_data)) {
+    $existing_breadcrumb = drupal_get_breadcrumb();
+    // If the existing breadcrumb is empty, that means a module has
+    // intentionally removed it. Honor that, and stop here.
+    if (empty($existing_breadcrumb)) {
+      $_data = FALSE;
+      return $_data;
+    }
+
     $show_current_page = variable_get('crumbs_show_current_page', FALSE);
     $trail = crumbs_get_trail();
     if ($show_current_page) {
       // Do not show the breadcrumb if it contains only 1 item. This prevents
       // the breadcrumb from showing up on the frontpage.
       if (count($trail) == 1) {
-        return array(
-          'trail' => array(),
-          'items' => array(),
-          'html' => '',
-        );
+        $_data = FALSE;
+        return $_data;
       }
     }
     else {
@@ -164,8 +191,6 @@ function crumbs_get_breadcrumb_data() {
     module_load_include('inc', 'crumbs', 'crumbs.breadcrumb');
     $breadcrumb_items = crumbs_build_breadcrumb($trail);
     $router_item = crumbs_get_router_item($_GET['q']);
-
-    // Support for core's breadcrumb api.
 
     // Allow modules to alter the breadcrumb, if possible, as that is much
     // faster than rebuilding an entirely new active trail.
@@ -196,7 +221,16 @@ function crumbs_get_breadcrumb_data() {
   return $_data;
 }
 
-
+/**
+ * Returns the menu trail for the provided path.
+ *
+ * @param $path
+ *   The path for which the menu trail is built. If NULL, the url of the
+ *   current page is assumed.
+ *
+ * @return
+ *   An associative array containing menu trail for the provided path.
+ */
 function crumbs_get_trail($path = NULL) {
   static $_trails;
   if (!isset($_trails)) {
