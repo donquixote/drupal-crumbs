@@ -59,22 +59,26 @@ function crumbs_theme() {
     'crumbs_breadcrumb_link' => array(
       'item' => NULL,
     ),
+    'crumbs_breadcrumb_current_page' => array(
+      'item' => NULL,
+    ),
   );
 }
 
 
 /**
- * Default theme implementation for theme('crumbs_breadcrumb').
- * The default implementation uses the theme's implementation of
- * theme('breadcrumb').
- * Themes that are crumbs-aware can override this theme hook to ignore
- * theme('breadcrumb'). Such a theme implementation will look much simpler than
- * the default imp.
+ * Default theme implementation for theme('crumbs_breadcrumb_link').
  */
 function theme_crumbs_breadcrumb_link(array $item) {
   return l($item['link_title'], $item['link_path'], $item['link_options']);
 }
 
+/**
+ * Default theme implementation for theme('crumbs_breadcrumb_current_page').
+ */
+function theme_crumbs_breadcrumb_current_page(array $item) {
+  return check_plain($item['link_title']);
+}
 
 /**
  * Implements hook_preprocess_page()
@@ -138,41 +142,54 @@ function _crumbs_themekey_path2trailpaths($path) {
 function crumbs_get_breadcrumb_data() {
   static $_data;
   if (!isset($_data)) {
+    $show_current_page = variable_get('crumbs_show_current_page', FALSE);
     $trail = crumbs_get_trail();
+    if ($show_current_page) {
+      // Do not show the breadcrumb if it contains only 1 item. This prevents
+      // the breadcrumb from showing up on the frontpage.
+      if (count($trail) == 1) {
+        return array(
+          'trail' => array(),
+          'items' => array(),
+          'html' => '',
+        );
+      }
+    }
+    else {
+      // The current page should not be shown, remove it from the trail so that
+      // the plugins don't need to waste time loading its title.
+      array_pop($trail);
+    }
+
     module_load_include('inc', 'crumbs', 'crumbs.breadcrumb');
-    $breadcrumb_items_full = crumbs_build_breadcrumb($trail);
+    $breadcrumb_items = crumbs_build_breadcrumb($trail);
     $router_item = crumbs_get_router_item($_GET['q']);
 
     // Support for core's breadcrumb api.
 
     // Allow modules to alter the breadcrumb, if possible, as that is much
     // faster than rebuilding an entirely new active trail.
-    drupal_alter('menu_breadcrumb', $breadcrumb_items_full, $router_item);
+    drupal_alter('menu_breadcrumb', $breadcrumb_items, $router_item);
 
-    $links_full = array();
-    foreach ($breadcrumb_items_full as $i => $item) {
-      $links_full[$i] = theme('crumbs_breadcrumb_link', $item);
-    }
-
-    // By default, don't show a link to the current page in the breadcrumb.
-    $links = $links_full;
-    $breadcrumb_items = $breadcrumb_items_full;
-    $end = end($breadcrumb_items_full);
-    if ($router_item['href'] == $end['href']) {
-      array_pop($links);
-      array_pop($breadcrumb_items);
+    $links = array();
+    foreach ($breadcrumb_items as $i => $item) {
+      if ($show_current_page && $item['href'] == $router_item['href']) {
+        // The current page should be styled differently (no link).
+        $links[$i] = theme('crumbs_breadcrumb_current_page', $item);
+      }
+      else {
+        $links[$i] = theme('crumbs_breadcrumb_link', $item);
+      }
     }
 
     $html = theme('breadcrumb', array(
       'breadcrumb' => $links,
-      'breadcrumb_full' => $links_full,
-      'crumbs_breadcrumb_items' => $breadcrumb_items_full,
+      'crumbs_breadcrumb_items' => $breadcrumb_items,
       'crumbs_trail' => $trail,
     ));
     $_data = array(
       'trail' => $trail,
       'items' => $breadcrumb_items,
-      'items_full' => $breadcrumb_items_full,
       'html' => $html,
     );
   }
@@ -265,7 +282,7 @@ function crumbs_get_plugin_engine() {
 /**
  * This function has exactly one possible input value for
  * each possible return value, except the return value FALSE.
- * 
+ *
  * @param $router_path :string
  *   The router path can contain any character, but will typically
  *   have a format like "node/%/edit".
@@ -375,7 +392,7 @@ interface crumbs_InvokeActionInterface_alter {
 
 /**
  * Interface for plugin objects registered with hook_crumbs_plugins().
- * 
+ *
  */
 interface crumbs_MonoPlugin {
 
@@ -397,7 +414,7 @@ interface crumbs_MonoPlugin {
 
 /**
  * Interface for plugin objects registered with hook_crumbs_plugins().
- * 
+ *
  */
 interface crumbs_MultiPlugin {
 

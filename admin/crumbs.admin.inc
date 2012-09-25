@@ -71,6 +71,11 @@ EOT;
     // TODO: Add a CSS file? Or totally revamp this settings form?
     '#attributes' => array('style' => 'font-family:"Courier new", monospace;'),
   );
+  $form['show_current_page'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show the current page at the end of the breadcrumb trail.'),
+    '#default_value' => variable_get('crumbs_show_current_page', FALSE),
+  );
 
   $form['submit'] = array(
     '#type' => 'submit',
@@ -221,6 +226,7 @@ function crumbs_admin_form_submit($form, &$form_state) {
   }
 
   variable_set('crumbs_weights', $weights);
+  variable_set('crumbs_show_current_page', $form_state['values']['show_current_page']);
 }
 
 
