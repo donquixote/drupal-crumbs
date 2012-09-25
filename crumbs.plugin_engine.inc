@@ -45,7 +45,7 @@ function _crumbs_load_plugins() {
 
 
 function _crumbs_load_weights() {
-  $weights = variable_get('crumbs_weights', array());
+  $weights = variable_get('crumbs_weights', array('crumbs.home_title' => 0));
   asort($weights);
   if (!isset($weights['*'])) {
     $weights['*'] = count($weights);
