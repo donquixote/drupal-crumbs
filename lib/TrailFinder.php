@@ -10,8 +10,7 @@ class crumbs_TrailFinder {
   }
 
   /**
-   * Build the raw trail,
-   * with no respect to title, access check, or skip-in-breadcrumb.
+   * Build the raw trail.
    */
   function buildTrail($path) {
     $path = drupal_get_normal_path($path);
@@ -28,9 +27,10 @@ class crumbs_TrailFinder {
         break;
       }
       $item = crumbs_get_router_item($path);
-      // if menu_get_item() does not resolve as a valid router item,
-      // we skip this path.
-      if ($item && $item['access']) {
+      // For a path to be included in the trail, it must resolve to a valid
+      // router item, the access check must pass, and the path must not
+      // link to the parent (which is the case for default local tasks).
+      if ($item && $item['access'] && !($item['type'] & MENU_LINKS_TO_PARENT)) {
         $trail_reverse[$path] = $item;
       }
       $parent_path = $this->parentFinder->getParentPath($path, $item);
