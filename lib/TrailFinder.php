@@ -27,10 +27,16 @@ class crumbs_TrailFinder {
         break;
       }
       $item = crumbs_get_router_item($path);
+      // If this menu item is a default local task and links to its parent,
+      // skip it and start the search from the parent instead.
+      if ($item && ($item['type'] & MENU_LINKS_TO_PARENT)) {
+        $path = $item['tab_parent_href'];
+        $item = crumbs_get_router_item($item['tab_parent_href']);
+      }
+
       // For a path to be included in the trail, it must resolve to a valid
-      // router item, the access check must pass, and the path must not
-      // link to the parent (which is the case for default local tasks).
-      if ($item && $item['access'] && !($item['type'] & MENU_LINKS_TO_PARENT)) {
+      // router item, and the access check must pass.
+      if ($item && $item['access']) {
         $trail_reverse[$path] = $item;
       }
       $parent_path = $this->parentFinder->getParentPath($path, $item);
