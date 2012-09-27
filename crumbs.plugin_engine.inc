@@ -33,7 +33,7 @@ function _crumbs_load_plugins() {
     'og',
     'path',
     'taxonomy',
-    // Unported: 'pathauto', 'forum'
+    // Unported: 'forum'
   );
 
   foreach ($modules as $module) {
