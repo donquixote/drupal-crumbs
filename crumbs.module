@@ -93,10 +93,6 @@ function crumbs_preprocess_page(&$vars) {
   if ($breadcrumb_data) {
     $vars['crumbs_trail'] = $breadcrumb_data['trail'];
     $vars['breadcrumb'] = $breadcrumb_data['html'];
-    // TODO: Invoke preprocessPage() plugin method.
-    $plugin_engine = crumbs_get_plugin_engine();
-    $action = new crumbs_InvokeAction_preprocessPage($vars);
-    $plugin_engine->invokeAll_alter($action);
   }
 }
 
