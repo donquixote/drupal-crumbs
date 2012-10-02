@@ -72,6 +72,9 @@ class _entityreference_CrumbsMultiPlugin_node extends _entityreference_CrumbsMul
    */
   function findParent__node_x($path, $item) {
     $node = $item['map'][1];
+    // Load the node if it hasn't been loaded due to a missing wildcard loader.
+    $node = is_numeric($node) ? node_load($node) : $node;
+
     $parent_path = $this->_findParentPath($node);
     if ($parent_path) {
       return array($node->type => $parent_path);
@@ -89,6 +92,9 @@ class _entityreference_CrumbsMultiPlugin_user extends _entityreference_CrumbsMul
    */
   function findParent__user_x($path, $item) {
     $user = $item['map'][1];
+    // Load the user if it hasn't been loaded due to a missing wildcard loader.
+    $user = is_numeric($user) ? user_load($user) : $user;
+
     $parent_path = $this->_findParentCandidates($user);
     if ($parent_path) {
       // TODO: Is 'user' the correct bundle name?

@@ -25,6 +25,9 @@ class og_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin {
 
   function findParent__node_x($path, $item) {
     $node = $item['map'][1];
+    // Load the node if it hasn't been loaded due to a missing wildcard loader.
+    $node = is_numeric($node) ? node_load($node) : $node;
+
     $items = field_get_items('node', $node, 'group_audience');
     if ($items) {
       foreach ($items as $item) {
@@ -52,6 +55,9 @@ class og_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin {
 
   function findParent__node_x($path, $item) {
     $node = $item['map'][1];
+    // Load the node if it hasn't been loaded due to a missing wildcard loader.
+    $node = is_numeric($node) ? node_load($node) : $node;
+
     $items = field_get_items('node', $node, 'group_group');
     if ($items) {
       return array($node->type => 'group-list');
@@ -87,6 +93,9 @@ class og_CrumbsMultiPlugin_my_groups_overview implements crumbs_MultiPlugin {
 
   function findParent__node_x($path, $item) {
     $node = $item['map'][1];
+    // Load the node if it hasn't been loaded due to a missing wildcard loader.
+    $node = is_numeric($node) ? node_load($node) : $node;
+
     if (og_is_group_type('node', $node->type)) {
       $group = og_get_group('node', $node->nid);
       if (!empty($group)) {

@@ -50,6 +50,9 @@ class crumbs_CrumbsMultiPlugin_nodeParent implements crumbs_MultiPlugin {
   function findParent__node_x($path, $item) {
     global $language;
     $node = $item['map'][1];
+    // Load the node if it hasn't been loaded due to a missing wildcard loader.
+    $node = is_numeric($node) ? node_load($node) : $node;
+
     $pattern = @$this->patterns[$node->type];
     if (!empty($pattern)) {
       if (module_exists('token')) {
