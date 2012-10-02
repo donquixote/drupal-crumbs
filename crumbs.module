@@ -188,8 +188,9 @@ function crumbs_get_breadcrumb_data() {
     drupal_alter('menu_breadcrumb', $breadcrumb_items, $router_item);
 
     $links = array();
+    $last_item = end($breadcrumb_items);
     foreach ($breadcrumb_items as $i => $item) {
-      if ($show_current_page && $item['href'] == $router_item['href']) {
+      if ($show_current_page && $item == $last_item) {
         // The current page should be styled differently (no link).
         $links[$i] = theme('crumbs_breadcrumb_current_page', $item);
       }
