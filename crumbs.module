@@ -158,14 +158,15 @@ function _crumbs_themekey_path2trailpaths($path) {
  *   or FALSE if the breadcrumb could not be determined.
  */
 function crumbs_get_breadcrumb_data() {
-  static $_data;
-  if (!isset($_data)) {
+  static $data;
+
+  if (!isset($data)) {
     $existing_breadcrumb = drupal_get_breadcrumb();
     // If the existing breadcrumb is empty, that means a module has
     // intentionally removed it. Honor that, and stop here.
     if (empty($existing_breadcrumb)) {
-      $_data = FALSE;
-      return $_data;
+      $data = FALSE;
+      return $data;
     }
 
     $show_current_page = variable_get('crumbs_show_current_page', FALSE);
@@ -174,8 +175,8 @@ function crumbs_get_breadcrumb_data() {
       // Do not show the breadcrumb if it contains only 1 item. This prevents
       // the breadcrumb from showing up on the frontpage.
       if (count($trail) == 1) {
-        $_data = FALSE;
-        return $_data;
+        $data = FALSE;
+        return $data;
       }
     }
     else {
@@ -208,71 +209,99 @@ function crumbs_get_breadcrumb_data() {
       'crumbs_breadcrumb_items' => $breadcrumb_items,
       'crumbs_trail' => $trail,
     ));
-    $_data = array(
+    $data = array(
       'trail' => $trail,
       'items' => $breadcrumb_items,
       'html' => $html,
     );
   }
-  return $_data;
+
+  return $data;
 }
 
 /**
- * Returns the menu trail for the provided path.
+ * Returns the trail for the provided path.
  *
  * @param $path
- *   The path for which the menu trail is built. If NULL, the url of the
+ *   The path for which the trail is built. If NULL, the url of the
  *   current page is assumed.
  *
  * @return
- *   An associative array containing the menu trail for the provided path.
+ *   An associative array containing the trail, with the paths as the keys, and
+ *   the router items (as received from crumbs_get_router_item()) as the values.
+ *
+ * @see crumbs_TrailFinder
  */
 function crumbs_get_trail($path = NULL) {
-  static $_trails = array();
+  static $trails = array();
 
   if (!isset($path)) {
     $path = $_GET['q'];
   }
   $path = drupal_get_normal_path($path);
 
-  if (!isset($_trails[$path])) {
-    $_trails[$path] = crumbs_build_trail($path);
+  if (!isset($trails[$path])) {
+    $finder = crumbs_get_trail_finder();
+    $trails[$path] = $finder->buildTrail($path);
   }
 
-  return $_trails[$path];
+  return $trails[$path];
 }
 
-function crumbs_build_trail($path) {
-  $finder = _crumbs_get_finder();
-  return $finder->buildTrail($path);
-}
-
+/**
+ * Builds the breadcrumb based on the provided trail.
+ *
+ * Each breadcrumb item is a router item taken from the trail, with
+ * two additional keys set:
+ * - link_title: The title of the breadcrumb item as received from a plugin.
+ * - link_options: An array of options passed to l() if needed.
+ *
+ * @param $trail
+ *   The trail provided by crumbs_get_trail().
+ *
+ * @return
+ *   An array of breadcrumb items.
+ *
+ * @see crumbs_BreadcrumbBuilder
+ */
 function crumbs_build_breadcrumb(array $trail) {
-  $pluginEngine = _crumbs_load_plugin_engine();
-  $breadcrumbBuilder = new crumbs_BreadcrumbBuilder($pluginEngine);
-  return $breadcrumbBuilder->buildBreadcrumb($trail);
+  $plugin_engine = crumbs_get_plugin_engine();
+  $breadcrumb_builder = new crumbs_BreadcrumbBuilder($plugin_engine);
+  return $breadcrumb_builder->buildBreadcrumb($trail);
 }
 
+/**
+ * Loads and instantiates the trail finder.
+ *
+ * @return
+ *   An instance of crumbs_TrailFinder.
+ */
 function crumbs_get_trail_finder() {
-  return _crumbs_get_finder();
-}
+  static $trail_finder;
 
-function _crumbs_get_finder() {
-  static $_trailFinder;
-  if (!isset($_trailFinder)) {
+  if (!isset($trail_finder)) {
     $parent_finder = crumbs_get_parent_finder();
-    $_trailFinder = new crumbs_TrailFinder($parent_finder);
+    $trail_finder = new crumbs_TrailFinder($parent_finder);
   }
-  return $_trailFinder;
+
+  return $trail_finder;
 }
 
+/**
+ * Loads and instantiates the parent finder.
+ *
+ * @return
+ *   An instance of crumbs_ParentFinder.
+ */
 function crumbs_get_parent_finder() {
-  static $_parentFinder;
-  if (!isset($_parentFinder)) {
+  static $parent_finder;
+
+  if (!isset($parent_finder)) {
     $plugin_engine = crumbs_get_plugin_engine();
-    $_parentFinder = new crumbs_ParentFinder($plugin_engine);
+    $parent_finder = new crumbs_ParentFinder($plugin_engine);
   }
-  return $_parentFinder;
+
+  return $parent_finder;
 }
 
 /**
@@ -282,74 +311,101 @@ function crumbs_get_parent_finder() {
  *   An instance of crumbs_PluginEngine.
  */
 function crumbs_get_plugin_engine() {
-  static $_plugin_engine;
-  if (!isset($_plugin_engine)) {
-    $_plugin_engine = _crumbs_load_plugin_engine();
-  }
-  return $_plugin_engine;
-}
+  static $plugin_engine;
 
-function _crumbs_load_plugin_engine() {
-  list($plugins, $disabled_keys) = crumbs_get_plugins();
-  $weights = _crumbs_load_weights();
-  foreach ($disabled_keys as $key => $disabled) {
-    if (!isset($weights[$key])) {
-      $weights[$key] = FALSE;
+  if (!isset($plugin_engine)) {
+    list($plugins, $disabled_keys) = crumbs_get_plugins();
+    $weights = crumbs_get_weights();
+    foreach ($disabled_keys as $key => $disabled) {
+      if (!isset($weights[$key])) {
+        $weights[$key] = FALSE;
+      }
     }
+    $plugin_engine = new crumbs_PluginEngine($plugins, $weights);
   }
-  return new crumbs_PluginEngine($plugins, $weights);
+
+  return $plugin_engine;
 }
 
+/**
+ * Returns an array of loaded plugins and disabled plugin keys.
+ *
+ * @return
+ *   An array containing two arrays:
+ *   - An array of loaded plugins keyed by plugin key.
+ *   - An array of disabled plugin keys.
+ */
 function crumbs_get_plugins() {
-  static $_plugins;
-  static $_disabled_keys;
-  if (!isset($_plugins)) {
-    list($_plugins, $_disabled_keys) = _crumbs_load_plugins();
-  }
-  return array($_plugins, $_disabled_keys);
-}
+  static $plugins, $disabled_keys;
 
-function _crumbs_load_plugins() {
-  $modules = array(
-    'blog',
-    'comment',
-    'crumbs',
-    'entityreference',
-    'menu',
-    'og',
-    'path',
-    'taxonomy',
-    // Unported: 'forum'
-  );
+  if (!isset($plugins)) {
+    $modules = array(
+      'blog',
+      'comment',
+      'crumbs',
+      'entityreference',
+      'menu',
+      'og',
+      'path',
+      'taxonomy',
+      // Unported: 'forum'
+    );
 
-  foreach ($modules as $module) {
-    if (module_exists($module)) {
-      module_load_include('inc', 'crumbs', 'plugins/crumbs.'. $module);
+    // Include Crumbs-provided plugins.
+    foreach ($modules as $module) {
+      if (module_exists($module)) {
+        module_load_include('inc', 'crumbs', 'plugins/crumbs.'. $module);
+      }
+    }
+
+    $plugins = array();
+    $disabled_keys = array();
+    $api = new crumbs_InjectedAPI_hookCrumbsPlugins($plugins, $disabled_keys);
+    foreach (module_implements('crumbs_plugins') as $module) {
+      $function = $module .'_crumbs_plugins';
+      $api->setModule($module);
+      $function($api);
     }
   }
-  $plugins = array();
-  $disabled_keys = array();
-  $api = new crumbs_InjectedAPI_hookCrumbsPlugins($plugins, $disabled_keys);
-  foreach (module_implements('crumbs_plugins') as $module) {
-    $function = $module .'_crumbs_plugins';
-    $api->setModule($module);
-    $function($api);
-  }
+
   return array($plugins, $disabled_keys);
 }
 
-function _crumbs_load_weights() {
+/**
+ * Returns an array of plugin keys and their weights.
+ *
+ * Make sure to distinguish the weight 0 from FALSE, which denotes a disabled
+ * plugin.
+ *
+ * The "*" plugin key is a wildcard that triggers inheritance (runs all
+ * implicitly enabled plugins that aren't in the provided list).
+ * It always has the biggest weight.
+ *
+ * @return
+ *   An array of plugin keys and their weights, sorted by weight.
+ */
+function crumbs_get_weights() {
   $weights = variable_get('crumbs_weights', array('crumbs.home_title' => 0));
   asort($weights);
   if (!isset($weights['*'])) {
     $weights['*'] = count($weights);
   }
+
   return $weights;
 }
 
 /**
- * Very similar to menu_get_item(),
- * but with some little extra info stored in the result array.
+ * Returns a router item.
+ *
+ * This is a wrapper around menu_get_item() that sets additional keys
+ * (route, link_path, alias, fragments).
+ *
+ * @param $path
+ *   The path for which the corresponding router item is returned.
+ *   For example, node/5.
+ *
+ * @return
+ *   The router item.
  */
 function crumbs_get_router_item($path) {
   $normalpath = drupal_get_normal_path($path);
@@ -359,9 +415,9 @@ function crumbs_get_router_item($path) {
   catch (Exception $e) {
     // Some modules throw an exception, if a path has unloadable arguments.
     // We don't care, because we don't actually load this page.
-    // drupal_set_message('Ehm...', 'error');
     return NULL;
   }
+
   if (!empty($item) && is_array($item)) {
     // 'route' is a less ambiguous name for a router path than 'path'.
     $item['route'] = $item['path'];
@@ -369,16 +425,18 @@ function crumbs_get_router_item($path) {
     $item['link_path'] = $normalpath;
     $item['alias'] = drupal_get_path_alias($normalpath);
     $item['fragments'] = explode('/', $normalpath);
+
     return $item;
   }
 }
 
 /**
  * Chop off path fragments until we find a valid path.
+ *
  * @param $path
- *   starting path or alias
+ *   Starting path or alias
  * @param $depth
- *   max number of fragments we try to chop off. -1 means no limit.
+ *   Max number of fragments we try to chop off. -1 means no limit.
  */
 function crumbs_reduce_path($path, $depth = -1) {
   $fragments = explode('/', $path);
@@ -430,12 +488,13 @@ function crumbs_build_method_suffix($router_path) {
  *   first time.
  */
 function crumbs_benchmark($label = NULL) {
-  static $_t;
-  $t = microtime(TRUE);
-  if (isset($_t) && isset($label)) {
-    $str = 'Duration: ' . number_format(1000 * ($t-$_t), 3) . ' ms for '. $label;
+  static $previous_time;
+
+  $current_time = microtime(TRUE);
+  if (isset($previous_time) && isset($label)) {
+    $str = 'Duration: ' . number_format(1000 * ($current_time - $previous_time), 3) . ' ms for '. $label;
   }
-  $_t = $t;
+  $previous_time = $current_time;
   return isset($str) ? $str : NULL;
 }
 
