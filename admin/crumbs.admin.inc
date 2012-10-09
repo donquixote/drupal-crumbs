@@ -2,9 +2,6 @@
 
 
 function crumbs_admin_form() {
-
-  _crumbs_include();
-
   $form = array();
 
   // drupal_add_js(drupal_get_path('module', 'crumbs') .'/crumbs.admin.js');
@@ -195,9 +192,6 @@ function _crumbs_admin_find_ideal_length(array $key_lengths, $factor = 30) {
 
 
 function crumbs_admin_form_submit($form, &$form_state) {
-
-  module_load_include('inc', 'crumbs', 'crumbs.plugin_engine');
-
   $weights = _crumbs_load_weights();
   asort($weights);
   list($plugins, $disabled_keys) = _crumbs_load_plugins();

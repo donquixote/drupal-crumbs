@@ -2,7 +2,6 @@
 
 
 function crumbs_debug_page() {
-  _crumbs_include();
   drupal_set_title('Crumbs debug');
   $path = isset($_GET['path_to_test']) ? $_GET['path_to_test'] : '';
   $path_checked = check_plain($path);
@@ -30,9 +29,6 @@ EOT;
     </form>
 EOT;
   if (strlen($path)) {
-    module_load_include('inc', 'crumbs', 'crumbs.plugin_engine');
-    module_load_include('inc', 'crumbs', 'crumbs.trail');
-
     crumbs_benchmark();
     $log = array();
 

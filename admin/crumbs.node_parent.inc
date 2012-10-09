@@ -5,9 +5,6 @@
  * Form builder callback
  */
 function crumbs_admin_node_parent_form() {
-
-  _crumbs_include();
-
   $text = <<<EOT
 <p>You may specify a pattern for the parent path for each node type.</p>
 EOT;
