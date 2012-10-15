@@ -60,14 +60,22 @@ class menu_CrumbsMultiPlugin_link_title implements crumbs_MultiPlugin {
     return array('*');
   }
 
+  /**
+   * Find all menu links with $path as the link path.
+   * For each menu, find the one with the lowest depth.
+   */
   function findTitle($path, $item) {
+
     $q = db_select('menu_links', 'ml');
     $q->fields('ml', array('link_title', 'menu_name'));
     $q->condition('link_path', $path);
-    $q->groupBy('menu_name');
+    $q->orderBy('ml.depth', 'ASC');
+
     $titles = array();
     foreach ($q->execute() as $row) {
-      $titles[$row->menu_name] = $row->link_title;
+      if (!isset($titles[$row->menu_name])) {
+        $titles[$row->menu_name] = $row->link_title;
+      }
     }
     return $titles;
   }
