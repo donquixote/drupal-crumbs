@@ -4,16 +4,14 @@
 /**
  * Implements hook_crumbs_plugins().
  *
- * This is the version for the og-7.x-1.x branch.
+ * This is the version for the og-7.x-2.x branch.
  */
 function og_crumbs_plugins($api) {
   $api->multiPlugin('group_post');
-  $api->monoPlugin('groups_overview_title');
 
-  $api->multiPlugin('groups_overview',
-    new og_CrumbsMultiPlugin_groups_overview('group-list'));
-  $api->multiPlugin('my_groups_overview',
-    new og_CrumbsMultiPlugin_my_groups_overview('user-groups'));
+  // There are no default paths for group overview pages in og-7.x-2.x anymore.
+  // We leave it to custom module developers to instantiate or override those
+  // classes.
 }
 
 
@@ -37,14 +35,16 @@ class og_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin {
     // Load the node if it hasn't been loaded due to a missing wildcard loader.
     $node = is_numeric($node) ? node_load($node) : $node;
 
-    $items = field_get_items('node', $node, 'group_audience');
-    if ($items) {
+    // field_get_items() performs a lot faster than og_get_entity_groups().
+    // TODO:
+    //   We cannot rely on the field name to always be og_group_ref.
+    //   Instead, we could provide a separate plugin for each such field.
+    //   This way, fields in disabled plugins get never triggered.
+    $items = field_get_items('node', $node, 'og_group_ref');
+    if (!empty($items)) {
       foreach ($items as $item) {
-        $row = db_query("SELECT * FROM {og} WHERE gid = :gid", array(':gid' => $item['gid']))->fetchObject();
-        if ($row && $row->entity_type === 'node') {
-          $parent_path = $this->getParentPath($row->etid, $node);
-          return array($node->type => $parent_path);
-        }
+        $parent_path = $this->getParentPath($item['target_id'], $node);
+        return array($node->type => $parent_path);
       }
     }
   }
@@ -99,27 +99,10 @@ class og_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin {
     $node = $item['map'][1];
     // Load the node if it hasn't been loaded due to a missing wildcard loader.
     $node = is_numeric($node) ? node_load($node) : $node;
-
+return;
     $items = field_get_items('node', $node, 'group_group');
-    if ($items) {
-      return array($node->type => 'group-list');
-    }
-  }
-}
-
-
-/**
- * Make t('Groups') the title for '/group-list'.
- */
-class og_CrumbsMonoPlugin_groups_overview_title implements crumbs_MonoPlugin {
-
-  function describe($api) {
-    return t('Set "Group" as the title for item for "group-list".');
-  }
-
-  function findTitle($path, $item) {
-    if ($item['route'] === 'group-list') {
-      return t('Groups');
+    if (!empty($items)) {
+      return array($node->type => $this->groupsOverviewPath);
     }
   }
 }
@@ -157,12 +140,10 @@ class og_CrumbsMultiPlugin_my_groups_overview implements crumbs_MultiPlugin {
     // Load the node if it hasn't been loaded due to a missing wildcard loader.
     $node = is_numeric($node) ? node_load($node) : $node;
 
-    if (og_is_group_type('node', $node->type)) {
-      $group = og_get_group('node', $node->nid);
-      if (!empty($group)) {
-        if (og_is_member($group->gid)) {
-          return array($node->type => 'user-groups');
-        }
+    $items = field_get_items('node', $node, 'group_group');
+    if (!empty($items)) {
+      if (og_is_member('node', $node->nid)) {
+        return array($node->type => $this->myGroupsPath);
       }
     }
   }
