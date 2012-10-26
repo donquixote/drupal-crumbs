@@ -41,17 +41,17 @@ class crumbs_PluginEngine {
   }
 
   /**
-   * Invoke the invoke action for all plugins, starting with the plugin with
+   * Invoke the plugin operation for all plugins, starting with the plugin with
    * highest priority. The function will stop when it has 
    *
-   * @param $invokeAction
+   * @param $plugin_operation
    *   an object that does the method call, and can maintain a state between
    *   different plugins' method calls.
    */
-  function invokeAll_find(crumbs_InvokeActionInterface_find $invoke_action) {
+  function invokeAll_find(crumbs_PluginOperationInterface_find $plugin_operation) {
     foreach ($this->pluginOrder_find as $plugin_key => $plugin) {
       $weight_keeper = $this->weightKeeper->prefixedWeightKeeper($plugin_key);
-      $found = $invoke_action->invoke($plugin, $plugin_key, $weight_keeper);
+      $found = $plugin_operation->invoke($plugin, $plugin_key, $weight_keeper);
       if ($found) {
         return $found;
       }
@@ -63,9 +63,9 @@ class crumbs_PluginEngine {
    * These need to be called with the lowest priority first,
    * because later calls will overwrite earlier calls.
    */
-  function invokeAll_alter(crumbs_InvokeActionInterface_alter $invokeAction) {
+  function invokeAll_alter(crumbs_PluginOperationInterface_alter $plugin_operation) {
     foreach ($this->pluginOrder_alter as $plugin_key => $plugin) {
-      $invokeAction->invoke($plugin, $plugin_key);
+      $plugin_operation->invoke($plugin, $plugin_key);
     }
   }
 }
