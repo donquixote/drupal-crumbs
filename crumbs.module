@@ -348,7 +348,7 @@ function crumbs_get_plugins() {
       'og',
       'path',
       'taxonomy',
-      // Unported: 'forum'
+      'forum',
     );
 
     // Include Crumbs-provided plugins.
