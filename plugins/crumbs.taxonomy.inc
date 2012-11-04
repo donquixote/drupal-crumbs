@@ -162,7 +162,7 @@ class taxonomy_CrumbsMultiPlugin_termParent implements crumbs_MultiPlugin {
       $api->addRule($voc->machine_name, 'Vocabulary: '. $voc->name);
     }
     // Now set a generic title for the entire plugin.
-    $api->addRule('*', t('Set taxonomy/term/% as the parent for node/%, if the node is tagged with a term.'));
+    $api->addRule('*', t('Set taxonomy/term/123 as the parent for taxonomy/term/456, if 123 is the parent term of 456.'));
   }
 
   /**
