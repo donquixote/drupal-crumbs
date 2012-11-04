@@ -1,7 +1,7 @@
 <?php
 
 
-class crumbs_InvokeAction_findParent extends crumbs_InvokeAction_findForPath {
+class crumbs_PluginOperation_findParent extends crumbs_PluginOperation_findForPath {
 
   protected $method = 'findParent';
 

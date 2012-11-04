@@ -30,13 +30,13 @@ class crumbs_BreadcrumbBuilder {
   }
 
   protected function _findTitle($path, array $item, array $breadcrumb_parents) {
-    $invokeAction = new crumbs_InvokeAction_findTitle($path, $item, $breadcrumb_parents);
-    $this->pluginEngine->invokeAll_find($invokeAction);
-    return $invokeAction->getValue();
+    $plugin_operation = new crumbs_PluginOperation_findTitle($path, $item, $breadcrumb_parents);
+    $this->pluginEngine->invokeAll_find($plugin_operation);
+    return $plugin_operation->getValue();
   }
 
   protected function _decorateBreadcrumb(array &$breadcrumb) {
-    $invokeAction = new crumbs_InvokeAction_decorateBreadcrumb($breadcrumb);
-    $this->pluginEngine->invokeAll_alter($invokeAction);
+    $plugin_operation = new crumbs_PluginOperation_decorateBreadcrumb($breadcrumb);
+    $this->pluginEngine->invokeAll_alter($plugin_operation);
   }
 }

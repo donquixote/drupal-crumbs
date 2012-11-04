@@ -6,13 +6,13 @@
  */
 class crumbs_InjectedAPI_describeMonoPlugin {
 
-  protected $invokeAction;
+  protected $pluginOperation;
 
-  function __construct($invoke_action) {
-    $this->invokeAction = $invoke_action;
+  function __construct($plugin_operation) {
+    $this->pluginOperation = $plugin_operation;
   }
 
   function setTitle($title) {
-    $this->invokeAction->setTitle($title);
+    $this->pluginOperation->setTitle($title);
   }
 }

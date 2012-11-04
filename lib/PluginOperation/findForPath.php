@@ -1,7 +1,7 @@
 <?php
 
 
-abstract class crumbs_InvokeAction_findForPath implements crumbs_InvokeActionInterface_find {
+abstract class crumbs_PluginOperation_findForPath implements crumbs_PluginOperationInterface_find {
 
   // injected constructor parameters
   protected $path;
@@ -75,7 +75,7 @@ abstract class crumbs_InvokeAction_findForPath implements crumbs_InvokeActionInt
   }
 
   /**
-   * This runs at the end of the InvokeAction's life cycle,
+   * This runs at the end of the PluginOperation's life cycle,
    * and returns the value that was determined.
    */
   function getValue() {
