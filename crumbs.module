@@ -88,6 +88,38 @@ function theme_crumbs_breadcrumb_current_page(array $item) {
 }
 
 /**
+ * Implements hook_block_info()
+ */
+function crumbs_block_info() {
+
+  return array(
+    'breadcrumb' => array(
+      'info' => t('Breadcrumb (Crumbs)'),
+      'cache' => DRUPAL_NO_CACHE,
+    ),
+  );
+}
+
+/**
+ * Implements hook_block_view()
+ */
+function crumbs_block_view($delta = '') {
+
+  $block = array();
+
+  switch ($delta) {
+    case 'breadcrumb':
+      $breadcrumb_data = crumbs_get_breadcrumb_data();
+      if ($breadcrumb_data) {
+        $block['content'] = $breadcrumb_data['html'];
+      }
+      break;
+  }
+
+  return $block;
+}
+
+/**
  * Implements hook_preprocess_page().
  */
 function crumbs_preprocess_page(&$vars) {
