@@ -62,58 +62,43 @@ class menu_CrumbsMultiPlugin_link_title implements crumbs_MultiPlugin {
    */
   function findTitle($path, $item) {
 
-    $q = db_select('menu_links', 'ml');
-    $q->fields('ml', array('link_title', 'menu_name'));
-    $q->condition('link_path', $path);
+    // We need to load the original title from menu_router,
+    // because _menu_item_localize() does a decision based on that, that we want
+    // to reproduce.
+    $q = db_select('menu_router', 'mr');
+    $q->condition('path', $item['path']);
+    $q->fields('mr', array('title'));
+    $router_title = $q->execute()->fetchField();
 
-    if (module_exists('i18n_menu')) {
-      // i18n_menu needs some more fields to decide whether an item should be
-      // translated with i18n_menu logic.
-      $q->fields('ml', array('customized', 'language'));
-    }
+    // Reproduce menu_link_load() with _menu_link_translate() and
+    // _menu_item_localize(). However, a lot of information is already provided
+    // in the $item argument, so we can skip these steps.
+    $q = db_select('menu_links', 'ml');
+    $q->fields('ml');
+    $q->condition('link_path', $path);
+    $q->condition('router_path', $item['path']);
 
     // Top-level links have higher priority.
     $q->orderBy('ml.depth', 'ASC');
 
-    // We need to load the original title from menu_router.
-    $q->leftJoin('menu_router', 'mr', 'ml.router_path = mr.path');
-    $q->fields('mr', array('title'));
+    $result = $q->execute();
 
     $titles = array();
-    foreach ($q->execute() as $row) {
-      if (!isset($titles[$row->menu_name])) {
-        // Replicate the translation logic of _menu_item_localize(), which is
-        // used by menu_link_load() via _menu_link_translate().
-        if (
-          // If i18n_menu is enabled, we replicate the logic of
-          // i18n_menu_translated_menu_link_alter()
-          module_exists('i18n_menu') &&
-          // Only use menu_i18n for customized items
-          !empty($row->custmomized) &&
-          // Items that already have a language don't need to be translated
-          empty($row->language)
-        ) {
-          // See _i18n_menu_link_title()
-          $titles[$row->menu_name] = i18n_string_translate(
-            array('menu', 'item', $link['mlid'], 'title'),
-            $link['link_title'],
-            array('langcode' => $langcode)
-          );
+    while ($row = $result->fetchAssoc()) {
+      if (!isset($titles[$row['menu_name']])) {
+        $link = $row + $item;
+        if ($row['link_title'] == $router_title) {
+          // Use the localized title from menu_router.
+          // Fortunately, this is already computed by menu_get_item().
+          $link['title'] = $item['title'];
         }
         else {
-          // i18n_menu is not enabled or does not apply to this link, so we
-          // replicate the logic of Drupal core menu link translation.
-          // See _menu_item_localize().
-          if ($row->link_title == $row->title) {
-            // Use the localized title from menu_router.
-            // Fortunately, this is already computed by menu_get_item().
-            $titles[$row->menu_name] = $item['title'];
-          }
-          else {
-            // Use the untranslated title from menu links.
-            $titles[$row->menu_name] = $row->link_title;
-          }
+          // Use the untranslated title from menu_links.
+          $link['title'] = $row['link_title'];
         }
+        // Give other modules (e.g. i18n_menu) a chance to alter the title.
+        drupal_alter('translated_menu_link', $link, $item['map']);
+        $titles[$row['menu_name']] = $link['title'];
       }
     }
     return $titles;
