@@ -1,13 +1,13 @@
 <?php
 
 
-class crumbs_InvokeAction_findTitle extends crumbs_InvokeAction_findForPath {
+class crumbs_PluginOperation_findTitle extends crumbs_PluginOperation_findForPath {
 
   protected $method = 'findTitle';
   protected $breadcrumbParents;
 
   function __construct($path, array $item, array $breadcrumb_parents) {
-    crumbs_InvokeAction_findForPath::__construct($path, $item);
+    crumbs_PluginOperation_findForPath::__construct($path, $item);
     $this->breadcrumbParents = $breadcrumb_parents;
   }
 
