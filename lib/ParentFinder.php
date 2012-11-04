@@ -40,12 +40,12 @@ class crumbs_ParentFinder {
         // Parent should be the front page.
         return FALSE;
       }
-      $invoke_action = new crumbs_InvokeAction_findParent($path, $item);
-      $this->pluginEngine->invokeAll_find($invoke_action);
-      $parent_path = $invoke_action->getValue();
-      $this->log[$path] = $invoke_action->getLoggedCandidates();
+      $plugin_operation = new crumbs_PluginOperation_findParent($path, $item);
+      $this->pluginEngine->invokeAll_find($plugin_operation);
+      $parent_path = $plugin_operation->getValue();
+      $this->log[$path] = $plugin_operation->getLoggedCandidates();
       if (isset($parent_path)) {
-        $item['crumbs_candidate_key'] = $invoke_action->getCandidateKey();
+        $item['crumbs_candidate_key'] = $plugin_operation->getCandidateKey();
         return $parent_path;
       }
     }

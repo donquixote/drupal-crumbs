@@ -227,9 +227,9 @@ function crumbs_admin_form_submit($form, &$form_state) {
 function _crumbs_load_available_keys(array $plugins) {
   // we can't use the plugin engine,
   // or else we would miss disabled plugins.
-  $invokeAction = new crumbs_InvokeAction_describe();
+  $plugin_operation = new crumbs_PluginOperation_describe();
   foreach ($plugins as $plugin_key => $plugin) {
-    $invokeAction->invoke($plugin, $plugin_key);
+    $plugin_operation->invoke($plugin, $plugin_key);
   }
-  return array($invokeAction->getKeys(), $invokeAction->getKeysByPlugin());
+  return array($plugin_operation->getKeys(), $plugin_operation->getKeysByPlugin());
 }

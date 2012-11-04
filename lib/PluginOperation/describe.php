@@ -2,11 +2,11 @@
 
 
 /**
- * This class uses the InvokeAction pattern, but it does not implement any of
- * the InvokeAction interfaces. This is because it is not supposed to be used
+ * This class uses the PluginOperation pattern, but it does not implement any of
+ * the PluginOperation interfaces. This is because it is not supposed to be used
  * with the PluginEngine, but rather from a custom function (see above).
  */
-class crumbs_InvokeAction_describe {
+class crumbs_PluginOperation_describe {
 
   protected $keys = array('*' => TRUE);
   protected $keysByPlugin = array();

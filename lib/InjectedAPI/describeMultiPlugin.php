@@ -6,13 +6,13 @@
  */
 class crumbs_InjectedAPI_describeMultiPlugin {
 
-  protected $invokeAction;
+  protected $pluginOperation;
 
-  function __construct($invoke_action) {
-    $this->invokeAction = $invoke_action;
+  function __construct($plugin_operation) {
+    $this->pluginOperation = $plugin_operation;
   }
 
   function addRule($key_suffix, $title = TRUE) {
-    $this->invokeAction->addRule($key_suffix, $title);
+    $this->pluginOperation->addRule($key_suffix, $title);
   }
 }
