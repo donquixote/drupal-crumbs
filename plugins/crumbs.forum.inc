@@ -5,48 +5,87 @@
  * Implements hook_crumbs_plugins().
  */
 function forum_crumbs_plugins($api) {
-  // TODO: Port the forum plugins to D7.
-  return;
-  $forum_vid = variable_get('forum_nav_vocabulary', NULL);
-  if ($forum_vid) {
-    return array(
-      'hierarchy' => new _forum_CrumbsPlugin__hierarchy(),
-      'term_node' => new _forum_CrumbsPlugin__term_node($forum_vid),
-      'term_name' => new _forum_CrumbsPlugin__term_name(),
-      'admin'     => new _forum_CrumbsPlugin__admin(),
-    );
-  }
+
+  $api->monoPlugin('forumTerm');
+  $api->monoPlugin('forumTermName');
+  $api->monoPlugin('forumThread');
+  $api->monoPlugin('forumThreadCreate');
 }
 
 
-class _forum_CrumbsPlugin__hierarchy {
+// -----------------------------------------------------------------------------
+
+
+class forum_CrumbsMonoPlugin_forumTerm implements crumbs_MonoPlugin {
+
+  function describe($api) {
+    return t('Let /forum/123 be the parent path of /forum/456, if 123 is the parent of 456.');
+  }
 
   /**
-   * Terms get their parent terms as breadcrumb parent.
-   * The method name matches the router path "taxonomy/term/%".
+   * Forums get their parent forums as breadcrumb parent.
+   * The method name matches the router path "forum/%".
+   * Forums are actually taxonomy terms, just the path is different.
    */
-  function findParent__forum($path, $item) {
-    if (preg_match('#^forum/(\d+)$#', $path, $m)) {
-      list(,$tid) = $m;
-      $q = db_query($sql = "SELECT parent FROM {term_hierarchy} WHERE tid = %d", $tid);
-      while ($row = db_fetch_object($q)) {
-        if ($row->parent) {
-          return 'forum/'. $row->parent;
-        }
+  function findParent__forum_x($path, $item) {
+    $term = $item['map'][1];
+    // Load the forum term,
+    // if it hasn't been loaded due to a missing wildcard loader.
+    // We could use forum_forum_load() instead, but this looks too scary
+    // performance-wise, and we don't actually need it.
+    // So we just use taxonomy_term_load() instead.
+    $term = is_numeric($term) ? taxonomy_term_load($term) : $term;
+
+    $parents = taxonomy_get_parents($term->tid);
+    $result = array();
+    foreach ($parents as $parent_tid => $parent_term) {
+      if ($parent_term->vocabulary_machine_name == $term->vocabulary_machine_name) {
+        // The parent forum
+        return 'forum/' . $parent_tid;
       }
-      return 'forum';
     }
-    return '<front>';
+    // Forum overview
+    return 'forum';
   }
 }
 
 
-class _forum_CrumbsPlugin__term_node {
+// -----------------------------------------------------------------------------
 
-  protected $_forum_vid;
 
-  function __construct($forum_vid) {
-    $this->_forum_vid = $forum_vid;
+class forum_CrumbsMonoPlugin_forumTermName implements crumbs_MonoPlugin {
+
+  function describe($api) {
+    return t('Let /forum/123 be the parent path of /forum/456, if 123 is the parent of 456.');
+  }
+
+  /**
+   * Forums get their parent forums as breadcrumb parent.
+   * The method name matches the router path "forum/%".
+   * Forums are actually taxonomy terms, just the path is different.
+   */
+  function findTitle__forum_x($path, $item) {
+    $term = $item['map'][1];
+    // Load the forum term,
+    // if it hasn't been loaded due to a missing wildcard loader.
+    // We could use forum_forum_load() instead, but this looks too scary
+    // performance-wise, and we don't actually need it.
+    // So we just use taxonomy_term_load() instead.
+    $term = is_numeric($term) ? taxonomy_term_load($term) : $term;
+    if (!empty($term) && !empty($term->name)) {
+      return $term->name;
+    }
+  }
+}
+
+
+// -----------------------------------------------------------------------------
+
+
+class forum_CrumbsMonoPlugin_forumThread implements crumbs_MonoPlugin {
+
+  function describe($api) {
+    return t('Let /forum/456 be the parent path of /node/789, if node 789 is a thread in this forum.');
   }
 
   /**
@@ -54,64 +93,83 @@ class _forum_CrumbsPlugin__term_node {
    * The method name matches the router path "node/%".
    */
   function findParent__node_x($path, $item) {
-    $node = $item['map'][0];
-    if ($node->type == 'forum' && is_array($node->taxonomy)) {
-      $result = array();
-      foreach ($node->taxonomy as $tid => $term) {
-        if ($term->vid == $this->_forum_vid) {
-          return 'forum/'. $tid;
+    $node = $item['map'][1];
+    // Load the node if it hasn't been loaded due to a missing wildcard loader.
+    $node = is_numeric($node) ? node_load($node) : $node;
+    if (!empty($node->forum_tid) && _forum_node_check_node_type($node)) {
+      return 'forum/' . $node->forum_tid;
+    }
+  }
+}
+
+
+// -----------------------------------------------------------------------------
+
+
+class forum_CrumbsMonoPlugin_forumThreadCreate implements crumbs_MonoPlugin {
+
+  function describe($api) {
+    return t('Let /forum/456 be the parent path of /node/789, if node 789 is a thread in this forum.');
+  }
+
+  /**
+   * Set a parent path for e.g. node/add/(type)/(tid), where
+   * - (type) a forum-enabled node type, e.g. "forum".
+   * - (tid) is the forum term tid.
+   */
+  function findParent($path, $item) {
+    if (
+      // Start with a cheap-to-compute condition,
+      // so the regex can be skipped in the average case.
+      substr($path, 0, 9) === 'node/add/' &&
+      preg_match('#^node/add/([^/]+)/(\d+)$#', $path, $m)
+    ) {
+      $type = $m[1];
+      $tid = (int)$m[2];
+      // We need to find out if the node type is forum-enabled.
+      // See _forum_node_check_node_type() in forum.module.
+      $field = field_info_instance('node', 'taxonomy_forums', $type);
+      if (is_array($field)) {
+        // That's a node/add/(type)/(tid) page for a forum-enabled node type.
+        $term = taxonomy_term_load($item['original_map'][3]);
+        if ($term && $term->vocabulary_machine_name === 'forums') {
+          return 'forum/' . $term->tid;
         }
       }
     }
   }
-}
 
-
-class _forum_CrumbsPlugin__term_name {
-
-  function findTitle__forum($path, $item) {
-    if (preg_match('#^forum/(\d+)$#', $path, $m)) {
-      list(,$tid) = $m;
-      $q = db_query($sql = "SELECT name FROM {term_data} WHERE tid = %d", $tid);
-      if ($row = db_fetch_object($q)) {
-        return $row->name;
+  /**
+   * Set a breadcrumb item title for e.g. node/add/(type)/(tid), where
+   * - (type) a forum-enabled node type, e.g. "forum".
+   * - (tid) is the forum term tid.
+   */
+  function findTitle($path, $item) {
+    if (
+      // Start with a cheap-to-compute condition,
+      // so the regex can be skipped in the average case.
+      substr($path, 0, 9) === 'node/add/' &&
+      preg_match('#^node/add/([^/]+)/(\d+)$#', $path, $m)
+    ) {
+      $type = $m[1];
+      $tid = (int)$m[2];
+      // We need to find out if the node type is forum-enabled.
+      // See _forum_node_check_node_type() in forum.module.
+      $field = field_info_instance('node', 'taxonomy_forums', $type);
+      if (is_array($field)) {
+        // That's a node/add/(type)/(tid) page for a forum-enabled node type.
+        $term = taxonomy_term_load($item['original_map'][3]);
+        if ($term && $term->vocabulary_machine_name === 'forums') {
+          return $this->newTopicTitle($type);
+        }
       }
     }
-    return t('Forums');
-  }
-}
-
-
-class _forum_CrumbsPlugin__admin {
-
-  protected $_containers;
-
-  function findTitle__admin_content_forum($path, $item) {
-    switch ($path) {
-      case 'admin/content/forum/edit':
-      case 'admin/content/forum/add':
-        // skip
-        return FALSE;
-    }
   }
 
-
-
-  function findTitle__admin_content_forum_edit_forum_x($path, $item) {
-    $term = $item['map'][5];
-    return $term['name'];
-  }
-
-  function findTitle__admin_content_forum_edit_container_x($path, $item) {
-    $term = $item['map'][5];
-    return $term['name'];
-  }
-
-  protected function _isContainer($tid) {
-    if (!isset($this->_containers)) {
-      $containers = variable_get('forum_containers', array());
-      $this->_containers = array_combine($containers, $containers);
-    }
-    return isset($this->_containers[$tid]) ? TRUE : FALSE;
+  /**
+   * Method that can be overwritten by subclasses.
+   */
+  protected function newTopicTitle($type) {
+    return t('New topic');
   }
 }
