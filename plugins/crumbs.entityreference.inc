@@ -95,10 +95,10 @@ class _entityreference_CrumbsMultiPlugin_user extends _entityreference_CrumbsMul
     // Load the user if it hasn't been loaded due to a missing wildcard loader.
     $user = is_numeric($user) ? user_load($user) : $user;
 
-    $parent_path = $this->_findParentCandidates($user);
+    $parent_path = $this->_findParentPath($user);
     if ($parent_path) {
       // TODO: Is 'user' the correct bundle name?
-      return array('user' => $user);
+      return array('user' => $parent_path);
     }
   }
 }
