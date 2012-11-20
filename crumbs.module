@@ -77,7 +77,8 @@ function crumbs_theme($existing, $type, $theme, $path) {
  * Default theme implementation for theme('crumbs_breadcrumb_link').
  */
 function theme_crumbs_breadcrumb_link(array $item) {
-  return l($item['link_title'], $item['link_path'], $item['link_options']);
+  $options = isset($item['link_options']) ? $item['link_options'] : array();
+  return l($item['link_title'], $item['link_path'], $options);
 }
 
 /**
