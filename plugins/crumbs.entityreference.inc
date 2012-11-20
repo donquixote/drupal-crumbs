@@ -97,7 +97,6 @@ class _entityreference_CrumbsMultiPlugin_user extends _entityreference_CrumbsMul
 
     $parent_path = $this->_findParentPath($user);
     if ($parent_path) {
-      // TODO: Is 'user' the correct bundle name?
       return array('user' => $parent_path);
     }
   }
