@@ -77,15 +77,15 @@ function crumbs_theme($existing, $type, $theme, $path) {
  * Default theme implementation for theme('crumbs_breadcrumb_link').
  */
 function theme_crumbs_breadcrumb_link(array $item) {
-  $options = isset($item['link_options']) ? $item['link_options'] : array();
-  return l($item['link_title'], $item['link_path'], $options);
+  $options = isset($item['localized_options']) ? $item['localized_options'] : array();
+  return l($item['title'], $item['href'], $options);
 }
 
 /**
  * Default theme implementation for theme('crumbs_breadcrumb_current_page').
  */
 function theme_crumbs_breadcrumb_current_page(array $item) {
-  return check_plain($item['link_title']);
+  return check_plain($item['title']);
 }
 
 /**
