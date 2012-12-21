@@ -81,6 +81,15 @@ class menu_CrumbsMultiPlugin_link_title implements crumbs_MultiPlugin {
     // Top-level links have higher priority.
     $q->orderBy('ml.depth', 'ASC');
 
+    // Filter and sort by language.
+    $language = LANGUAGE_NONE;
+    if (isset($GLOBALS['language'])) {
+      $language = array($language, $GLOBALS['language']->language);
+      $q->addExpression('ml.language = :language', 'has_language', array(':language' => LANGUAGE_NONE));
+      $q->orderBy('has_language');
+    }
+    $q->condition('language', $language);
+
     $result = $q->execute();
 
     $titles = array();
@@ -96,9 +105,14 @@ class menu_CrumbsMultiPlugin_link_title implements crumbs_MultiPlugin {
           // Use the untranslated title from menu_links.
           $link['title'] = $row['link_title'];
         }
+        if ($link['language'] === LANGUAGE_NONE) {
+          // i18n_menu_translated_menu_link_alter() expects $link['language'] to
+          // be empty for language neutral.
+          unset($link['language']);
+        }
         // Give other modules (e.g. i18n_menu) a chance to alter the title.
         drupal_alter('translated_menu_link', $link, $item['map']);
-        $titles[$row['menu_name']] = $link['title'];
+        $titles[$row['menu_name']] = $link['link_title'];
       }
     }
     return $titles;
