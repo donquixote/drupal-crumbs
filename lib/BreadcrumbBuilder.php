@@ -20,10 +20,6 @@ class crumbs_BreadcrumbBuilder {
         // The item will be skipped, if $title === FALSE.
         if (isset($title) && $title !== FALSE && $title !== '') {
           $item['title'] = $title;
-          // TODO: Can we assume that localized_options is already set?
-          if (!isset($item['localized_options'])) {
-            $item['localized_options'] = array();
-          }
           $breadcrumb[] = $item;
         }
       }
