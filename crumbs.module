@@ -70,6 +70,10 @@ function crumbs_theme($existing, $type, $theme, $path) {
     'crumbs_breadcrumb_current_page' => array(
       'item' => NULL,
     ),
+    'crumbs_weights_tabledrag' => array(
+      'file' => 'admin/crumbs.tabledrag.inc',
+      'render element' => 'element',
+    ),
   );
 }
 
