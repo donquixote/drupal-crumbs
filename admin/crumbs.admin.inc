@@ -1,14 +1,31 @@
 <?php
 
-
-function crumbs_admin_form() {
+/**
+ * The form displayed on admin/structure/crumbs(/weights)
+ */
+function crumbs_admin_weights_form() {
   $form = array();
 
-  // drupal_add_js(drupal_get_path('module', 'crumbs') .'/crumbs.admin.js');
-  // drupal_add_css(drupal_get_path('module', 'crumbs') .'/crumbs.admin.css');
+  $form['crumbs_weights'] = array(
+    '#title' => t('Weights'),
+    '#type' => 'crumbs_weights_tabledrag',
+    // Fetching the default value is not automated by system_settings_form().
+    '#default_value' => variable_get('crumbs_weights', array()),
+  );
 
-  module_load_include('tabledrag.inc', 'crumbs', 'admin/crumbs');
-  $form['crumbs_weights'] = _crumbs_weights_tabledrag();
+  return system_settings_form($form);
+}
+
+/**
+ * The form displayed on admin/structure/crumbs/display
+ */
+function crumbs_admin_display_form() {
+  $form = array();
+
+  // TODO:
+  //   Add options to
+  //   - hide the "Home" link
+  //   - hide the breadcrumb if it only contains the "Home" link.
 
   $form['crumbs_show_current_page'] = array(
     '#type' => 'checkbox',
@@ -17,15 +34,4 @@ function crumbs_admin_form() {
   );
 
   return system_settings_form($form);
-}
-
-
-function _crumbs_load_available_keys(array $plugins) {
-  // we can't use the plugin engine,
-  // or else we would miss disabled plugins.
-  $plugin_operation = new crumbs_PluginOperation_describe();
-  foreach ($plugins as $plugin_key => $plugin) {
-    $plugin_operation->invoke($plugin, $plugin_key);
-  }
-  return array($plugin_operation->getKeys(), $plugin_operation->getKeysByPlugin());
 }
