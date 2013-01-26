@@ -65,7 +65,11 @@ class crumbs_CrumbsMultiPlugin_nodeParent implements crumbs_MultiPlugin {
         $parent = $pattern;
       }
       if (!empty($parent)) {
-        return array($node->type => $parent);
+        // Only accept candidates where all tokens are fully resolved.
+        // This means we can't have literal '[' in the path - so be it.
+        if (FALSE === strpos($parent, '[')) {
+          return array($node->type => $parent);
+        }
       }
     }
   }
