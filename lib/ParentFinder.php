@@ -20,7 +20,10 @@ class crumbs_ParentFinder {
   function getParentPath($path, &$item) {
     if (!isset($this->parents[$path])) {
       $parent_path = $this->_findParentPath($path, $item);
-      $this->parents[$path] = drupal_get_normal_path($parent_path);
+      if (is_string($parent_path)) {
+        $parent_path = drupal_get_normal_path($parent_path);
+      }
+      $this->parents[$path] = $parent_path;
     }
     return $this->parents[$path];
   }
