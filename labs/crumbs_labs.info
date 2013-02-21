@@ -1,0 +1,5 @@
+name = Crumbs Labs
+description = Experimental stuff for Crumbs module.
+core = 7.x
+
+dependencies[] = crumbs

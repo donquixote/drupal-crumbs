@@ -3,15 +3,25 @@
 /**
  * The form displayed on admin/structure/crumbs(/weights)
  */
-function crumbs_admin_weights_form() {
+function crumbs_admin_weights_form($form, $form_state, $type = 'tabledrag') {
+
   $form = array();
 
   $form['crumbs_weights'] = array(
     '#title' => t('Weights'),
-    '#type' => 'crumbs_weights_tabledrag',
     // Fetching the default value is not automated by system_settings_form().
     '#default_value' => variable_get('crumbs_weights', array()),
   );
+
+  switch ($type) {
+    case 'textual':
+      // You need to enable crumbs_labs to get this.
+      $form['crumbs_weights']['#type'] = 'crumbs_weights_textual';
+      break;
+    case 'tabledrag':
+    default:
+      $form['crumbs_weights']['#type'] = 'crumbs_weights_tabledrag';
+  }
 
   return system_settings_form($form);
 }

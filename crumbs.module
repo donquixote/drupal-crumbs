@@ -83,6 +83,10 @@ function crumbs_theme($existing, $type, $theme, $path) {
       'file' => 'admin/crumbs.tabledrag.inc',
       'render element' => 'element',
     ),
+    'crumbs_weights_textual' => array(
+      'file' => 'admin/crumbs.textual.inc',
+      'render element' => 'element',
+    ),
   );
 }
 
@@ -609,138 +613,85 @@ function crumbs_clean_token_values(&$replacements, $data = array(), $options = a
  * Implements hook_element_info()
  */
 function crumbs_element_info() {
-  $types['crumbs_weights_tabledrag'] = array(
+  $types = array();
+  // Nice documentation to be found in
+  // http://api.drupal.org/api/drupal/includes%21form.inc/function/form_builder/7
+  $common = array(
     '#input' => TRUE,
-    '#theme' => 'crumbs_weights_tabledrag',
-    '#pre_render' => array('_crumbs_weights_tabledrag_pre_render'),
-    '#process' => array('_crumbs_weights_tabledrag_process'),
-    '#value_callback' => '_crumbs_weights_tabledrag_value_callback',
-    '#element_validate' => array('_crumbs_weights_tabledrag_validate'),
+    '#value_callback' => '_crumbs_element_value_callback',
+    '#process' => array('_crumbs_element_process'),
+    '#after_build' => array('_crumbs_element_after_build'),
+    '#element_validate' => array('_crumbs_element_validate'),
+    '#pre_render' => array('_crumbs_element_pre_render'),
   );
+  $types['crumbs_weights_tabledrag'] = array(
+    '#theme' => 'crumbs_weights_tabledrag',
+  ) + $common;
+  $types['crumbs_weights_textual'] = array(
+    '#theme' => 'crumbs_weights_textual',
+  ) + $common;
   return $types;
 }
 
 /**
- * Processor callback for tabledrag element.
+ * Value callback for tabledrag element ($element['#value_callback']).
+ */
+function _crumbs_element_value_callback(&$element, $input = FALSE, $form_state = array()) {
+  return _crumbs_element_object($element)->value_callback($element, $input, $form_state);
+}
+
+/**
+ * Processor callback for tabledrag element ($element['#process']).
  * See form_process_checkboxes() for an example how these processors work.
  */
-function _crumbs_weights_tabledrag_process($element) {
+function _crumbs_element_process($element, $form_state) {
+  return _crumbs_element_object($element)->process($element, $form_state);
+}
 
-  $element['#tree'] = TRUE;
+/**
+ * After build callback for tabledrag element ($element['#after_build']).
+ */
+function _crumbs_element_after_build($element, $form_state) {
+  return _crumbs_element_object($element)->after_build($element, $form_state);
+}
 
-  list($plugins, $disabled_keys) = crumbs_get_plugins();
-  list($available_keys, $keys_by_plugin) = _crumbs_load_available_keys($plugins);
+/**
+ * Pre-render callback for tabledrag element ($element['#pre_render']).
+ */
+function _crumbs_element_pre_render($element) {
+  return _crumbs_element_object($element)->pre_render($element);
+}
 
-  foreach (array(
-    'enabled' => t('Enabled'),
-    'disabled' => t('Disabled'),
-    'auto' => t('Inherit / automatic'),
-  ) as $section_key => $section_title) {
-    $element["sections.$section_key"] = array(
-      '#tree' => TRUE,
-      '#title' => $section_title,
-      'weight' => array(
-        '#type' => 'hidden',
-        '#default_value' => 'section',
-      ),
-      '#section_key' => $section_key,
-    );
-  }
+/**
+ * Validation callback for tabledrag element ($element['#element_validate']).
+ */
+function _crumbs_element_validate(&$element, &$form_state) {
+  return _crumbs_element_object($element)->validate($element, $form_state);
+}
 
-  foreach ($available_keys as $key => $description) {
-    $child = array(
-      '#title' => $key,
-      'weight' => array(
-        '#type' => 'textfield',
-        '#size' => 10,
-        '#default_value' => -1,
-        '#class' => array('crumbs-weight-element'),
-      ),
-      '#section_key' => 'auto',
-    );
-    if (is_string($description)) {
-      $child['#description'] = $description;
+/**
+ * Lazy-create an object representing the form element.
+ * This allows to use methods instead of procedural callbacks.
+ *
+ * There will be one instance per element, so the object can actually hold some
+ * state information.
+ *
+ * This mechanic would even make sense as a reusable module, but for now we just
+ * have it crumbs-specific.
+ */
+function _crumbs_element_object(&$element) {
+  if (!isset($element['#crumbs_element_object'])) {
+    switch ($element['#type']) {
+      case 'crumbs_weights_tabledrag':
+        $obj = new crumbs_Admin_ElementObject_WeightsTabledrag($element);
+        break;
+      case 'crumbs_weights_textual':
+        $obj = new crumbs_Admin_ElementObject_WeightsTextual($element);
+        break;
     }
-    $element["rules.$key"] = $child;
+    $element['#crumbs_element_object'] = $obj;
   }
-
-  if (is_array($element['#value'])) {
-    foreach ($element['#value'] as $key => $value) {
-      $child = &$element["rules.$key"];
-      if (FALSE === $value) {
-        $child['#section_key'] = 'disabled';
-      }
-      elseif (is_numeric($value)) {
-        $child['weight']['#default_value'] = $value;
-        $child['#section_key'] = 'enabled';
-      }
-    }
-  }
-
-  $element['#_crumbs_disabled_keys'] = $disabled_keys;
-
-  return $element;
-}
-
-/**
- * Get available keys for the weights configuration.
- */
-function _crumbs_load_available_keys(array $plugins) {
-  // we can't use the plugin engine,
-  // or else we would miss disabled plugins.
-  $plugin_operation = new crumbs_PluginOperation_describe();
-  foreach ($plugins as $plugin_key => $plugin) {
-    $plugin_operation->invoke($plugin, $plugin_key);
-  }
-  return array($plugin_operation->getKeys(), $plugin_operation->getKeysByPlugin());
-}
-
-/**
- * Value callback for tabledrag element.
- */
-function _crumbs_weights_tabledrag_value_callback($element, $input = FALSE, $form_state = array()) {
-
-  if ($input === FALSE) {
-    return isset($element['#default_value']) ? $element['#default_value'] : array();
-  }
-  else {
-    $weights = array();
-    $i = 0;
-    foreach ($input as $row_key => $row_values) {
-      if (substr($row_key, 0, 9) === 'sections.') {
-        $section_key = substr($row_key, 9);
-        if ($section_key === 'auto') {
-          break;
-        }
-      }
-      elseif (substr($row_key, 0, 6) === 'rules.') {
-        $key = substr($row_key, 6);
-        if ($section_key === 'enabled') {
-          $weights[$key] = ++$i;
-        }
-        elseif ($section_key === 'disabled') {
-          $weights[$key] = FALSE;
-        }
-      }
-    }
-    return $weights;
-  }
-}
-
-/**
- * Pre-render callback for tabledrag element.
- */
-function _crumbs_weights_tabledrag_pre_render($element) {
-  return $element;
-}
-
-/**
- * Validation callback for tabledrag element.
- */
-function _crumbs_weights_tabledrag_validate(&$element, &$form_state) {
-  // We need to unset the NULL values from the input elements.
-  $weights = $element['#value'];
-  form_set_value($element, $weights, $form_state);
+  return $element['#crumbs_element_object'];
 }
 
 
