@@ -114,6 +114,9 @@ class menu_CrumbsMultiPlugin_link_title implements crumbs_MultiPlugin {
           // be empty for language neutral.
           unset($link['language']);
         }
+        if (!is_array($link['options'])) {
+          $link['options'] = unserialize($link['options']);
+        }
         // Give other modules (e.g. i18n_menu) a chance to alter the title.
         drupal_alter('translated_menu_link', $link, $item['map']);
         $titles[$row['menu_name']] = $link['link_title'];
