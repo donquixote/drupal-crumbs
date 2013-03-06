@@ -40,8 +40,9 @@ class crumbs_Admin_ElementObject_WeightsTabledrag extends crumbs_Admin_ElementOb
    */
   function process($element, $form_state) {
 
-    $element['#tree'] = TRUE;
-
+    // TODO:
+    //   This should not be part of the element type.
+    //   We will clean this up later.
     list($plugins, $disabled_keys) = crumbs_get_plugins();
     list($available_keys, $keys_by_plugin) = $this->loadAvailableKeys($plugins);
 
@@ -94,14 +95,5 @@ class crumbs_Admin_ElementObject_WeightsTabledrag extends crumbs_Admin_ElementOb
     $element['#_crumbs_disabled_keys'] = $disabled_keys;
 
     return $element;
-  }
-
-  /**
-   * Callback for $element['#element_validate']
-   */
-  function validate(&$element, &$form_state) {
-    // We need to unset the NULL values from the input elements.
-    $weights = $element['#value'];
-    form_set_value($element, $weights, $form_state);
   }
 }
