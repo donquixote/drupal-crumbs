@@ -10,6 +10,25 @@ if (!module_exists('xautoload')) {
   spl_autoload_register('_crumbs_autoload');
 }
 
+/**
+ * Crumbs autoloader.
+ *
+ * Takes the class name, strips the "crumbs_" prefix, converts underscores
+ * to directory separators.
+ *
+ * For example, crumbs_InjectedAPI_describeMonoPlugin will be loaded
+ * from lib/InjectedAPI/describeMonoPlugin.php.
+ *
+ * @param $class
+ *   The name of the class to load.
+ */
+function _crumbs_autoload($class) {
+  if (preg_match('#^crumbs_(.*)$#', $class, $m)) {
+    $path = strtr($m[1], '_', '/');
+    module_load_include('php', 'crumbs', "lib/$path");
+  }
+}
+
 
 // Hook implementations
 // -----------------------------------------------------------------------------
@@ -118,25 +137,6 @@ function crumbs_theme($existing, $type, $theme, $path) {
   );
 }
 
-
-// Theme implementations
-// -----------------------------------------------------------------------------
-
-/**
- * Default theme implementation for theme('crumbs_breadcrumb_link').
- */
-function theme_crumbs_breadcrumb_link(array $item) {
-  $options = isset($item['localized_options']) ? $item['localized_options'] : array();
-  return l($item['title'], $item['href'], $options);
-}
-
-/**
- * Default theme implementation for theme('crumbs_breadcrumb_current_page').
- */
-function theme_crumbs_breadcrumb_current_page(array $item) {
-  return check_plain($item['title']);
-}
-
 /**
  * Implements hook_block_info()
  */
@@ -204,6 +204,25 @@ function crumbs_themekey_properties() {
   return array('attributes' => $attributes, 'maps' => $maps);
 }
 
+
+// Theme implementations
+// -----------------------------------------------------------------------------
+
+/**
+ * Default theme implementation for theme('crumbs_breadcrumb_link').
+ */
+function theme_crumbs_breadcrumb_link(array $item) {
+  $options = isset($item['localized_options']) ? $item['localized_options'] : array();
+  return l($item['title'], $item['href'], $options);
+}
+
+/**
+ * Default theme implementation for theme('crumbs_breadcrumb_current_page').
+ */
+function theme_crumbs_breadcrumb_current_page(array $item) {
+  return check_plain($item['title']);
+}
+
 /**
  * Callback for themekey integration.
  */
@@ -217,6 +236,10 @@ function _crumbs_themekey_path2trailpaths($path) {
   }
   return array_keys($paths);
 }
+
+
+// Public API functions
+// -----------------------------------------------------------------------------
 
 /**
  * Returns the breadcrumb data for the current page.
@@ -261,24 +284,6 @@ function crumbs_get_trail($path = NULL) {
     $path = $_GET['q'];
   }
   return crumbs('trails')->getForPath($path);
-}
-
-/**
- * Get the service with the given key.
- * If it does not exist, it will be lazy-created with all its dependencies.
- */
-function crumbs($key = NULL) {
-  static $cache = NULL;
-  if (!isset($cache)) {
-    $factory = new crumbs_ServiceFactory();
-    $cache = new crumbs_ServiceCache($factory);
-  }
-  if (isset($key)) {
-    return $cache->__get($key);
-  }
-  else {
-    return $cache;
-  }
 }
 
 /**
@@ -343,29 +348,6 @@ function crumbs_reduce_path($path, $depth = -1) {
   return crumbs('router')->reducePath($path, $depth);
 }
 
-
-// Admin tabledrag element
-// -----------------------------------------------------------------------------
-
-/**
- * Crumbs autoloader.
- *
- * Takes the class name, strips the "crumbs_" prefix, converts underscores
- * to directory separators.
- *
- * For example, crumbs_InjectedAPI_describeMonoPlugin will be loaded
- * from lib/InjectedAPI/describeMonoPlugin.php.
- *
- * @param $class
- *   The name of the class to load.
- */
-function _crumbs_autoload($class) {
-  if (preg_match('#^crumbs_(.*)$#', $class, $m)) {
-    $path = strtr($m[1], '_', '/');
-    module_load_include('php', 'crumbs', "lib/$path");
-  }
-}
-
 /**
  * Clean tokens so they are URL friendly.
  * Taken directly from pathauto_clean_token_values()
@@ -379,6 +361,28 @@ function _crumbs_autoload($class) {
  */
 function crumbs_clean_token_values(&$replacements, $data = array(), $options = array()) {
   return crumbs_Util::cleanTokenValues($replacements, $data, $options);
+}
+
+
+// Service cache
+// -----------------------------------------------------------------------------
+
+/**
+ * Get the service with the given key.
+ * If it does not exist, it will be lazy-created with all its dependencies.
+ */
+function crumbs($key = NULL) {
+  static $cache = NULL;
+  if (!isset($cache)) {
+    $factory = new crumbs_ServiceFactory();
+    $cache = new crumbs_ServiceCache($factory);
+  }
+  if (isset($key)) {
+    return $cache->__get($key);
+  }
+  else {
+    return $cache;
+  }
 }
 
 
