@@ -40,9 +40,9 @@ EOT;
 
     $log[] = crumbs_Util::benchmark('crumbs_get_router_item("' . $path . '")');
 
-    $parent_finder = crumbs_get_parent_finder();
+    $parent_finder = crumbs('parentFinder');
 
-    $log[] = crumbs_Util::benchmark('crumbs_get_parent_finder()');
+    $log[] = crumbs_Util::benchmark('crumbs(\'parentFinder\')');
 
     $parent_path = $parent_finder->getParentPath($path, $item);
 

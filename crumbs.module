@@ -10,6 +10,10 @@ if (!module_exists('xautoload')) {
   spl_autoload_register('_crumbs_autoload');
 }
 
+
+// Hook implementations
+// -----------------------------------------------------------------------------
+
 /**
  * Implements hook_permission().
  */
@@ -113,6 +117,10 @@ function crumbs_theme($existing, $type, $theme, $path) {
     ),
   );
 }
+
+
+// Theme implementations
+// -----------------------------------------------------------------------------
 
 /**
  * Default theme implementation for theme('crumbs_breadcrumb_link').
@@ -232,65 +240,7 @@ function _crumbs_themekey_path2trailpaths($path) {
  *   or FALSE if the breadcrumb could not be determined.
  */
 function crumbs_get_breadcrumb_data() {
-  static $data;
-
-  if (!isset($data)) {
-    $existing_breadcrumb = drupal_get_breadcrumb();
-    // If the existing breadcrumb is empty, that means a module has
-    // intentionally removed it. Honor that, and stop here.
-    if (empty($existing_breadcrumb)) {
-      $data = FALSE;
-      return $data;
-    }
-
-    $show_current_page = variable_get('crumbs_show_current_page', FALSE);
-    $trail = crumbs_get_trail();
-    if ($show_current_page) {
-      // Do not show the breadcrumb if it contains only 1 item. This prevents
-      // the breadcrumb from showing up on the frontpage.
-      if (count($trail) == 1) {
-        $data = FALSE;
-        return $data;
-      }
-    }
-    else {
-      // The current page should not be shown, remove it from the trail so that
-      // the plugins don't need to waste time loading its title.
-      array_pop($trail);
-    }
-
-    $breadcrumb_items = crumbs_build_breadcrumb($trail);
-    $router_item = crumbs_get_router_item($_GET['q']);
-
-    // Allow modules to alter the breadcrumb, if possible, as that is much
-    // faster than rebuilding an entirely new active trail.
-    drupal_alter('menu_breadcrumb', $breadcrumb_items, $router_item);
-
-    $links = array();
-    $last_item = end($breadcrumb_items);
-    foreach ($breadcrumb_items as $i => $item) {
-      if ($show_current_page && $item == $last_item) {
-        // The current page should be styled differently (no link).
-        $links[$i] = theme('crumbs_breadcrumb_current_page', $item);
-      }
-      else {
-        $links[$i] = theme('crumbs_breadcrumb_link', $item);
-      }
-    }
-
-    $html = theme('breadcrumb', array(
-      'breadcrumb' => $links,
-      'crumbs_breadcrumb_items' => $breadcrumb_items,
-      'crumbs_trail' => $trail,
-    ));
-    $data = array(
-      'trail' => $trail,
-      'items' => $breadcrumb_items,
-      'html' => $html,
-    );
-  }
-
-  return $data;
+  return crumbs('page')->breadcrumbData;
 }
 
 /**
@@ -307,58 +257,10 @@ function crumbs_get_breadcrumb_data() {
  * @see crumbs_TrailFinder
  */
 function crumbs_get_trail($path = NULL) {
-  static $trails = array();
-
   if (!isset($path)) {
     $path = $_GET['q'];
   }
-  $path = drupal_get_normal_path($path);
-
-  if (!isset($trails[$path])) {
-    $trails[$path] = crumbs('trailFinder')->buildTrail($path);
-  }
-
-  return $trails[$path];
-}
-
-/**
- * Builds the breadcrumb based on the provided trail.
- *
- * Each breadcrumb item is a router item taken from the trail, with
- * two additional/updated keys:
- * - title: The title of the breadcrumb item as received from a plugin.
- * - localized_options: An array of options passed to l() if needed.
- *
- * @param $trail
- *   The trail provided by crumbs_get_trail().
- *
- * @return
- *   An array of breadcrumb items.
- *
- * @see crumbs_BreadcrumbBuilder
- */
-function crumbs_build_breadcrumb(array $trail) {
-  return crumbs('breadcrumbBuilder')->buildBreadcrumb($trail);
-}
-
-/**
- * Loads and instantiates the trail finder.
- *
- * @return
- *   An instance of crumbs_TrailFinder.
- */
-function crumbs_get_trail_finder() {
-  return crumbs('trailFinder');
-}
-
-/**
- * Loads and instantiates the parent finder.
- *
- * @return
- *   An instance of crumbs_ParentFinder.
- */
-function crumbs_get_parent_finder() {
-  return crumbs('parentFinder');
+  return crumbs('trails')->getForPath($path);
 }
 
 /**
@@ -377,16 +279,6 @@ function crumbs($key = NULL) {
   else {
     return $cache;
   }
-}
-
-/**
- * Loads and instantiates the plugin engine.
- *
- * @return
- *   An instance of crumbs_PluginEngine.
- */
-function crumbs_get_plugin_engine() {
-  return crumbs('pluginEngine');
 }
 
 /**
@@ -436,39 +328,7 @@ function crumbs_get_weights() {
  *   The router item.
  */
 function crumbs_get_router_item($path) {
-  $normalpath = drupal_get_normal_path($path);
-  try {
-    $item = menu_get_item($normalpath);
-  }
-  catch (Exception $e) {
-    // Some modules throw an exception, if a path has unloadable arguments.
-    // We don't care, because we don't actually load this page.
-    return NULL;
-  }
-
-  // Some additional keys.
-  if (!empty($item) && is_array($item)) {
-    // 'route' is a less ambiguous name for a router path than 'path'.
-    $item['route'] = $item['path'];
-    // 'href' sounds more like it had already run through url().
-    $item['link_path'] = $normalpath;
-    $item['alias'] = drupal_get_path_alias($normalpath);
-    $item['fragments'] = explode('/', $normalpath);
-
-    if (!isset($item['localized_options'])) {
-      $item['localized_options'] = array();
-    }
-
-    if ($normalpath !== $item['href']) {
-      $pos = strlen($item['href']);
-      $item['variadic_suffix'] = substr($normalpath, $pos);
-    }
-    else {
-      $item['variadic_suffix'] = NULL;
-    }
-
-    return $item;
-  }
+  return crumbs('router')->getRouterItem($path);
 }
 
 /**
@@ -480,32 +340,7 @@ function crumbs_get_router_item($path) {
  *   Max number of fragments we try to chop off. -1 means no limit.
  */
 function crumbs_reduce_path($path, $depth = -1) {
-  $fragments = explode('/', $path);
-  while (count($fragments) > 1 && $depth !== 0) {
-    array_pop($fragments);
-    $parent_path = implode('/', $fragments);
-    $parent_item = crumbs_get_router_item($parent_path);
-    if ($parent_item && $parent_item['href'] === $parent_item['link_path']) {
-      return $parent_item['link_path'];
-    }
-    --$depth;
-  }
-}
-
-/**
- * This function has exactly one possible input value for
- * each possible return value, except the return value FALSE.
- *
- * @param $router_path :string
- *   The router path can contain any character, but will typically
- *   have a format like "node/%/edit".
- * @return :string or FALSE
- *   A string that can be used as a method suffix,
- *   or FALSE, where that is not possible.
- *   The route "node/%/edit" will resolve as "node_x_edit".
- */
-function crumbs_build_method_suffix($router_path) {
-  return crumbs_Util::buildMethodSuffix($router_path);
+  return crumbs('router')->reducePath($path, $depth);
 }
 
 

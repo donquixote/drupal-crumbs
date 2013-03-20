@@ -9,6 +9,10 @@ class crumbs_TrailFinder {
     $this->parentFinder = $parent_finder;
   }
 
+  function getForPath($path) {
+    return $this->buildTrail($path);
+  }
+
   /**
    * Build the raw trail.
    */
