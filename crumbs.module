@@ -315,8 +315,7 @@ function crumbs_get_trail($path = NULL) {
   $path = drupal_get_normal_path($path);
 
   if (!isset($trails[$path])) {
-    $finder = crumbs_get_trail_finder();
-    $trails[$path] = $finder->buildTrail($path);
+    $trails[$path] = crumbs('trailFinder')->buildTrail($path);
   }
 
   return $trails[$path];
@@ -339,9 +338,7 @@ function crumbs_get_trail($path = NULL) {
  * @see crumbs_BreadcrumbBuilder
  */
 function crumbs_build_breadcrumb(array $trail) {
-  $plugin_engine = crumbs_get_plugin_engine();
-  $breadcrumb_builder = new crumbs_BreadcrumbBuilder($plugin_engine);
-  return $breadcrumb_builder->buildBreadcrumb($trail);
+  return crumbs('breadcrumbBuilder')->buildBreadcrumb($trail);
 }
 
 /**
@@ -351,14 +348,7 @@ function crumbs_build_breadcrumb(array $trail) {
  *   An instance of crumbs_TrailFinder.
  */
 function crumbs_get_trail_finder() {
-  static $trail_finder;
-
-  if (!isset($trail_finder)) {
-    $parent_finder = crumbs_get_parent_finder();
-    $trail_finder = new crumbs_TrailFinder($parent_finder);
-  }
-
-  return $trail_finder;
+  return crumbs('trailFinder');
 }
 
 /**
@@ -368,14 +358,25 @@ function crumbs_get_trail_finder() {
  *   An instance of crumbs_ParentFinder.
  */
 function crumbs_get_parent_finder() {
-  static $parent_finder;
+  return crumbs('parentFinder');
+}
 
-  if (!isset($parent_finder)) {
-    $plugin_engine = crumbs_get_plugin_engine();
-    $parent_finder = new crumbs_ParentFinder($plugin_engine);
+/**
+ * Get the service with the given key.
+ * If it does not exist, it will be lazy-created with all its dependencies.
+ */
+function crumbs($key = NULL) {
+  static $cache = NULL;
+  if (!isset($cache)) {
+    $factory = new crumbs_ServiceFactory();
+    $cache = new crumbs_ServiceCache($factory);
   }
-
-  return $parent_finder;
+  if (isset($key)) {
+    return $cache->__get($key);
+  }
+  else {
+    return $cache;
+  }
 }
 
 /**
@@ -385,20 +386,7 @@ function crumbs_get_parent_finder() {
  *   An instance of crumbs_PluginEngine.
  */
 function crumbs_get_plugin_engine() {
-  static $plugin_engine;
-
-  if (!isset($plugin_engine)) {
-    list($plugins, $disabled_keys) = crumbs_get_plugins();
-    $weights = crumbs_get_weights();
-    foreach ($disabled_keys as $key => $disabled) {
-      if (!isset($weights[$key])) {
-        $weights[$key] = FALSE;
-      }
-    }
-    $plugin_engine = new crumbs_PluginEngine($plugins, $weights);
-  }
-
-  return $plugin_engine;
+  return crumbs('pluginEngine');
 }
 
 /**
@@ -410,51 +398,11 @@ function crumbs_get_plugin_engine() {
  *   - An array of disabled plugin keys.
  */
 function crumbs_get_plugins() {
-  static $plugins, $disabled_keys;
-
-  if (!isset($plugins)) {
-    $modules = array(
-      'blog',
-      'comment',
-      'crumbs',
-      'entityreference',
-      'menu',
-      'path',
-      'taxonomy',
-      'forum',
-    );
-
-    // Include Crumbs-provided plugins.
-    foreach ($modules as $module) {
-      if (module_exists($module)) {
-        module_load_include('inc', 'crumbs', 'plugins/crumbs.'. $module);
-      }
-    }
-
-    // Organic groups is a special case,
-    // because 7.x-2.x behaves different from 7.x-1.x.
-    if (module_exists('og')) {
-      if (function_exists('og_get_group')) {
-        // We are using the og-7.x-1.x branch.
-        module_load_include('inc', 'crumbs', 'plugins/crumbs.og');
-      }
-      else {
-        // We are using the og-7.x-2.x branch.
-        module_load_include('inc', 'crumbs', 'plugins/crumbs.og.2');
-      }
-    }
-
-    $plugins = array();
-    $disabled_keys = array();
-    $api = new crumbs_InjectedAPI_hookCrumbsPlugins($plugins, $disabled_keys);
-    foreach (module_implements('crumbs_plugins') as $module) {
-      $function = $module .'_crumbs_plugins';
-      $api->setModule($module);
-      $function($api);
-    }
-  }
-
-  return array($plugins, $disabled_keys);
+  $lib = crumbs('pluginLibrary');
+  return array(
+    $lib->getAvailablePlugins(),
+    $lib->getDisabledByDefaultKeys(),
+  );
 }
 
 /**
@@ -471,13 +419,7 @@ function crumbs_get_plugins() {
  *   An array of plugin keys and their weights, sorted by weight.
  */
 function crumbs_get_weights() {
-  $weights = variable_get('crumbs_weights', array('crumbs.home_title' => 0));
-  asort($weights);
-  if (!isset($weights['*'])) {
-    $weights['*'] = count($weights);
-  }
-
-  return $weights;
+  return crumbs('ruleWeightSettings')->get();
 }
 
 /**
@@ -515,6 +457,14 @@ function crumbs_get_router_item($path) {
 
     if (!isset($item['localized_options'])) {
       $item['localized_options'] = array();
+    }
+
+    if ($normalpath !== $item['href']) {
+      $pos = strlen($item['href']);
+      $item['variadic_suffix'] = substr($normalpath, $pos);
+    }
+    else {
+      $item['variadic_suffix'] = NULL;
     }
 
     return $item;
@@ -555,39 +505,12 @@ function crumbs_reduce_path($path, $depth = -1) {
  *   The route "node/%/edit" will resolve as "node_x_edit".
  */
 function crumbs_build_method_suffix($router_path) {
-  $method_suffix = strtolower($router_path);
-  $method_suffix = preg_replace('#[^a-z0-9\%]#', '_', $method_suffix);
-  $method_suffix = strtr($method_suffix, array('%' => 'x'));
-  $reverse = strtr($method_suffix, array('_' => '/'));
-  $reverse = preg_replace(array('#/x/#', '#/x$#'), array('/%/', '/%'), $reverse);
-  // we need to do this two time to catch things like "/x/x/x/x".
-  $reverse = strtr($reverse, array('/x/' => '/%/'));
-  if ($reverse === $router_path) {
-    return $method_suffix;
-  }
-  return FALSE;
+  return crumbs_Util::buildMethodSuffix($router_path);
 }
 
-/**
- * Measures time between two runs and displays it in a human-readable format.
- *
- * @param $label
- *   String used to identify the measured time.
- *
- * @param
- *   A string with the measurement, or NULL if the function was run for the
- *   first time.
- */
-function crumbs_benchmark($label = NULL) {
-  static $previous_time;
 
-  $current_time = microtime(TRUE);
-  if (isset($previous_time) && isset($label)) {
-    $str = 'Duration: ' . number_format(1000 * ($current_time - $previous_time), 3) . ' ms for '. $label;
-  }
-  $previous_time = $current_time;
-  return isset($str) ? $str : NULL;
-}
+// Admin tabledrag element
+// -----------------------------------------------------------------------------
 
 /**
  * Crumbs autoloader.
@@ -620,13 +543,7 @@ function _crumbs_autoload($class) {
  *   An array of options used to generate the replacements.
  */
 function crumbs_clean_token_values(&$replacements, $data = array(), $options = array()) {
-  foreach ($replacements as $token => &$value) {
-    // Only clean non-path tokens.
-    if (!preg_match('/(path|alias|url|url-brief)\]$/', $token)) {
-      // We use a simple regex instead of pathauto_cleanstring().
-      $value = preg_replace('#[^a-z0-9/]+#', '-', strtolower($value));
-    }
-  }
+  return crumbs_Util::cleanTokenValues($replacements, $data, $options);
 }
 
 

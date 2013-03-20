@@ -26,7 +26,7 @@ abstract class crumbs_PluginOperation_findForPath implements crumbs_PluginOperat
     // but not 'node-_' or 'node-x', or other exotic router paths.
     // Special character router paths can not be matched by any method name,
     // so you will need to use switch() or if/else on $item['path'].
-    $method_suffix = crumbs_build_method_suffix($item['path']);
+    $method_suffix = crumbs_Util::buildMethodSuffix($item['path']);
     if ($method_suffix !== FALSE) {
       $this->methods[] = $this->method .'__'. $method_suffix;
     }

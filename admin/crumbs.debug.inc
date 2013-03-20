@@ -29,24 +29,24 @@ EOT;
     </form>
 EOT;
   if (strlen($path)) {
-    crumbs_benchmark();
+    crumbs_Util::benchmark();
     $log = array();
 
     $path = drupal_get_normal_path($path);
 
-    $log[] = crumbs_benchmark('drupal_get_normal_path()');
+    $log[] = crumbs_Util::benchmark('drupal_get_normal_path()');
 
     $item = crumbs_get_router_item($path);
 
-    $log[] = crumbs_benchmark('crumbs_get_router_item("' . $path . '")');
+    $log[] = crumbs_Util::benchmark('crumbs_get_router_item("' . $path . '")');
 
     $parent_finder = crumbs_get_parent_finder();
 
-    $log[] = crumbs_benchmark('crumbs_get_parent_finder()');
+    $log[] = crumbs_Util::benchmark('crumbs_get_parent_finder()');
 
     $parent_path = $parent_finder->getParentPath($path, $item);
 
-    $log[] = crumbs_benchmark('$finder->getParentPath()');
+    $log[] = crumbs_Util::benchmark('$finder->getParentPath()');
     $log_html = implode('<br/>', $log);
 
     $log = $parent_finder->getLoggedCandidates($path);
