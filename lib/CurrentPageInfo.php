@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Creates various data related to the current page.
+ *
+ * The data is provided to the rest of the world via crumbs_Util_DataCache.
+ * Each method in here corresponds to one key on the data cache.
+ *
+ * The $page argument on each method is the data cache itself.
+ * The argument can be mocked with a simple stdClass, to test the behavior of
+ * each method. (if we had the time to write unit tests)
+ */
 class crumbs_CurrentPageInfo {
 
   protected $trails;
@@ -53,7 +63,7 @@ class crumbs_CurrentPageInfo {
    */
   function rawBreadcrumbItems($page) {
     if ($page->breadcrumbSuppressed) {
-      return FALSE;
+      return array();
     }
     $trail = $page->trail;
     if ($page->showCurrentPage) {
@@ -81,6 +91,9 @@ class crumbs_CurrentPageInfo {
    * Build altered breadcrumb items.
    */
   function breadcrumbItems($page) {
+    if ($page->breadcrumbSuppressed) {
+      return array();
+    }
     $router_item = crumbs_get_router_item($page->path);
     $breadcrumb_items = $page->rawBreadcrumbItems;
     // Allow modules to alter the breadcrumb, if possible, as that is much
@@ -94,7 +107,7 @@ class crumbs_CurrentPageInfo {
    */
   function breadcrumbHtml($page) {
     if ($page->breadcrumbSuppressed) {
-      return FALSE;
+      return '';
     }
     $breadcrumb_items = $page->breadcrumbItems;
     $links = array();
