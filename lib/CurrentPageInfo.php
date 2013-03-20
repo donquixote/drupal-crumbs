@@ -24,6 +24,7 @@ class crumbs_CurrentPageInfo {
    * Check if the breadcrumb is to be suppressed altogether.
    */
   function breadcrumbSuppressed($page) {
+    return FALSE;
     $existing_breadcrumb = drupal_get_breadcrumb();
     // If the existing breadcrumb is empty, that means a module has
     // intentionally removed it. Honor that, and stop here.
@@ -34,7 +35,7 @@ class crumbs_CurrentPageInfo {
    * Assemble all breadcrumb data.
    */
   function breadcrumbData($page) {
-    if ($page->breadcrumbSuppressed) {
+    if (empty($page->breadcrumbItems)) {
       return FALSE;
     }
     return array(
@@ -66,18 +67,24 @@ class crumbs_CurrentPageInfo {
       return array();
     }
     $trail = $page->trail;
-    if ($page->showCurrentPage) {
-      // Do not show the breadcrumb if it contains only 1 item. This prevents
-      // the breadcrumb from showing up on the frontpage.
-      if (count($trail) == 1) {
-        return FALSE;
-      }
+    if (count($trail) < $page->minTrailItems) {
+      return array();
     }
-    else {
-      // Remove the last item, before building the breadcrumb.
+    if (!$page->showFrontPage) {
+      array_shift($trail);
+    }
+    if (!$page->showCurrentPage) {
       array_pop($trail);
     }
-    return $this->breadcrumbBuilder->buildBreadcrumb($trail);
+    if (!count($trail)) {
+      return array();
+    }
+    $items = $this->breadcrumbBuilder->buildBreadcrumb($trail);
+    if (count($items) < $page->minVisibleItems) {
+      // Some items might get lost due to having an empty title.
+      return array();
+    }
+    return $items;
   }
 
   /**
@@ -87,15 +94,34 @@ class crumbs_CurrentPageInfo {
     return variable_get('crumbs_show_current_page', FALSE);
   }
 
+  function showFrontPage($page) {
+    return variable_get('crumbs_show_front_page', TRUE);
+  }
+
+  function minTrailItems($page) {
+    return variable_get('crumbs_minimum_trail_items', 2);
+  }
+
+  function minVisibleItems($page) {
+    $n = $page->minTrailItems;
+    if (!$page->showCurrentPage) {
+      --$n;
+    }
+    if (!$page->showFrontPage) {
+      --$n;
+    }
+    return $n;
+  }
+
   /**
    * Build altered breadcrumb items.
    */
   function breadcrumbItems($page) {
-    if ($page->breadcrumbSuppressed) {
+    $breadcrumb_items = $page->rawBreadcrumbItems;
+    if (empty($breadcrumb_items)) {
       return array();
     }
     $router_item = crumbs_get_router_item($page->path);
-    $breadcrumb_items = $page->rawBreadcrumbItems;
     // Allow modules to alter the breadcrumb, if possible, as that is much
     // faster than rebuilding an entirely new active trail.
     drupal_alter('menu_breadcrumb', $breadcrumb_items, $router_item);
@@ -106,10 +132,10 @@ class crumbs_CurrentPageInfo {
    * Build the breadcrumb HTML.
    */
   function breadcrumbHtml($page) {
-    if ($page->breadcrumbSuppressed) {
+    $breadcrumb_items = $page->breadcrumbItems;
+    if (empty($breadcrumb_items)) {
       return '';
     }
-    $breadcrumb_items = $page->breadcrumbItems;
     $links = array();
     $last_item = end($breadcrumb_items);
     foreach ($breadcrumb_items as $i => $item) {
