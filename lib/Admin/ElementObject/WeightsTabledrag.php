@@ -81,13 +81,15 @@ class crumbs_Admin_ElementObject_WeightsTabledrag extends crumbs_Admin_ElementOb
 
     if (is_array($element['#value'])) {
       foreach ($element['#value'] as $key => $value) {
-        $child = &$element["rules.$key"];
-        if (FALSE === $value) {
-          $child['#section_key'] = 'disabled';
-        }
-        elseif (is_numeric($value)) {
-          $child['weight']['#default_value'] = $value;
-          $child['#section_key'] = 'enabled';
+        if (isset($element["rules.$key"])) {
+          $child = &$element["rules.$key"];
+          if (FALSE === $value) {
+            $child['#section_key'] = 'disabled';
+          }
+          elseif (is_numeric($value)) {
+            $child['weight']['#default_value'] = $value;
+            $child['#section_key'] = 'enabled';
+          }
         }
       }
     }
