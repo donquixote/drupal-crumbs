@@ -6,7 +6,15 @@
  */
 function crumbs_crumbs_plugins($api) {
   $api->monoPlugin('home_title');
-  $api->multiPlugin('nodeParent');
+  foreach (array(
+    'node' => 'node/%',
+    'taxonomy_term' => 'taxonomy/term/%',
+    'user' => 'user/%',
+  ) as $entity_type => $route) {
+    $patterns = variable_get('crumbs_' . $entity_type . '_parent_patterns', array());
+    $plugin = new crumbs_CrumbsMultiPlugin_entityParent($entity_type, $route, $patterns);
+    $api->multiPlugin("entityParent.$entity_type", $plugin);
+  }
 }
 
 
@@ -30,34 +38,46 @@ class crumbs_CrumbsMonoPlugin_home_title implements crumbs_MonoPlugin {
 }
 
 
-class crumbs_CrumbsMultiPlugin_nodeParent implements crumbs_MultiPlugin {
+class crumbs_CrumbsMultiPlugin_entityParent implements crumbs_MultiPlugin {
 
+  protected $entityType;
+  protected $route;
   protected $patterns;
 
-  function __construct() {
-    $this->patterns = variable_get('crumbs_node_parent_patterns', array());
+  function __construct($entity_type, $route, $patterns) {
+    $this->entityType = $entity_type;
+    $this->info = entity_get_info($entity_type);
+    $this->route = $route;
+    $this->patterns = $patterns;
   }
 
   function describe($api) {
-    $types = node_type_get_types();
-    foreach ($types as $type) {
-      if (!empty($this->patterns[$type->type])) {
-        $api->addRule($type->type);
+    foreach ($this->info['bundles'] as $bundle_key => $bundle) {
+      if (!empty($this->patterns[$bundle_key])) {
+        $api->addRule($bundle_key);
       }
     }
   }
 
-  function findParent__node_x($path, $item) {
-    global $language;
-    $node = $item['map'][1];
-    // Load the node if it hasn't been loaded due to a missing wildcard loader.
-    $node = is_numeric($node) ? node_load($node) : $node;
+  function findParent($path, $item) {
+    if ($item['route'] !== $this->route) {
+      return;
+    }
+    $entity = end($item['map']);
+    // Load the entity if it hasn't been loaded due to a missing wildcard loader.
+    $entity = is_numeric($entity) ? entity_load($this->entity_type, $entity) : $entity;
+    if (empty($entity) || !is_object($entity)) {
+      return;
+    }
 
-    $pattern = @$this->patterns[$node->type];
+    $bundle_key = $entity->{$this->info['entity keys']['bundle']};
+    $pattern = @$this->patterns[$bundle_key];
     if (!empty($pattern)) {
       if (module_exists('token')) {
-        $parent = token_replace($pattern, array('node' => $node), array(
-          'language' => $language,
+        $parent = token_replace($pattern, array(
+          $this->info['token type'] => $entity
+        ), array(
+          'language' => $GLOBALS['language'],
           'callback' => 'crumbs_clean_token_values',
         ));
       }
@@ -68,7 +88,7 @@ class crumbs_CrumbsMultiPlugin_nodeParent implements crumbs_MultiPlugin {
         // Only accept candidates where all tokens are fully resolved.
         // This means we can't have literal '[' in the path - so be it.
         if (FALSE === strpos($parent, '[')) {
-          return array($node->type => $parent);
+          return array($bundle_key => $parent);
         }
       }
     }

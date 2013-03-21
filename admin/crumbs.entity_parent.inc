@@ -4,15 +4,18 @@
 /**
  * Form builder callback
  */
-function crumbs_admin_node_parent_form() {
+function crumbs_admin_entity_parent_form($form, &$form_state, $entity_type) {
+
+  $info = entity_get_info($entity_type);
+
   $text = <<<EOT
-<p>You may specify a pattern for the parent path for each node type.</p>
+<p>You may specify a pattern for the parent path for each entity bundle.</p>
 EOT;
   $doc = t($text);
 
   $text = <<<EOT
 <p>Whatever you configure here, will be available on the Crumbs settings page as<br/>
-crumbs.nodeParent.[type]</p>
+crumbs.entityParent.$entity_type.[type]</p>
 EOT;
   $doc .= t($text);
 
@@ -39,31 +42,32 @@ EOT;
     '#markup' => $doc,
   );
 
-  $form['types'] = array(
-    '#title' => t('Node types'),
+  $form['crumbs_' . $entity_type . '_parent_patterns'] = array(
+    '#title' => t('Bundles'),
     '#tree' => TRUE,
   );
 
-  $settings = variable_get('crumbs_node_parent_patterns', array());
+  $settings = variable_get('crumbs_' . $entity_type . '_parent_patterns', array());
 
-  foreach (node_type_get_types() as $type_name => $type) {
+  foreach ($info['bundles'] as $bundle_key => $bundle) {
     $element = array(
       '#type' => 'textfield',
-      '#title' => t($type->name),
-      '#description' => t('Crumbs parent path for nodes of type "!type_name" (!type)', array(
-        '!type_name' => $type->name,
-        '!type' => "$type_name",
+      '#title' => t($bundle['label']),
+      '#description' => t('Crumbs parent path for !plural of type "!bundle_label" (!bundle_key)', array(
+        '!plural' => t($info['plural label']),
+        '!bundle_label' => t($bundle['label']),
+        '!bundle_key' => $bundle_key,
       )),
       // The maximum length is quite arbitrary.
       // Pathauto has 1280, but we think that 512 is enough.
       '#maxlength' => 512,
-      '#default_value' => @$settings[$type_name],
+      '#default_value' => @$settings[$bundle_key],
     );
     if (module_exists('token')) {
       $element['#element_validate'][] = 'token_element_validate';
-      $element['#token_types'][] = 'node';
+      $element['#token_types'][] = $info['token type'];
     }
-    $form['types'][$type_name] = $element;
+    $form['crumbs_' . $entity_type . '_parent_patterns'][$bundle_key] = $element;
   }
 
   if (module_exists('token')) {
@@ -76,25 +80,9 @@ EOT;
 
     $form['token_help']['help'] = array(
       '#theme' => 'token_tree',
-      '#token_types' => array('node'),
+      '#token_types' => array($info['token type']),
     );
   }
 
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save'),
-  );
-
-  return $form;
-}
-
-
-function crumbs_admin_node_parent_form_submit(&$form, &$form_state) {
-  $settings = $form_state['values']['types'];
-  foreach ($settings as $type_name => $setting) {
-    if (empty($setting)) {
-      unset($settings[$type_name]);
-    }
-  }
-  variable_set('crumbs_node_parent_patterns', $settings);
+  return system_settings_form($form);
 }
