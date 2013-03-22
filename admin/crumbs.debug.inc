@@ -8,7 +8,7 @@ function crumbs_debug_page() {
   $form_action = url('admin/structure/crumbs/debug');
 
   $input_html = <<<EOT
-<input id="path" size="40" name="path_to_test" value="$path_checked"/>
+<input id="path" type="text" class="form-text" size="40" name="path_to_test" value="$path_checked"/>
 EOT;
   $input_html = t('Path: !text_field', array('!text_field' => $input_html));
   $text = <<<EOT
