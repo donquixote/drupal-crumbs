@@ -74,17 +74,19 @@ EOT;
 
     $log_html = implode('<br/>', $log);
 
+    $default_parent = crumbs_reduce_path($path);
     $default_row = array(
       '',
       '(default)',
       $item['title'],
-      crumbs_reduce_path($path),
-      $parent_item['title'],
+      $default_parent,
+      drupal_get_normal_path($default_parent),
+      empty($parent_item) ? '' : $parent_item['title'],
     );
 
     $sort = array();
     $rule_found = FALSE;
-    foreach (array('title', 'parent_path', 'parent_title') as $i => $k) {
+    foreach (array('title', 'parent_path', 'parent_path', 'parent_title') as $i => $k) {
       if (!isset(${$k . '_candidates'})) {
         continue;
       }
@@ -92,7 +94,10 @@ EOT;
         $default_row[$i + 2] = '<strong>' . $default_row[$i + 2] . '</strong>';
       }
       foreach (${$k . '_candidates'} as $key => $x) {
-        list($candidate, $weight) = $x;
+        list($weight, $candidate_raw, $candidate) = $x;
+        if ($i === 1) {
+          $candidate = $candidate_raw;
+        }
         if (FALSE === $weight) {
           // This one is disabled. Continue.
           $weight = 'FALSE';
@@ -107,6 +112,7 @@ EOT;
           $sort[$weight][$key] = array(
             $weight,
             $key,
+            '',
             '',
             '',
             '',
@@ -140,7 +146,8 @@ EOT;
       'Weight',
       'Key',
       'Title candidate',
-      'Parent path candidate',
+      'Parent path, raw',
+      'Parent path, processed',
       'Parent title candidate',
     );
     $table = theme('table', array(

@@ -59,7 +59,7 @@ abstract class crumbs_PluginOperation_findForPath implements crumbs_PluginOperat
         }
       }
       else {
-        $this->log[$plugin_key .'.*'] = array(NULL, NULL);
+        $this->log[$plugin_key .'.*'] = array(NULL, NULL, NULL);
       }
     }
     elseif ($plugin instanceof crumbs_MonoPlugin) {
@@ -69,7 +69,7 @@ abstract class crumbs_PluginOperation_findForPath implements crumbs_PluginOperat
         $this->_setValue($plugin_key, $result, $weight);
       }
       else {
-        $this->log[$plugin_key] = array(NULL, NULL);
+        $this->log[$plugin_key] = array(NULL, NULL, NULL);
       }
     }
   }
@@ -91,14 +91,22 @@ abstract class crumbs_PluginOperation_findForPath implements crumbs_PluginOperat
   }
 
   protected function _setValue($key, $value, $weight) {
+    $processed = NULL;
     if ($weight !== FALSE) {
       if (!isset($this->candidateWeight) || $weight < $this->candidateWeight) {
-        $this->candidateWeight = $weight;
-        $this->candidateValue = $value;
-        $this->candidateKey = $key;
+        $processed = $this->_processValue($value);
+        if (isset($processed)) {
+          $this->candidateWeight = $weight;
+          $this->candidateValue = $processed;
+          $this->candidateKey = $key;
+        }
       }
     }
-    $this->log[$key] = array($value, $weight);
+    $this->log[$key] = array($weight, $value, $processed);
+  }
+
+  protected function _processValue($value) {
+    return $value;
   }
 
   abstract protected function _invoke($plugin, $method);
