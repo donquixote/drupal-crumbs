@@ -82,7 +82,6 @@ EOT;
       $parent_item['title'],
     );
 
-    dpm($parent_path_candidates);
     $sort = array();
     $rule_found = FALSE;
     foreach (array('title', 'parent_path', 'parent_title') as $i => $k) {
