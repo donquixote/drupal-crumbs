@@ -94,14 +94,27 @@ class crumbs_CurrentPageInfo {
     return variable_get('crumbs_show_current_page', FALSE);
   }
 
+  /**
+   * Determine if we want to show the breadcrumb item for the front page.
+   */
   function showFrontPage($page) {
     return variable_get('crumbs_show_front_page', TRUE);
   }
 
+  /**
+   * If there are fewer trail items than this, we hide the breadcrumb.
+   */
   function minTrailItems($page) {
     return variable_get('crumbs_minimum_trail_items', 2);
   }
 
+  /**
+   * If there are fewer visible items than this, we hide the breadcrumb.
+   * Every "trail item" does become a "visible item", except when it is hidden:
+   * - The frontpage item might be hidden based on a setting.
+   * - The current page item might be hidden based on a setting.
+   * - Any item where the title is FALSE will be hidden / skipped over.
+   */
   function minVisibleItems($page) {
     $n = $page->minTrailItems;
     if (!$page->showCurrentPage) {
