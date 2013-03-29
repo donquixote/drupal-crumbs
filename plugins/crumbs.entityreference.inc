@@ -7,97 +7,46 @@
 function entityreference_crumbs_plugins($api) {
   foreach (field_info_fields() as $key => $info) {
     if ($info['type'] === 'entityreference') {
-      foreach ($info['bundles'] as $entity_type => $bundles) {
-        $class = '_entityreference_CrumbsMultiPlugin_' . $entity_type;
-        if (class_exists($class)) {
-          $plugin = new $class($key, $bundles);
-          $api->multiPlugin("$key.$entity_type", $plugin);
-        }
-      }
+      $plugin = new entityreference_CrumbsEntityParentPlugin($key, $info['bundles'], array_keys($info['bundles']));
+      $api->entityParentPlugin($key, $plugin);
     }
   }
   $api->disabledByDefault('*');
 }
 
 
-abstract class _entityreference_CrumbsMultiPlugin implements crumbs_MultiPlugin {
+class entityreference_CrumbsEntityParentPlugin {
 
   protected $fieldKey;
-  protected $bundles;
+  protected $bundlesByType;
 
-  // To be defined by the child class
-  protected $entityType;
-
-  function __construct($field_key, $bundles) {
+  function __construct($field_key, $bundles_by_type) {
     $this->fieldKey = $field_key;
-    $this->bundles = $bundles;
+    $this->bundlesByType = $bundles_by_type;
   }
 
-  function describe($api) {
-    foreach ($this->bundles as $bundle) {
-      $api->addRule($bundle, $bundle);
-    }
-  }
-
-  protected function _findParentPath($entity) {
-    $items = field_get_items($this->entityType, $entity, $this->fieldKey);
-    if ($items) {
-      $field = field_info_field($this->fieldKey);
-      $item = $items[0];
-      $target_id = $item['target_id'];
-      $target_type = $field['settings']['target_type'];
-      $method = '_getPath_' . $target_type;
-      if (method_exists($this, $method)) {
-        return $this->$method($target_id);
+  function describe($api, $entity_type) {
+    if (!empty($this->bundlesByType[$entity_type])) {
+      foreach ($this->bundlesByType[$entity_type] as $bundle) {
+        $api->addRule($bundle, $bundle);
       }
     }
   }
 
-  protected function _getPath_node($nid) {
-    return 'node/' . $nid;
-  }
-
-  protected function _getPath_user($uid) {
-    return 'user/' . $uid;
-  }
-}
-
-
-class _entityreference_CrumbsMultiPlugin_node extends _entityreference_CrumbsMultiPlugin {
-
-  protected $entityType = 'node';
-
-  /**
-   * Match "node/%" router path
-   */
-  function findParent__node_x($path, $item) {
-    $node = $item['map'][1];
-    // Load the node if it hasn't been loaded due to a missing wildcard loader.
-    $node = is_numeric($node) ? node_load($node) : $node;
-
-    $parent_path = $this->_findParentPath($node);
-    if ($parent_path) {
-      return array($node->type => $parent_path);
-    }
-  }
-}
-
-
-class _entityreference_CrumbsMultiPlugin_user extends _entityreference_CrumbsMultiPlugin {
-
-  protected $entityType = 'user';
-
-  /**
-   * Match "user/%" router path
-   */
-  function findParent__user_x($path, $item) {
-    $user = $item['map'][1];
-    // Load the user if it hasn't been loaded due to a missing wildcard loader.
-    $user = is_numeric($user) ? user_load($user) : $user;
-
-    $parent_path = $this->_findParentPath($user);
-    if ($parent_path) {
-      return array('user' => $parent_path);
+  function entityFindParent($entity, $entity_type, $distinction_key) {
+    $items = field_get_items($entity_tpy, $entity, $this->fieldKey);
+    if ($items) {
+      $field = field_info_field($this->fieldKey);
+      $item = $items[0];
+      $target_id = $item['target_id'];
+      switch ($field['settings']['target_type']) {
+        case 'node':
+          return 'node/' . $target_id;
+        case 'user':
+          return 'user/' . $target_id;
+        case 'taxonomy_term':
+          return 'taxonomy/term/' . $target_id;
+      }
     }
   }
 }
