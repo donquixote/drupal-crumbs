@@ -10,10 +10,48 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
   protected $module;
   protected $plugins;
   protected $disabledKeys;
+  protected $entityRoutes = array();
+  protected $entityParentPlugins = array();
 
   function __construct(&$plugins, &$disabled_keys) {
     $this->plugins =& $plugins;
     $this->disabledKeys =& $disabled_keys;
+  }
+
+  function finalize() {
+    $build = array();
+    foreach ($this->entityParentPlugins as $key => $y) {
+      list($entity_plugin, $types) = $y;
+      if (!isset($types)) {
+        foreach ($this->entityRoutes as $entity_type => $x) {
+          $build[$entity_type][$key . '.' . $entity_type] = $entity_plugin;
+        }
+      }
+      elseif (is_array($types)) {
+        foreach ($types as $entity_type) {
+          $build[$entity_type][$key . '.' . $entity_type] = $entity_plugin;
+        }
+      }
+      elseif (is_string($types)) {
+        $entity_type = $types;
+        $build[$entity_type][$key] = $entity_plugin;
+      }
+    }
+    foreach ($this->entityRoutes as $entity_type => $x) {
+      list($route, $class, $bundle_key) = $x;
+      if (!empty($build[$entity_type])) {
+        if (empty($class)) {
+          foreach ($build[$entity_type] as $key => $entity_plugin) {
+            $this->plugins[$key] = new crumbs_MultiPlugin_EntityParent($entity_type, $route, $bundle_key, $entity_plugin);
+          }
+        }
+        else {
+          foreach ($build[$entity_type] as $key => $entity_plugin) {
+            $this->plugins[$key] = new $class($entity_plugin);
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -27,6 +65,29 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    */
   function setModule($module) {
     $this->module = $module;
+  }
+
+  function entityRoute($entity_type, $route, $class_prefix, $bundle_key) {
+    $class = 'crumbs_MultiPlugin_' . $class_prefix . 'Parent';
+    if (!class_exists($class)) {
+      $class = NULL;
+    }
+    $this->entityRoutes[$entity_type] = array($route, $class, $bundle_key);
+  }
+
+  function entityParentPlugin($key, $entity_plugin, $types = NULL) {
+    $this->entityParentPlugins[$this->module . '.' . $key] = array($entity_plugin, $types);
+  }
+
+  protected function buildEntityParentPlugin($entity_plugin, $entity_type) {
+    switch ($entity_type) {
+      case 'node':
+        return new crumbs_MultiPlugin_NodeParent($entity_plugin);
+      case 'user':
+        return new crumbs_MultiPlugin_UserParent($entity_plugin);
+      case 'taxonomy_term':
+        return new crumbs_MultiPlugin_TaxonomyTermParent($entity_plugin);
+    }
   }
 
   /**

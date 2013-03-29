@@ -6,6 +6,8 @@
  */
 function taxonomy_crumbs_plugins($api) {
 
+  $api->entityRoute('taxonomy_term', 'taxonomy/term/%', 'TaxonomyTerm', 'vocabulary_machine_name');
+
   $api->multiPlugin('termParent');
 
   foreach (field_info_fields() as $key => $info) {

@@ -75,5 +75,6 @@ class crumbs_PluginLibrary {
       $api->setModule($module);
       $function($api);
     }
+    $api->finalize();
   }
 }
