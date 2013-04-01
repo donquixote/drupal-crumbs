@@ -16,8 +16,6 @@ class crumbs_RuleWeightKeeper {
 
   protected $ruleWeights;
   protected $prefixedKeepers = array();
-  protected $prefixSorted = array();
-  protected $soloSorted = array();
 
   /**
    * @param array $rule_weights
