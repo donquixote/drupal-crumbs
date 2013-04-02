@@ -45,6 +45,7 @@ class crumbs_PluginLibrary {
       'path',
       'taxonomy',
       'forum',
+      'entityreference_prepopulate',
     );
 
     // Include Crumbs-provided plugins.
