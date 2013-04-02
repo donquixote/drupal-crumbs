@@ -25,10 +25,10 @@ class entityreference_CrumbsEntityParentPlugin {
     $this->bundlesByType = $bundles_by_type;
   }
 
-  function describe($api, $entity_type) {
+  function describe($api, $entity_type, $entity_info) {
     if (!empty($this->bundlesByType[$entity_type])) {
-      foreach ($this->bundlesByType[$entity_type] as $bundle) {
-        $api->addRule($bundle, $bundle);
+      foreach ($this->bundlesByType[$entity_type] as $bundle_name) {
+        $api->addRule($bundle_name, $bundle_name);
       }
     }
   }

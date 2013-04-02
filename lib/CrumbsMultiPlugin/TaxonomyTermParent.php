@@ -1,6 +1,6 @@
 <?php
 
-class crumbs_MultiPlugin_TaxonomyTermParent extends crumbs_MultiPlugin_EntityParentAbstract {
+class crumbs_CrumbsMultiPlugin_TaxonomyTermParent extends crumbs_CrumbsMultiPlugin_EntityParentAbstract {
 
   function describe($api) {
     $info = entity_get_info('taxonomy_term');

@@ -67,8 +67,8 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
     $this->module = $module;
   }
 
-  function entityRoute($entity_type, $route, $class_prefix, $bundle_key) {
-    $class = 'crumbs_MultiPlugin_' . $class_prefix . 'Parent';
+  function entityRoute($entity_type, $route, $class_suffix, $bundle_key) {
+    $class = $this->module . '_CrumbsMultiPlugin_' . $class_suffix;
     if (!class_exists($class)) {
       $class = NULL;
     }

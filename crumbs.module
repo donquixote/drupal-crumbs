@@ -317,10 +317,10 @@ function crumbs_get_trail($path = NULL) {
  *   - An array of disabled plugin keys.
  */
 function crumbs_get_plugins() {
-  $lib = crumbs('pluginLibrary');
+  $discovery = crumbs('pluginDiscovery');
   return array(
-    $lib->getAvailablePlugins(),
-    $lib->getDisabledByDefaultKeys(),
+    $discovery->getAvailablePlugins(),
+    $discovery->getDisabledByDefaultKeys(),
   );
 }
 

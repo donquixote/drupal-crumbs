@@ -5,8 +5,12 @@
  * Implements hook_crumbs_plugins().
  */
 function crumbs_crumbs_plugins($api) {
-  $api->entityRoute('node', 'node/%', 'Node', 'type');
-  $api->entityRoute('user', 'user/%', 'User', NULL);
+  $api->entityRoute('node', 'node/%', 'NodeParent', 'type');
+  $api->entityRoute('user', 'user/%', 'UserParent', NULL);
+  if (module_exists('taxonomy')) {
+    $api->entityRoute('taxonomy_term', 'taxonomy/term/%', 'TaxonomyTermParent', 'vocabulary_machine_name');
+  }
+
   $api->monoPlugin('home_title');
   if (module_exists('token')) {
     $api->entityParentPlugin('entityParent', new crumbs_EntityParentPlugin_TokenEnabled());

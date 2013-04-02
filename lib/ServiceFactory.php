@@ -37,20 +37,24 @@ class crumbs_ServiceFactory {
    * Available as crumbs('pluginEngine').
    */
   function pluginEngine($cache) {
-    $plugins = $cache->pluginLibrary->getAvailablePlugins();
-    $disabled_keys = $cache->pluginLibrary->getDisabledByDefaultKeys();
+    $plugins = $cache->pluginDiscovery->getAvailablePlugins();
+    return new crumbs_PluginEngine($plugins, $cache->weightKeeper);
+  }
+
+  function weightKeeper($cache) {
+    $disabled_keys = $cache->pluginDiscovery->getDisabledByDefaultKeys();
     $weights = $cache->ruleWeightSettings->buildWeights($disabled_keys);
-    return new crumbs_PluginEngine($plugins, $weights);
+    return new crumbs_RuleWeightKeeper($weights);
   }
 
   /**
    * A service that knows about all available plugins and their default
    * settings, but not about their runtime configuration / weights.
    *
-   * Available as crumbs('pluginLibrary').
+   * Available as crumbs('pluginDiscovery').
    */
-  function pluginLibrary($cache) {
-    return new crumbs_PluginLibrary();
+  function pluginDiscovery($cache) {
+    return new crumbs_PluginDiscovery();
   }
 
   /**

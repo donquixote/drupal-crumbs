@@ -9,9 +9,8 @@ class crumbs_ParentFinder {
 
   protected $pluginEngine;
 
-  // cached parent paths
+  // Cached parent paths
   protected $parents = array();
-  protected $log = array();
 
   function __construct($pluginEngine) {
     $this->pluginEngine = $pluginEngine;
@@ -28,27 +27,14 @@ class crumbs_ParentFinder {
     return $this->parents[$path];
   }
 
-  function getLoggedCandidates($path) {
-    if (is_array($this->log[$path])) {
-      return $this->log[$path];
-    }
-    else {
-      return array();
-    }
-  }
-
   protected function _findParentPath($path, &$item) {
     if ($item) {
       if (!$item['access']) {
         // Parent should be the front page.
         return FALSE;
       }
-      $plugin_operation = new crumbs_PluginOperation_findParent($path, $item);
-      $this->pluginEngine->invokeAll_find($plugin_operation);
-      $parent_path = $plugin_operation->getValue();
-      $this->log[$path] = $plugin_operation->getLoggedCandidates();
+      $parent_path = $this->pluginEngine->findParent($path, $item);
       if (isset($parent_path)) {
-        $item['crumbs_candidate_key'] = $plugin_operation->getCandidateKey();
         return $parent_path;
       }
     }

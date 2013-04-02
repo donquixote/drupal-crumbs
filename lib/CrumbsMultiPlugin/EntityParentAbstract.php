@@ -1,6 +1,6 @@
 <?php
 
-abstract class crumbs_MultiPlugin_EntityParentAbstract implements crumbs_MultiPlugin {
+abstract class crumbs_CrumbsMultiPlugin_EntityParentAbstract implements crumbs_MultiPlugin {
 
   protected $plugin;
 

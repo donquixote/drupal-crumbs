@@ -1,6 +1,6 @@
 <?php
 
-class crumbs_MultiPlugin_UserParent extends crumbs_MultiPlugin_EntityParentAbstract {
+class crumbs_CrumbsMultiPlugin_UserParent extends crumbs_CrumbsMultiPlugin_EntityParentAbstract {
 
   function describe($api) {
     $info = entity_get_info('user');

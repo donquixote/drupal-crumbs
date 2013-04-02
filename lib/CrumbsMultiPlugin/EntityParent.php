@@ -1,6 +1,6 @@
 <?php
 
-class crumbs_MultiPlugin_EntityParent extends crumbs_MultiPlugin_EntityParentAbstract {
+class crumbs_CrumbsMultiPlugin_EntityParent extends crumbs_CrumbsMultiPlugin_EntityParentAbstract {
 
   protected $entityType;
   protected $route;

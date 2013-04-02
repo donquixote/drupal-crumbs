@@ -44,30 +44,25 @@ EOT;
 
     $log[] = crumbs_Util::benchmark("crumbs('pluginEngine')");
 
-    $op = new crumbs_PluginOperation_findTitle($path, $item, array());
-    $engine->invokeAll_find($op);
-    $title = $op->getValue();
-    $title_candidates = $op->getLoggedCandidates();
-    $title_candidate_key = $op->getCandidateKey();
+    $title_candidates = array();
+    $title_candidate_key = NULL;
+    $title = $engine->findTitle($path, $item, array(), $title_candidates, $title_candidate_key);
 
     $log[] = crumbs_Util::benchmark('find title');
 
-    $op = new crumbs_PluginOperation_findParent($path, $item, array());
-    $engine->invokeAll_find($op);
-    $parent_path = $op->getValue();
-    $parent_path_candidates = $op->getLoggedCandidates();
-    $parent_path_candidate_key = $op->getCandidateKey();
+    $parent_path_candidates = array();
+    $parent_path_candidate_key = NULL;
+    $parent_path = $engine->findParent($path, $item, $parent_path_candidates, $parent_path_candidate_key);
     $parent_path = drupal_get_normal_path($parent_path);
     $parent_item = crumbs_get_router_item($parent_path);
 
     $log[] = crumbs_Util::benchmark('find parent');
 
     if (!empty($parent_item)) {
-      $op = new crumbs_PluginOperation_findTitle($parent_path, $parent_item, array());
-      $engine->invokeAll_find($op);
-      $parent_title = $op->getValue();
-      $parent_title_candidates = $op->getLoggedCandidates();
-      $parent_title_candidate_key = $op->getCandidateKey();
+
+      $parent_title_candidates = array();
+      $parent_title_candidate_key = NULL;
+      $parent_title = $engine->findTitle($parent_path, $parent_item, array(), $parent_title_candidates, $parent_title_candidate_key);
     }
 
     $log[] = crumbs_Util::benchmark('find parent title');
