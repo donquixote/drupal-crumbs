@@ -23,15 +23,6 @@ class crumbs_PluginDiscovery {
     }
   }
 
-  function load() {
-    // Not implemented yet.
-    $this->discover();
-  }
-
-  function save() {
-    // Not implemented yet.
-  }
-
   /**
    * Discover all plugins via hook_crumbs_plugins()
    */
