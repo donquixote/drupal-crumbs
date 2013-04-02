@@ -19,16 +19,33 @@ class crumbs_PluginDiscovery {
 
   protected function lazyInit() {
     if (!isset($this->plugins)) {
-      $this->discover();
+      $this->includePluginFiles();
+      $this->load();
+      if (!isset($this->plugins)) {
+        $this->discover();
+      }
     }
+  }
+
+  protected function load() {
+    $cache = cache_get('crumbs:plugin_info');
+    if ($cache && isset($cache->data['plugins']) && isset($cache->data['disabled_keys'])) {
+      $this->plugins = $cache->data['plugins'];
+      $this->disabledKeys = $cache->data['disabled_keys'];
+    }
+  }
+
+  protected function save() {
+    cache_set('crumbs:plugin_info', array(
+      'plugins' => $this->plugins,
+      'disabled_keys' => $this->disabledKeys,
+    ));
   }
 
   /**
    * Discover all plugins via hook_crumbs_plugins()
    */
-  function discover() {
-
-    $this->includePluginFiles();
+  protected function discover() {
 
     $this->plugins = array();
     $this->disabledKeys = array();
@@ -39,6 +56,7 @@ class crumbs_PluginDiscovery {
       $function($api);
     }
     $api->finalize();
+    $this->save();
   }
 
   protected function includePluginFiles() {
