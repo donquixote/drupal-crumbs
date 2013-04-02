@@ -76,7 +76,7 @@ class crumbs_PluginEngine {
             if (isset($candidate_raw)) {
               $candidate_weight = $keeper->findWeight($candidate_key);
               $candidate = $process($candidate_raw);
-              $all_candidates[$candidate_key] = array($candidate_weight, $candidate_raw, $candidate);
+              $all_candidates["$plugin_key.$candidate_key"] = array($candidate_weight, $candidate_raw, $candidate);
               if ($best_candidate_weight > $candidate_weight && isset($candidate)) {
                 $best_candidate = $candidate;
                 $best_candidate_weight = $candidate_weight;
