@@ -70,6 +70,7 @@ class crumbs_PluginDiscovery {
       'path',
       'taxonomy',
       'forum',
+      'entityreference_prepopulate'
     );
 
     // Include Crumbs-provided plugins.
