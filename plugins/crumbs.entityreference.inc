@@ -8,7 +8,7 @@ function entityreference_crumbs_plugins($api) {
   foreach (field_info_fields() as $key => $info) {
     if ($info['type'] === 'entityreference') {
       $plugin = new entityreference_CrumbsEntityParentPlugin($key, $info['bundles']);
-      $api->entityParentPlugin($key, $plugin);
+      $api->entityParentPlugin($key, $plugin, array_keys($info['bundles']));
     }
   }
   $api->disabledByDefault('*');

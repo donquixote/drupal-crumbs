@@ -11,7 +11,7 @@ function taxonomy_crumbs_plugins($api) {
   foreach (field_info_fields() as $key => $info) {
     if ($info['type'] == 'taxonomy_term_reference') {
       $plugin = new taxonomy_CrumbsEntityParentPlugin_termReference($key, $info['bundles']);
-      $api->entityParentPlugin("termReference.$key", $plugin);
+      $api->entityParentPlugin("termReference.$key", $plugin, array_keys($info['bundles']));
     }
   }
 
