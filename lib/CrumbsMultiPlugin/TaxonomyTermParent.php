@@ -30,7 +30,7 @@ class crumbs_CrumbsMultiPlugin_TaxonomyTermParent extends crumbs_CrumbsMultiPlug
       return;
     }
 
-    $parent = $this->plugin->entityFindParent($entity, 'taxonomy_term', $term->vocabulary_machine_name);
+    $parent = $this->plugin->entityFindParent($term, 'taxonomy_term', $term->vocabulary_machine_name);
     if (!empty($parent)) {
       return array($term->vocabulary_machine_name => $parent);
     }

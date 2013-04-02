@@ -77,11 +77,11 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
 
   function entityParentPlugin($key, $entity_plugin, $types = NULL) {
     if (!isset($entity_plugin)) {
-      $class = $this->module . 'CrumbsEntityParentPlugin';
+      $class = $this->module . '_CrumbsEntityParentPlugin';
       $entity_plugin = new $class();
     }
     elseif (is_string($entity_plugin)) {
-      $class = $this->module . 'CrumbsEntityParentPlugin_' . $entity_plugin;
+      $class = $this->module . '_CrumbsEntityParentPlugin_' . $entity_plugin;
       $entity_plugin = new $class();
     }
     $this->entityParentPlugins[$this->module . '.' . $key] = array($entity_plugin, $types);
