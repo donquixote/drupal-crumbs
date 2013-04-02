@@ -7,7 +7,7 @@
 function entityreference_crumbs_plugins($api) {
   foreach (field_info_fields() as $key => $info) {
     if ($info['type'] === 'entityreference') {
-      $plugin = new entityreference_CrumbsEntityParentPlugin($key, $info['bundles'], array_keys($info['bundles']));
+      $plugin = new entityreference_CrumbsEntityParentPlugin($key, $info['bundles']);
       $api->entityParentPlugin($key, $plugin);
     }
   }
@@ -34,11 +34,12 @@ class entityreference_CrumbsEntityParentPlugin {
   }
 
   function entityFindParent($entity, $entity_type, $distinction_key) {
-    $items = field_get_items($entity_tpy, $entity, $this->fieldKey);
+    $items = field_get_items($entity_type, $entity, $this->fieldKey);
     if ($items) {
       $field = field_info_field($this->fieldKey);
       $item = $items[0];
       $target_id = $item['target_id'];
+      // TODO: Use entity_uri() ?
       switch ($field['settings']['target_type']) {
         case 'node':
           return 'node/' . $target_id;
