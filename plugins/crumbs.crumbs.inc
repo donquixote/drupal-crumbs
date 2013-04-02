@@ -12,22 +12,8 @@ function crumbs_crumbs_plugins($api) {
   }
 
   $api->monoPlugin('home_title');
-  if (module_exists('token')) {
-    $api->entityParentPlugin('entityParent', new crumbs_EntityParentPlugin_TokenEnabled());
-  }
-  else {
-    $api->entityParentPlugin('entityParent', new crumbs_EntityParentPlugin());
-  }
-  return;
-  foreach (array(
-    'node' => 'node/%',
-    'taxonomy_term' => 'taxonomy/term/%',
-    'user' => 'user/%',
-  ) as $entity_type => $route) {
-    $patterns = variable_get('crumbs_' . $entity_type . '_parent_patterns', array());
-    $plugin = new crumbs_CrumbsMultiPlugin_entityParent($entity_type, $route, $patterns);
-    $api->multiPlugin("entityParent.$entity_type", $plugin);
-  }
+  $suffix = module_exists('token') ? 'TokenEnabled' : NULL;
+  $api->entityParentPlugin('entityParent', $suffix);
 }
 
 
@@ -51,7 +37,7 @@ class crumbs_CrumbsMonoPlugin_home_title implements crumbs_MonoPlugin {
 }
 
 
-class crumbs_EntityParentPlugin {
+class crumbs_CrumbsEntityParentPlugin {
 
   function entityFindParent($entity, $entity_type, $distinction_key) {
 
@@ -70,7 +56,7 @@ class crumbs_EntityParentPlugin {
 }
 
 
-class crumbs_EntityParentPlugin_TokenEnabled {
+class crumbs_CrumbsEntityParentPlugin_TokenEnabled {
 
   function entityFindParent($entity, $entity_type, $distinction_key) {
 
