@@ -40,6 +40,10 @@ EOT;
 
     $log[] = crumbs_Util::benchmark('crumbs_get_router_item("' . $path . '")');
 
+    crumbs('pluginDiscovery')->getAvailablePlugins();
+
+    $log[] = crumbs_Util::benchmark("crumbs('pluginDiscovery')->getAvailablePlugins()");
+
     $engine = crumbs('pluginEngine');
 
     $log[] = crumbs_Util::benchmark("crumbs('pluginEngine')");
