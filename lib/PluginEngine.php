@@ -30,6 +30,10 @@ class crumbs_PluginEngine {
   function findParent($path, $item, &$all_candidates = array(), &$best_candidate_key = NULL) {
     $plugin_methods = $this->pluginLibrary->routeFinderPluginMethods('findParent', $item['route']);
     $result = $this->find($plugin_methods, array($path, $item), function ($parent_raw) {
+      if (url_is_external($parent_raw)) {
+        // Always discard external paths.
+        return NULL;
+      }
       return drupal_get_normal_path($parent_raw);
     }, $all_candidates, $best_candidate_key);
     return $result;
@@ -44,9 +48,7 @@ class crumbs_PluginEngine {
    */
   function findTitle($path, $item, $breadcrumb, &$all_candidates = array(), &$best_candidate_key = NULL) {
     $plugin_methods = $this->pluginLibrary->routeFinderPluginMethods('findTitle', $item['route']);
-    $result = $this->find($plugin_methods, array($path, $item, $breadcrumb), function ($title_raw) {
-      return $title_raw;
-    }, $all_candidates, $best_candidate_key);
+    $result = $this->find($plugin_methods, array($path, $item, $breadcrumb), NULL, $all_candidates, $best_candidate_key);
     return $result;
   }
 
@@ -75,7 +77,7 @@ class crumbs_PluginEngine {
           foreach ($candidates as $candidate_key => $candidate_raw) {
             if (isset($candidate_raw)) {
               $candidate_weight = $keeper->findWeight($candidate_key);
-              $candidate = $process($candidate_raw);
+              $candidate = isset($process) ? $process($candidate_raw) : $candidate_raw;
               $all_candidates["$plugin_key.$candidate_key"] = array($candidate_weight, $candidate_raw, $candidate);
               if ($best_candidate_weight > $candidate_weight && isset($candidate)) {
                 $best_candidate = $candidate;
@@ -94,7 +96,7 @@ class crumbs_PluginEngine {
         }
         $candidate_raw = call_user_func_array(array($plugin, $method), $args);
         if (isset($candidate_raw)) {
-          $candidate = $process($candidate_raw);
+          $candidate = isset($process) ? $process($candidate_raw) : $candidate_raw;
           $all_candidates[$plugin_key] = array($candidate_weight, $candidate_raw, $candidate);
           if (isset($candidate)) {
             $best_candidate = $candidate;
