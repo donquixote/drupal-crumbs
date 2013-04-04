@@ -9,7 +9,7 @@ class crumbs_Util_CachedLazyDataContainer {
   function __construct($source) {
     $this->source = $source;
     foreach ($source->keysToCache() as $key) {
-      $this->keysToCache = TRUE;
+      $this->keysToCache[$key] = TRUE;
     }
   }
 
