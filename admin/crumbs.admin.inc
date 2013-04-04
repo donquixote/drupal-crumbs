@@ -70,12 +70,3 @@ function crumbs_admin_display_form() {
   $form['#submit'] = '_crumbs_admin_flush_cache';
   return $form;
 }
-
-function _crumbs_admin_flush_cache() {
-
-  // This will only hit the 'cache_page' and 'cache_block' cache bins.
-  cache_clear_all();
-
-  // Clear plugin info in 'cache' cache bin.
-  crumbs('pluginInfo')->flushCaches();
-}

@@ -2,11 +2,22 @@
 
 class crumbs_CrumbsMultiPlugin_UserParent extends crumbs_CrumbsMultiPlugin_EntityParentAbstract {
 
+  protected $weights = array();
+
   function describe($api) {
-    $info = entity_get_info('user');
-    foreach ($info['bundles'] as $bundle_key => $bundle) {
-      $api->addRule($bundle_key);
+    foreach (user_roles(TRUE) as $rid => $role) {
+      $api->addRule($role);
     }
+  }
+
+  function initWeights($weight_keeper) {
+    foreach (user_roles(TRUE) as $rid => $role) {
+      $weight = $weight_keeper->findWeight($role);
+      if (FALSE !== $weight) {
+        $this->weights[$rid] = $weight;
+      }
+    }
+    asort($this->weights);
   }
 
   /**
@@ -29,10 +40,13 @@ class crumbs_CrumbsMultiPlugin_UserParent extends crumbs_CrumbsMultiPlugin_Entit
     }
 
     $candidates = array();
-    foreach ($user->roles as $role) {
-      $parent = $this->plugin->entityFindParent($user, 'user', $role);
-      if (!empty($parent)) {
-        $candidates[$role] = $parent;
+    foreach ($this->weights as $rid => $weight) {
+      if (!empty($user->roles[$rid])) {
+        $role = $user->roles[$rid];
+        $parent = $this->plugin->entityFindParent($user, 'user', $role);
+        if (!empty($parent)) {
+          $candidates[$role] = $parent;
+        }
       }
     }
     return $candidates;

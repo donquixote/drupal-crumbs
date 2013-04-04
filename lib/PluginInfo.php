@@ -81,7 +81,9 @@ class crumbs_PluginInfo {
       $method_suffix = crumbs_Util::buildMethodSuffix($route);
       if (!empty($method_suffix)) {
         $method_with_suffix = $method . '__' . $method_suffix;
-        foreach ($container->pluginOrder['find'] as $plugin_key => $plugin) {
+        $result = array();
+        foreach ($container->pluginOrder['find'] as $plugin_key => $weight) {
+          $plugin = $container->plugins[$plugin_key];
           if (method_exists($plugin, $method_with_suffix)) {
             $result[$plugin_key] = $method_with_suffix;
             $only_basic = FALSE;
@@ -132,6 +134,7 @@ class crumbs_PluginInfo {
       $api->setModule($module);
       $function($api);
     }
+    $api->finalize();
     return compact('plugins', 'disabled_keys');
   }
 
@@ -172,7 +175,7 @@ class crumbs_PluginInfo {
     asort($order['find']);
 
     // Lowest weight last = highest priority last
-    arsort($order['find']);
+    arsort($order['alter']);
 
     return $order;
   }
