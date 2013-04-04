@@ -43,6 +43,7 @@ class crumbs_CrumbsMultiPlugin_entityParent implements crumbs_MultiPlugin {
   protected $entityType;
   protected $route;
   protected $patterns;
+  protected $info;
 
   function __construct($entity_type, $route, $patterns) {
     $this->entityType = $entity_type;
@@ -70,7 +71,14 @@ class crumbs_CrumbsMultiPlugin_entityParent implements crumbs_MultiPlugin {
       return;
     }
 
-    $bundle_key = $entity->{$this->info['entity keys']['bundle']};
+    if (!empty($this->info['entity keys']['bundle'])) {
+      $bundle_key = $entity->{$this->info['entity keys']['bundle']};
+    }
+    else {
+      // Fallback in case of 'user' entity which has no bundles.
+      $bundle_key = $this->entityType;
+    }
+
     $pattern = @$this->patterns[$bundle_key];
     if (!empty($pattern)) {
       if (module_exists('token')) {
