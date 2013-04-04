@@ -59,7 +59,7 @@ class crumbs_Admin_ElementObject_WeightsTextual extends crumbs_Admin_ElementObje
 
     list($plugins, $disabled_keys) = crumbs_get_plugins();
     list($available_keys, $keys_by_plugin) = $this->loadAvailableKeys($plugins);
-    $weights = crumbs_get_weights();
+    $weights = crumbs('pluginInfo')->userWeights;
 
     return $this->buildDefaultText($available_keys, $keys_by_plugin, $weights, $disabled_keys);
   }

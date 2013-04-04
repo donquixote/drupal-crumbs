@@ -3,11 +3,9 @@
 
 class crumbs_PluginEngine {
 
+  protected $pluginInfo;
   protected $plugins;
   protected $weightKeeper;
-  protected $pluginLibrary;
-
-  protected $finderPluginMethods = array();
 
   /**
    * @param array $plugins
@@ -15,10 +13,19 @@ class crumbs_PluginEngine {
    * @param crumbs_RuleWeightKeeper $weight_keeper
    *   The weight keeper
    */
-  function __construct($plugins, $weight_keeper) {
-    $this->plugins = $plugins;
-    $this->weightKeeper = $weight_keeper;
-    $this->pluginLibrary = new crumbs_PluginLibrary($plugins, $weight_keeper);
+  function __construct($plugin_info) {
+    $this->pluginInfo = $plugin_info;
+    // These are for quicker access.
+    $this->plugins = $plugin_info->plugins;
+    $this->weightKeeper = $plugin_info->weightKeeper;
+  }
+
+  function decorateBreadcrumb($breadcrumb) {
+    $plugin_methods = $this->pluginInfo->basicPluginMethods('decorateBreadcrumb');
+    foreach ($plugin_methods as $plugin_key => $method) {
+      $plugin = $this->plugins[$plugin_key];
+      $plugin->decorateBreadcrumb($breadcrumb);
+    }
   }
 
   /**
@@ -28,15 +35,17 @@ class crumbs_PluginEngine {
    * @param array $item
    */
   function findParent($path, $item, &$all_candidates = array(), &$best_candidate_key = NULL) {
-    $plugin_methods = $this->pluginLibrary->routeFinderPluginMethods('findParent', $item['route']);
-    $result = $this->find($plugin_methods, array($path, $item), function ($parent_raw) {
-      if (url_is_external($parent_raw)) {
-        // Always discard external paths.
-        return NULL;
-      }
-      return drupal_get_normal_path($parent_raw);
-    }, $all_candidates, $best_candidate_key);
+    $plugin_methods = $this->pluginInfo->routePluginMethods('findParent', $item['route']);
+    $result = $this->find($plugin_methods, array($path, $item), TRUE, $all_candidates, $best_candidate_key);
     return $result;
+  }
+
+  protected function processFindParent($parent_raw) {
+    if (url_is_external($parent_raw)) {
+      // Always discard external paths.
+      return NULL;
+    }
+    return drupal_get_normal_path($parent_raw);
   }
 
   /**
@@ -47,8 +56,8 @@ class crumbs_PluginEngine {
    * @param array $breadcrumb
    */
   function findTitle($path, $item, $breadcrumb, &$all_candidates = array(), &$best_candidate_key = NULL) {
-    $plugin_methods = $this->pluginLibrary->routeFinderPluginMethods('findTitle', $item['route']);
-    $result = $this->find($plugin_methods, array($path, $item, $breadcrumb), NULL, $all_candidates, $best_candidate_key);
+    $plugin_methods = $this->pluginInfo->routePluginMethods('findTitle', $item['route']);
+    $result = $this->find($plugin_methods, array($path, $item, $breadcrumb), FALSE, $all_candidates, $best_candidate_key);
     return $result;
   }
 
@@ -61,7 +70,7 @@ class crumbs_PluginEngine {
    *   Collect information during the operation.
    * @param string &$best_candidate_key
    */
-  protected function find($plugin_methods, $args, $process, &$all_candidates = array(), &$best_candidate_key = NULL) {
+  protected function find($plugin_methods, $args, $processFindParent = FALSE, &$all_candidates = array(), &$best_candidate_key = NULL) {
     $best_candidate = NULL;
     $best_candidate_weight = 999999;
     foreach ($plugin_methods as $plugin_key => $method) {
@@ -77,7 +86,7 @@ class crumbs_PluginEngine {
           foreach ($candidates as $candidate_key => $candidate_raw) {
             if (isset($candidate_raw)) {
               $candidate_weight = $keeper->findWeight($candidate_key);
-              $candidate = isset($process) ? $process($candidate_raw) : $candidate_raw;
+              $candidate = $processFindParent ? $this->processFindParent($candidate_raw) : $candidate_raw;
               $all_candidates["$plugin_key.$candidate_key"] = array($candidate_weight, $candidate_raw, $candidate);
               if ($best_candidate_weight > $candidate_weight && isset($candidate)) {
                 $best_candidate = $candidate;
@@ -96,7 +105,7 @@ class crumbs_PluginEngine {
         }
         $candidate_raw = call_user_func_array(array($plugin, $method), $args);
         if (isset($candidate_raw)) {
-          $candidate = isset($process) ? $process($candidate_raw) : $candidate_raw;
+          $candidate = $processFindParent ? $this->processFindParent($candidate_raw) : $candidate_raw;
           $all_candidates[$plugin_key] = array($candidate_weight, $candidate_raw, $candidate);
           if (isset($candidate)) {
             $best_candidate = $candidate;

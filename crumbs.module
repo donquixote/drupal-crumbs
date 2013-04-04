@@ -317,10 +317,10 @@ function crumbs_get_trail($path = NULL) {
  *   - An array of disabled plugin keys.
  */
 function crumbs_get_plugins() {
-  $discovery = crumbs('pluginDiscovery');
+  $discovery = crumbs('pluginInfo')->discovery;
   return array(
-    $discovery->getAvailablePlugins(),
-    $discovery->getDisabledByDefaultKeys(),
+    $discovery['plugins'],
+    $discovery['disabled_keys'],
   );
 }
 
@@ -338,7 +338,7 @@ function crumbs_get_plugins() {
  *   An array of plugin keys and their weights, sorted by weight.
  */
 function crumbs_get_weights() {
-  return crumbs('ruleWeightSettings')->get();
+  return crumbs('pluginInfo')->weights;
 }
 
 /**
