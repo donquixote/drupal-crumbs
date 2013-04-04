@@ -67,6 +67,6 @@ function crumbs_admin_display_form() {
   );
 
   $form = system_settings_form($form);
-  $form['#submit'] = '_crumbs_admin_flush_cache';
+  $form['#submit'][] = '_crumbs_admin_flush_cache';
   return $form;
 }
