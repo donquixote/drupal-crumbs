@@ -37,7 +37,7 @@ class crumbs_CrumbsMonoPlugin_home_title implements crumbs_MonoPlugin {
 }
 
 
-class crumbs_CrumbsEntityParentPlugin {
+class crumbs_CrumbsEntityParentPlugin implements crumbs_EntityParentPlugin {
 
   function entityFindParent($entity, $entity_type, $distinction_key) {
 
@@ -56,7 +56,7 @@ class crumbs_CrumbsEntityParentPlugin {
 }
 
 
-class crumbs_CrumbsEntityParentPlugin_TokenEnabled {
+class crumbs_CrumbsEntityParentPlugin_TokenEnabled implements crumbs_EntityParentPlugin {
 
   function entityFindParent($entity, $entity_type, $distinction_key) {
 

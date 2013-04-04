@@ -84,7 +84,9 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
       $class = $this->module . '_CrumbsEntityParentPlugin_' . $entity_plugin;
       $entity_plugin = new $class();
     }
-    $this->entityParentPlugins[$this->module . '.' . $key] = array($entity_plugin, $types);
+    if ($entity_plugin instanceof crumbs_EntityParentPlugin) {
+      $this->entityParentPlugins[$this->module . '.' . $key] = array($entity_plugin, $types);
+    }
   }
 
   protected function buildEntityParentPlugin($entity_plugin, $entity_type) {

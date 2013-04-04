@@ -15,7 +15,7 @@ function entityreference_crumbs_plugins($api) {
 }
 
 
-class entityreference_CrumbsEntityParentPlugin {
+class entityreference_CrumbsEntityParentPlugin implements crumbs_EntityParentPlugin {
 
   protected $fieldKey;
   protected $bundlesByType;

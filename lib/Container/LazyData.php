@@ -1,6 +1,6 @@
 <?php
 
-class crumbs_Util_DataCache {
+class crumbs_Container_LazyData {
 
   protected $data = array();
   protected $source;

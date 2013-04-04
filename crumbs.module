@@ -397,7 +397,7 @@ function crumbs($key = NULL) {
   static $cache = NULL;
   if (!isset($cache)) {
     $factory = new crumbs_ServiceFactory();
-    $cache = new crumbs_ServiceCache($factory);
+    $cache = new crumbs_Container_LazyServices($factory);
   }
   if (isset($key)) {
     return $cache->__get($key);
