@@ -37,30 +37,17 @@ class crumbs_ServiceFactory {
    * Available as crumbs('pluginEngine').
    */
   function pluginEngine($cache) {
-    $plugins = $cache->pluginLibrary->getAvailablePlugins();
-    $disabled_keys = $cache->pluginLibrary->getDisabledByDefaultKeys();
-    $weights = $cache->ruleWeightSettings->buildWeights($disabled_keys);
-    return new crumbs_PluginEngine($plugins, $weights);
+    return new crumbs_PluginEngine($cache->pluginInfo);
   }
 
   /**
-   * A service that knows about all available plugins and their default
-   * settings, but not about their runtime configuration / weights.
+   * A service that knows all plugins and their configuration/weights.
    *
-   * Available as crumbs('pluginLibrary').
+   * Available as crumbs('pluginInfo').
    */
-  function pluginLibrary($cache) {
-    return new crumbs_PluginLibrary();
-  }
-
-  /**
-   * Service that knows about rule weight settings in the database,
-   * but not about which plugins are actually available.
-   *
-   * Available as crumbs('ruleWeightSettings').
-   */
-  function ruleWeightSettings($cache) {
-    return new crumbs_Conf_RuleWeightSettings();
+  function pluginInfo($cache) {
+    $source = new crumbs_PluginInfo();
+    return new crumbs_Container_CachedLazyData($source);
   }
 
   /**
@@ -70,7 +57,7 @@ class crumbs_ServiceFactory {
    */
   function page($cache) {
     $source = new crumbs_CurrentPageInfo($cache->trails, $cache->breadcrumbBuilder);
-    return new crumbs_Util_DataCache($source);
+    return new crumbs_Container_LazyData($source);
   }
 
   /**
@@ -79,7 +66,7 @@ class crumbs_ServiceFactory {
    * Available as crumbs('trails').
    */
   function trails($cache) {
-    return new crumbs_Util_PathCache($cache->trailFinder);
+    return new crumbs_Container_LazyDataByPath($cache->trailFinder);
   }
 
   function router($cache) {

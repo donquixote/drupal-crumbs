@@ -3,7 +3,7 @@
 /**
  * Creates various data related to the current page.
  *
- * The data is provided to the rest of the world via crumbs_Util_DataCache.
+ * The data is provided to the rest of the world via crumbs_Container_LazyData.
  * Each method in here corresponds to one key on the data cache.
  *
  * The $page argument on each method is the data cache itself.

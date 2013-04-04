@@ -317,10 +317,10 @@ function crumbs_get_trail($path = NULL) {
  *   - An array of disabled plugin keys.
  */
 function crumbs_get_plugins() {
-  $lib = crumbs('pluginLibrary');
+  $discovery = crumbs('pluginInfo')->discovery;
   return array(
-    $lib->getAvailablePlugins(),
-    $lib->getDisabledByDefaultKeys(),
+    $discovery['plugins'],
+    $discovery['disabled_keys'],
   );
 }
 
@@ -338,7 +338,7 @@ function crumbs_get_plugins() {
  *   An array of plugin keys and their weights, sorted by weight.
  */
 function crumbs_get_weights() {
-  return crumbs('ruleWeightSettings')->get();
+  return crumbs('pluginInfo')->weights;
 }
 
 /**
@@ -397,7 +397,7 @@ function crumbs($key = NULL) {
   static $cache = NULL;
   if (!isset($cache)) {
     $factory = new crumbs_ServiceFactory();
-    $cache = new crumbs_ServiceCache($factory);
+    $cache = new crumbs_Container_LazyServices($factory);
   }
   if (isset($key)) {
     return $cache->__get($key);
@@ -495,4 +495,17 @@ function _crumbs_element_object(&$element) {
     $element['#crumbs_element_object'] = $obj;
   }
   return $element['#crumbs_element_object'];
+}
+
+/**
+ * Submit callback registered on crumbs admin forms in addition to the usual
+ * system_settings_form stuff.
+ */
+function _crumbs_admin_flush_cache() {
+
+  // This will only hit the 'cache_page' and 'cache_block' cache bins.
+  cache_clear_all();
+
+  // Clear plugin info in 'cache' cache bin.
+  crumbs('pluginInfo')->flushCaches();
 }

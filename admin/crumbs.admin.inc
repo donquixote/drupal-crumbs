@@ -23,7 +23,9 @@ function crumbs_admin_weights_form($form, $form_state, $type = 'tabledrag') {
       $form['crumbs_weights']['#type'] = 'crumbs_weights_tabledrag';
   }
 
-  return system_settings_form($form);
+  $form = system_settings_form($form);
+  $form['#submit'][] = '_crumbs_admin_flush_cache';
+  return $form;
 }
 
 /**
@@ -64,5 +66,7 @@ function crumbs_admin_display_form() {
     ),
   );
 
-  return system_settings_form($form);
+  $form = system_settings_form($form);
+  $form['#submit'][] = '_crumbs_admin_flush_cache';
+  return $form;
 }

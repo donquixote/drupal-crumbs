@@ -10,13 +10,8 @@ function taxonomy_crumbs_plugins($api) {
 
   foreach (field_info_fields() as $key => $info) {
     if ($info['type'] == 'taxonomy_term_reference') {
-      foreach ($info['bundles'] as $entity_type => $bundles) {
-        $class = '_taxonomy_CrumbsMultiPlugin_termReference_' . $entity_type;
-        if (class_exists($class)) {
-          $plugin = new $class($key, $bundles);
-          $api->multiPlugin("termReference.$key.$entity_type", $plugin);
-        }
-      }
+      $plugin = new taxonomy_CrumbsEntityParentPlugin_termReference($key, $info['bundles']);
+      $api->entityParentPlugin("termReference.$key", $plugin, array_keys($info['bundles']));
     }
   }
 
@@ -27,28 +22,28 @@ function taxonomy_crumbs_plugins($api) {
 // -----------------------------------------------------------------------------
 
 
-class _taxonomy_CrumbsMultiPlugin_termReference implements crumbs_MultiPlugin {
+class taxonomy_CrumbsEntityParentPlugin_termReference {
 
   protected $fieldKey;
-  protected $bundles;
+  protected $bundlesByType;
 
-  // To be defined by the child class
-  protected $entityType;
-
-  function __construct($field_key, $bundles) {
+  function __construct($field_key, $bundles_by_type) {
     $this->fieldKey = $field_key;
-    $this->bundles = $bundles;
+    $this->bundlesByType = $bundles_by_type;
   }
 
-  function describe($api) {
-    foreach ($this->bundles as $bundle) {
-      $api->addRule($bundle, $bundle);
+  function describe($api, $entity_type, $entity_info) {
+    if (!empty($this->bundlesByType[$entity_type])) {
+      foreach ($this->bundlesByType[$entity_type] as $bundle_name) {
+        $api->addRule($bundle_name, $bundle_name);
+      }
     }
   }
 
-  protected function _findParentPath($entity) {
+  function entityFindParent($entity, $entity_type, $distinction_key) {
+
     $terms = array();
-    $items = field_get_items($this->entityType, $entity, $this->fieldKey);
+    $items = field_get_items($entity_type, $entity, $this->fieldKey);
     if ($items) {
       foreach ($items as $item) {
         $terms[$item['tid']] = TRUE;
@@ -82,77 +77,6 @@ class _taxonomy_CrumbsMultiPlugin_termReference implements crumbs_MultiPlugin {
           return $uri['path'];
         }
       }
-    }
-  }
-
-  protected function _getPath_node($nid) {
-    return 'node/' . $nid;
-  }
-
-  protected function _getPath_user($uid) {
-    return 'user/' . $uid;
-  }
-}
-
-
-class _taxonomy_CrumbsMultiPlugin_termReference_node extends _taxonomy_CrumbsMultiPlugin_termReference {
-
-  protected $entityType = 'node';
-
-  /**
-   * Match "node/%" router path
-   */
-  function findParent__node_x($path, $item) {
-    $node = $item['map'][1];
-    // Load the node if it hasn't been loaded due to a missing wildcard loader.
-    $node = is_numeric($node) ? node_load($node) : $node;
-
-    $parent_path = $this->_findParentPath($node);
-    if ($parent_path) {
-      return array($node->type => $parent_path);
-    }
-  }
-}
-
-
-class _taxonomy_CrumbsMultiPlugin_termReference_user extends _taxonomy_CrumbsMultiPlugin_termReference {
-
-  protected $entityType = 'user';
-
-  /**
-   * Match "user/%" router path
-   */
-  function findParent__user_x($path, $item) {
-    $user = $item['map'][1];
-    // Load the user if it hasn't been loaded due to a missing wildcard loader.
-    $user = is_numeric($user) ? user_load($user) : $user;
-
-    $parent_path = $this->_findParentPath($user);
-    if ($parent_path) {
-      // TODO: Is 'user' the correct bundle name?
-      return array('user' => $parent_path);
-    }
-  }
-}
-
-
-class _taxonomy_CrumbsMultiPlugin_termReference_commerce_product extends _taxonomy_CrumbsMultiPlugin_termReference {
-
-  protected $entityType = 'commerce_product';
-
-  /**
-   * Match "product/%" router path.
-   * This works only in combination with commerce_product_page module.
-   */
-  function findParent__product_x($path, $item) {
-    $product = $item['map'][1];
-    // Load the product if it hasn't been loaded due to a missing wildcard loader.
-    $product = is_numeric($product) ? commerce_product_load($product) : $product;
-
-    $parent_path = $this->_findParentPath($product);
-    if ($parent_path) {
-      // TODO: Is 'user' the correct bundle name?
-      return array($product->type => $parent_path);
     }
   }
 }

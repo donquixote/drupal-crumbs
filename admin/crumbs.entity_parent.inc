@@ -49,25 +49,40 @@ EOT;
 
   $settings = variable_get('crumbs_' . $entity_type . '_parent_patterns', array());
 
-  foreach ($info['bundles'] as $bundle_key => $bundle) {
-    $element = array(
-      '#type' => 'textfield',
-      '#title' => t($bundle['label']),
-      '#description' => t('Crumbs parent path for !plural of type "!bundle_label" (!bundle_key)', array(
-        '!plural' => t($info['plural label']),
-        '!bundle_label' => t($bundle['label']),
-        '!bundle_key' => $bundle_key,
-      )),
-      // The maximum length is quite arbitrary.
-      // Pathauto has 1280, but we think that 512 is enough.
-      '#maxlength' => 512,
-      '#default_value' => @$settings[$bundle_key],
-    );
-    if (module_exists('token')) {
-      $element['#element_validate'][] = 'token_element_validate';
-      $element['#token_types'][] = $info['token type'];
+  $element_defaults = array(
+    '#type' => 'textfield',
+    // The maximum length is quite arbitrary.
+    // Pathauto has 1280, but we think that 512 is enough.
+    '#maxlength' => 512,
+  );
+  if (module_exists('token')) {
+    $element_defaults['#element_validate'][] = 'token_element_validate';
+    $element_defaults['#token_types'][] = $info['token type'];
+  }
+
+  if ($entity_type === 'user') {
+    foreach (user_roles(TRUE) as $rid => $role) {
+      $form['crumbs_' . $entity_type . '_parent_patterns'][$role] = array(
+        '#title' => $role,
+        '#description' => t('Crumbs parent path for users with role "!role"', array(
+          '!role' => $role,
+        )),
+        '#default_value' => @$settings[$role],
+      ) + $element_defaults;
     }
-    $form['crumbs_' . $entity_type . '_parent_patterns'][$bundle_key] = $element;
+  }
+  else {
+    foreach ($info['bundles'] as $bundle_key => $bundle) {
+      $form['crumbs_' . $entity_type . '_parent_patterns'][$bundle_key] = array(
+        '#title' => t($bundle['label']),
+        '#description' => t('Crumbs parent path for !plural of type "!bundle_label" (!bundle_key)', array(
+          '!plural' => t($info['plural label']),
+          '!bundle_label' => t($bundle['label']),
+          '!bundle_key' => $bundle_key,
+        )),
+        '#default_value' => @$settings[$bundle_key],
+      ) + $element_defaults;
+    }
   }
 
   if (module_exists('token')) {
@@ -84,5 +99,7 @@ EOT;
     );
   }
 
-  return system_settings_form($form);
+  $form = system_settings_form($form);
+  $form['#submit'][] = '_crumbs_admin_flush_cache';
+  return $form;
 }

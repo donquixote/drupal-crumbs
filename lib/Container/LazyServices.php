@@ -3,7 +3,7 @@
 /**
  * Little brother of a dependency injection container (DIC)
  */
-class crumbs_ServiceCache {
+class crumbs_Container_LazyServices {
 
   protected $factory;
   protected $services = array();
