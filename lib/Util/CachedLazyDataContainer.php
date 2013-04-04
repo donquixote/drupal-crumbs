@@ -13,6 +13,13 @@ class crumbs_Util_CachedLazyDataContainer {
     }
   }
 
+  function flushCaches() {
+    $this->data = array();
+    foreach ($this->keysToCache as $key => $true) {
+      cache_clear_all("crumbs:$key", 'cache');
+    }
+  }
+
   function __get($key) {
     if (!isset($this->data[$key])) {
       if (!empty($this->keysToCache[$key])) {
@@ -20,13 +27,20 @@ class crumbs_Util_CachedLazyDataContainer {
         if (isset($cache->data)) {
           return $this->data[$key] = $cache->data;
         }
+        if (!method_exists($this->source, $key)) {
+          throw new Exception("Key $key not supported.");
+        }
+        $result = $this->source->$key($this);
+        $this->data[$key] = isset($result) ? $result : FALSE;
+        cache_set("crumbs:$key", $this->data[$key]);
       }
-      if (!method_exists($this->source, $key)) {
-        throw new Exception("Key $key not supported.");
+      else {
+        if (!method_exists($this->source, $key)) {
+          throw new Exception("Key $key not supported.");
+        }
+        $result = $this->source->$key($this);
+        $this->data[$key] = isset($result) ? $result : FALSE;
       }
-      $result = $this->source->$key($this);
-      $this->data[$key] = isset($result) ? $result : FALSE;
-      cache_set("crumbs:$key", $this->data[$key]);
     }
     return $this->data[$key];
   }
@@ -52,7 +66,9 @@ class crumbs_Util_CachedLazyDataContainer {
           }
           $result = $this->source->$method($this, $args[0]);
           $this->data[$method][$args[0]] = isset($result) ? $result : NULL;
-          cache_set("crumbs:$method", $this->data[$method]);
+          if (!empty($this->keysToCache[$method])) {
+            cache_set("crumbs:$method", $this->data[$method]);
+          }
         }
         return $this->data[$method][$args[0]];
 
@@ -63,7 +79,9 @@ class crumbs_Util_CachedLazyDataContainer {
           }
           $result = $this->source->$method($this, $args[0], $args[1]);
           $this->data[$method][$args[0]][$args[1]] = isset($result) ? $result : NULL;
-          cache_set("crumbs:$method", $this->data[$method]);
+          if (!empty($this->keysToCache[$method])) {
+            cache_set("crumbs:$method", $this->data[$method]);
+          }
         }
         return $this->data[$method][$args[0]][$args[1]];
 

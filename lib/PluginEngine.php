@@ -24,6 +24,12 @@ class crumbs_PluginEngine {
     $plugin_methods = $this->pluginInfo->basicPluginMethods('decorateBreadcrumb');
     foreach ($plugin_methods as $plugin_key => $method) {
       $plugin = $this->plugins[$plugin_key];
+      if (!method_exists($plugin, 'decorateBreadcrumb')) {
+        // This means the code has changed, without the cache being cleared.
+        // It is the user's responsibility to clear the cache.
+        // Until then, we simply ignore and move on.
+        continue;
+      }
       $plugin->decorateBreadcrumb($breadcrumb);
     }
   }
@@ -81,6 +87,12 @@ class crumbs_PluginEngine {
         if ($best_candidate_weight <= $keeper->getSmallestWeight()) {
           return $best_candidate;
         }
+        if (!method_exists($plugin, $method)) {
+          // This means the code has changed, without the cache being cleared.
+          // It is the user's responsibility to clear the cache.
+          // Until then, we simply ignore and move on.
+          continue;
+        }
         $candidates = call_user_func_array(array($plugin, $method), $args);
         if (!empty($candidates)) {
           foreach ($candidates as $candidate_key => $candidate_raw) {
@@ -102,6 +114,12 @@ class crumbs_PluginEngine {
         $candidate_weight = $this->weightKeeper->findWeight($plugin_key);
         if ($best_candidate_weight <= $candidate_weight) {
           return $best_candidate;
+        }
+        if (!method_exists($plugin, $method)) {
+          // This means the code has changed, without the cache being cleared.
+          // It is the user's responsibility to clear the cache.
+          // Until then, we simply ignore and move on.
+          continue;
         }
         $candidate_raw = call_user_func_array(array($plugin, $method), $args);
         if (isset($candidate_raw)) {
