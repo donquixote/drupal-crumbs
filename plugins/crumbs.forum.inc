@@ -10,6 +10,7 @@ function forum_crumbs_plugins($api) {
   $api->monoPlugin('forumTermName');
   $api->monoPlugin('forumThread');
   $api->monoPlugin('forumThreadCreate');
+  $api->monoPlugin('forumThreadCreateTitle');
 }
 
 
@@ -19,7 +20,7 @@ function forum_crumbs_plugins($api) {
 class forum_CrumbsMonoPlugin_forumTerm implements crumbs_MonoPlugin {
 
   function describe($api) {
-    return t('Let /forum/123 be the parent path of /forum/456, if 123 is the parent of 456.');
+    $api->titleWithLabel(t('The parent forum'), t('Parent'));
   }
 
   /**
@@ -56,7 +57,7 @@ class forum_CrumbsMonoPlugin_forumTerm implements crumbs_MonoPlugin {
 class forum_CrumbsMonoPlugin_forumTermName implements crumbs_MonoPlugin {
 
   function describe($api) {
-    return t('Let /forum/123 be the parent path of /forum/456, if 123 is the parent of 456.');
+    $api->titleWithLabel(t('The forum\'s term name'), t('Title'));
   }
 
   /**
@@ -85,7 +86,7 @@ class forum_CrumbsMonoPlugin_forumTermName implements crumbs_MonoPlugin {
 class forum_CrumbsMonoPlugin_forumThread implements crumbs_MonoPlugin {
 
   function describe($api) {
-    return t('Let /forum/456 be the parent path of /node/789, if node 789 is a thread in this forum.');
+    $api->titleWithLabel(t('The forum the node belongs to'), t('Parent'));
   }
 
   /**
@@ -109,7 +110,8 @@ class forum_CrumbsMonoPlugin_forumThread implements crumbs_MonoPlugin {
 class forum_CrumbsMonoPlugin_forumThreadCreate implements crumbs_MonoPlugin {
 
   function describe($api) {
-    return t('Let /forum/456 be the parent path of /node/789, if node 789 is a thread in this forum.');
+    $api->titleWithLabel(t('node/add/*/* in a forum'), t('Path'));
+    $api->titleWithLabel(t('The forum where the node is going to be created.'), t('Parent'));
   }
 
   /**
@@ -137,6 +139,15 @@ class forum_CrumbsMonoPlugin_forumThreadCreate implements crumbs_MonoPlugin {
         }
       }
     }
+  }
+}
+
+
+class forum_CrumbsMonoPlugin_forumThreadCreateTitle implements crumbs_MonoPlugin {
+
+  function describe($api) {
+    $api->titleWithLabel(t('node/add/*/* in a forum'), t('Path'));
+    $api->titleWithLabel('"' . t('New topic') . '"', t('Title'));
   }
 
   /**

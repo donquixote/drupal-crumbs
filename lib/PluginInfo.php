@@ -50,6 +50,27 @@ class crumbs_PluginInfo {
   }
 
   /**
+   * Info from the plugins' describe() method, plus reflection info.
+   * This is used on the weights form for the sake of information.
+   */
+  function adminPluginInfo($container) {
+
+    $op = new crumbs_PluginOperation_describe();
+    foreach ($container->plugins as $plugin_key => $plugin) {
+      $op->invoke($plugin, $plugin_key);
+    }
+    return $op;
+  }
+
+  function adminAvailableKeys($container) {
+    return $container->adminPluginInfo->getKeys();
+  }
+
+  function adminKeysByPlugin($container) {
+    return $container->adminPluginInfo->getKeysByPlugin();
+  }
+
+  /**
    * Prepared list of plugins and methods for a given operation.
    */
   function basicPluginMethods($container, $method) {

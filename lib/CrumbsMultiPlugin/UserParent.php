@@ -5,8 +5,18 @@ class crumbs_CrumbsMultiPlugin_UserParent extends crumbs_CrumbsMultiPlugin_Entit
   protected $weights = array();
 
   function describe($api) {
+    $roles = array();
     foreach (user_roles(TRUE) as $rid => $role) {
-      $api->addRule($role);
+      $roles[$role] = t('!key: !value', array(
+        '!key' => t('User role'),
+        '!value' => $role,
+      ));
+    }
+    if (method_exists($this->plugin, 'describe')) {
+      return $this->plugin->describe($api, 'user', $roles);
+    }
+    else {
+      return $roles;
     }
   }
 

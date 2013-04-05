@@ -7,10 +7,16 @@ function crumbs_admin_weights_form($form, $form_state, $type = 'tabledrag') {
 
   $form = array();
 
+  $info = crumbs('pluginInfo');
+
+  // Re-discover plugins, when the admin visits the weights configuration form.
+  $info->flushCaches();
+
   $form['crumbs_weights'] = array(
     '#title' => t('Weights'),
     // Fetching the default value is not automated by system_settings_form().
     '#default_value' => variable_get('crumbs_weights', array()),
+    '#crumbs_plugin_info' => $info,
   );
 
   switch ($type) {

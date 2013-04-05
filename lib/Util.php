@@ -31,26 +31,32 @@ class crumbs_Util {
    * This function has exactly one possible input value for
    * each possible return value, except the return value FALSE.
    *
-   * @param $router_path :string
+   * @param string $route
    *   The router path can contain any character, but will typically
    *   have a format like "node/%/edit".
-   * @return :string or FALSE
+   *
+   * @return string or FALSE
    *   A string that can be used as a method suffix,
    *   or FALSE, where that is not possible.
    *   The route "node/%/edit" will resolve as "node_x_edit".
    */
-  static function buildMethodSuffix($router_path) {
-    $method_suffix = strtolower($router_path);
+  static function buildMethodSuffix($route) {
+    $method_suffix = strtolower($route);
     $method_suffix = preg_replace('#[^a-z0-9\%]#', '_', $method_suffix);
     $method_suffix = strtr($method_suffix, array('%' => 'x'));
-    $reverse = strtr($method_suffix, array('_' => '/'));
-    $reverse = preg_replace(array('#/x/#', '#/x$#'), array('/%/', '/%'), $reverse);
-    // we need to do this two time to catch things like "/x/x/x/x".
-    $reverse = strtr($reverse, array('/x/' => '/%/'));
-    if ($reverse === $router_path) {
+    $reverse = self::routeFromMethodSuffix($method_suffix);
+    if ($reverse === $route) {
       return $method_suffix;
     }
     return FALSE;
+  }
+
+  static function routeFromMethodSuffix($method_suffix) {
+    $route = strtr($method_suffix, array('_' => '/'));
+    $route = preg_replace(array('#/x/#', '#/x$#'), array('/%/', '/%'), $route);
+    // we need to do this two time to catch things like "/x/x/x/x".
+    $route = strtr($route, array('/x/' => '/%/'));
+    return $route;
   }
 
   /**

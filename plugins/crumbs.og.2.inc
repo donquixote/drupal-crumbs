@@ -25,9 +25,10 @@ class og_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin {
     $types = node_type_get_types();
     foreach ($types as $type) {
       if (og_is_group_content_type('node', $type->type)) {
-        $api->addRule($type->type);
+        $api->ruleWithLabel($type->type, $type->name, t('Group content type'));
       }
     }
+    $api->descWithLabel(t('Group node'), t('Parent'));
   }
 
   /**

@@ -3,12 +3,7 @@
 class crumbs_CrumbsMultiPlugin_TaxonomyTermParent extends crumbs_CrumbsMultiPlugin_EntityParentAbstract {
 
   function describe($api) {
-    $info = entity_get_info('taxonomy_term');
-    foreach ($info['bundles'] as $bundle_key => $bundle) {
-      if (!empty($this->patterns[$bundle_key])) {
-        $api->addRule($bundle_key);
-      }
-    }
+    return $this->describeGeneric($api, 'taxonomy_term', t('Vocabulary'));
   }
 
   /**

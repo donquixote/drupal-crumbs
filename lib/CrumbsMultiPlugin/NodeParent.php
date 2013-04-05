@@ -3,10 +3,7 @@
 class crumbs_CrumbsMultiPlugin_NodeParent extends crumbs_CrumbsMultiPlugin_EntityParentAbstract {
 
   function describe($api) {
-    $info = entity_get_info('node');
-    foreach ($info['bundles'] as $bundle_key => $bundle) {
-      $api->addRule($bundle_key);
-    }
+    return $this->describeGeneric($api, 'node', t('Node type'));
   }
 
   /**

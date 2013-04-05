@@ -39,6 +39,19 @@ class crumbs_CrumbsMonoPlugin_home_title implements crumbs_MonoPlugin {
 
 class crumbs_CrumbsEntityParentPlugin implements crumbs_EntityParentPlugin {
 
+  function describe($api, $entity_type, $keys) {
+    $patterns = variable_get('crumbs_' . $entity_type . '_parent_patterns', array());
+    foreach ($keys as $key => $title) {
+      if (empty($patterns[$key])) {
+        unset($keys[$key]);
+      }
+      else {
+        $api->addRule($key, $title);
+        $api->descWithLabel('"' . check_plain($patterns[$key]) . '"', t('Parent'), $key);
+      }
+    }
+  }
+
   function entityFindParent($entity, $entity_type, $distinction_key) {
 
     // This is cached..
@@ -56,7 +69,7 @@ class crumbs_CrumbsEntityParentPlugin implements crumbs_EntityParentPlugin {
 }
 
 
-class crumbs_CrumbsEntityParentPlugin_TokenEnabled implements crumbs_EntityParentPlugin {
+class crumbs_CrumbsEntityParentPlugin_TokenEnabled extends crumbs_CrumbsEntityParentPlugin {
 
   function entityFindParent($entity, $entity_type, $distinction_key) {
 

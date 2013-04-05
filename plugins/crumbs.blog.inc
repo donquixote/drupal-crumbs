@@ -13,7 +13,7 @@ function blog_crumbs_plugins($api) {
 class blog_CrumbsMonoPlugin_authorPage implements crumbs_MonoPlugin {
 
   function describe($api) {
-    return t("Use the blog author's user account as the parent page, and 'Blog' as the title.");
+    $api->titleWithLabel(t("The author's blog page"), t('Parent'));
   }
 
   /**
@@ -34,7 +34,7 @@ class blog_CrumbsMonoPlugin_authorPage implements crumbs_MonoPlugin {
 class blog_CrumbsMonoPlugin_authorName implements crumbs_MonoPlugin {
 
   function describe($api) {
-    return t("Set '!name's blog' as the blog title, where !name is the author's username");
+    $api->titleWithLabel(t('"!name\'s blog", where !name is the author\'s username.'), t('Title'));
   }
 
   /**

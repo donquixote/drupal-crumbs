@@ -40,12 +40,12 @@ class crumbs_Admin_ElementObject_WeightsTabledrag extends crumbs_Admin_ElementOb
    */
   function process($element, $form_state) {
 
-    // TODO:
-    //   This should not be part of the element type.
-    //   We will clean this up later.
-    list($plugins, $disabled_keys) = crumbs_get_plugins();
-    list($available_keys, $keys_by_plugin) = $this->loadAvailableKeys($plugins);
+    // Apologies for the stupid identifiers.
+    $info = $element['#crumbs_plugin_info'];
+    $admin_info = $info->adminPluginInfo;
+    $available_keys = $admin_info->collectedInfo();
 
+    // Set up sections
     foreach (array(
       'enabled' => t('Enabled'),
       'disabled' => t('Disabled'),
@@ -62,7 +62,8 @@ class crumbs_Admin_ElementObject_WeightsTabledrag extends crumbs_Admin_ElementOb
       );
     }
 
-    foreach ($available_keys as $key => $description) {
+    // Set up tabledrag rows
+    foreach ($available_keys as $key => $meta) {
       $child = array(
         '#title' => $key,
         'weight' => array(
@@ -72,10 +73,8 @@ class crumbs_Admin_ElementObject_WeightsTabledrag extends crumbs_Admin_ElementOb
           '#class' => array('crumbs-weight-element'),
         ),
         '#section_key' => 'auto',
+        '#crumbs_rule_info' => $meta,
       );
-      if (is_string($description)) {
-        $child['#description'] = $description;
-      }
       $element["rules.$key"] = $child;
     }
 
@@ -93,8 +92,6 @@ class crumbs_Admin_ElementObject_WeightsTabledrag extends crumbs_Admin_ElementOb
         }
       }
     }
-
-    $element['#_crumbs_disabled_keys'] = $disabled_keys;
 
     return $element;
   }

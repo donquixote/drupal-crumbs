@@ -17,7 +17,7 @@ class comment_CrumbsMonoPlugin_reply implements crumbs_MonoPlugin {
    * Describe this plugin for the configuration form.
    */
   function describe($api) {
-    return t('Make node/% the parent for comment/reply/%');
+    $api->titleWithLabel(t("The comment's node"), t('Parent'));
   }
 
   /**
@@ -38,7 +38,7 @@ class comment_CrumbsMonoPlugin_comment implements crumbs_MonoPlugin {
    * Describe this plugin for the configuration form.
    */
   function describe($api) {
-    return t('Make node/% the parent for comment/%');
+    $api->titleWithLabel(t("The comment's node"), t('Parent'));
   }
 
   /**

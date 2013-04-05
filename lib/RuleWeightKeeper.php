@@ -14,7 +14,7 @@
  */
 class crumbs_RuleWeightKeeper {
 
-  protected $ruleWeights;
+  public $ruleWeights;
   protected $prefixedKeepers = array();
 
   /**

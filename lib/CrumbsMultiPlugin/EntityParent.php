@@ -24,10 +24,7 @@ class crumbs_CrumbsMultiPlugin_EntityParent extends crumbs_CrumbsMultiPlugin_Ent
   }
 
   function describe($api) {
-    $info = entity_get_info($this->entityType);
-    foreach ($info['bundles'] as $bundle_key => $bundle) {
-      $api->addRule($bundle_key);
-    }
+    return $this->describeGeneric($api, $this->entityType, t('Bundle'));
   }
 
   /**

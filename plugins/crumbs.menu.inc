@@ -13,7 +13,10 @@ function menu_crumbs_plugins($api) {
 class menu_CrumbsMultiPlugin_hierarchy implements crumbs_MultiPlugin {
 
   function describe($api) {
-    return menu_get_menus();
+    foreach (menu_get_menus() as $key => $title) {
+      $api->ruleWithLabel($key, $title, t('Menu'));
+    }
+    $api->addDescription(t('Menu link parent'));
   }
 
   function disabledByDefault() {
@@ -49,7 +52,10 @@ class menu_CrumbsMultiPlugin_hierarchy implements crumbs_MultiPlugin {
 class menu_CrumbsMultiPlugin_link_title implements crumbs_MultiPlugin {
 
   function describe($api) {
-    return menu_get_menus();
+    foreach (menu_get_menus() as $key => $title) {
+      $api->ruleWithLabel($key, $title, t('Menu'));
+    }
+    $api->addDescription(t('Menu link title'));
   }
 
   function disabledByDefault() {
