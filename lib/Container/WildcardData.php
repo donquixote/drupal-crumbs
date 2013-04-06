@@ -1,20 +1,33 @@
 <?php
 
-class crumbs_Container_WildcardData implements ArrayAccess {
+class crumbs_Container_WildcardData {
 
   protected $data;
   protected $fallback;
   protected $prefixedContainers = array();
 
   /**
-   * @param array $rule_weights
-   *   Weights with wildcards, as saved in the configuration form.
+   * @param array $data
+   *   Array keyed with wildcard keys.
    */
   function __construct(array $data = array()) {
     $this->data = $data;
     $this->fallback = isset($this->data['*']) ? $this->data['*'] : NULL;
   }
 
+  /**
+   * Determine the values for the key and all wildcard parents.
+   *
+   * @param string $key
+   *   The key
+   *
+   * @return array
+   *   The values, e.g.
+   *     aaa.bbb.ccc.ddd => 5
+   *     aaa.bbb.ccc.* => 77
+   *     aaa.* => 21
+   *     * => 9
+   */
   function getAll($key) {
     $fragments = explode('.', $key);
     $partial_key = array_shift($fragments);
@@ -32,6 +45,23 @@ class crumbs_Container_WildcardData implements ArrayAccess {
     return array_reverse($values);
   }
 
+  /**
+   * If the values are arrays, then this one merges the array values for the key
+   * and all wildcard parents.
+   *
+   * @param string $key
+   *   The key
+   *
+   * @return array
+   *   The merged arrays, e.g.
+   *   Starting from
+   *     aaa.bbb.ccc.ddd => array(5, 55)
+   *     aaa.bbb.ccc.* => array(77)
+   *     aaa.* => array(21)
+   *     * => array(9, 99, 999)
+   *  Merged:
+   *     array(5, 55, 77, 21, 9, 99, 999)
+   */
   function getAllMerged($key) {
     $merged = array();
     foreach ($this->getAll($key) as $values) {
@@ -42,20 +72,22 @@ class crumbs_Container_WildcardData implements ArrayAccess {
     return $merged;
   }
 
-  function offsetGet($key) {
-    return $this->resolve($key);
-  }
-
-  function offsetSet($key, $value) {
-    $this->data[$key] = $value;
-  }
-
-  function offsetExists($key) {
-    throw new Exception("offsetExists() not supported.");
-  }
-
-  function offsetUnset($key) {
-    throw new Exception("offsetUnset() not supported.");
+  /**
+   * Determine the value for the rule specified by the key.
+   *
+   * @param string $key
+   *   Key that we are looking for.
+   *
+   * @return mixed
+   *   The value for this key.
+   */
+  function valueAtKey($key) {
+    if (isset($this->data[$key])) {
+      // Look for explicit setting.
+      return $this->data[$key];
+    }
+    // Try wildcards.
+    return $this->wildcardValue($key);
   }
 
   /**
@@ -72,7 +104,8 @@ class crumbs_Container_WildcardData implements ArrayAccess {
   function prefixedContainer($prefix) {
     if (!isset($this->prefixedContainers[$prefix])) {
       $data = $this->buildPrefixedData($prefix);
-      $this->prefixedContainers[$prefix] = new self($data);
+      $class = get_class($this);
+      $this->prefixedContainers[$prefix] = new $class($data);
     }
     return $this->prefixedContainers[$prefix];
   }
@@ -105,28 +138,6 @@ class crumbs_Container_WildcardData implements ArrayAccess {
   }
 
   /**
-   * Determine the value for the rule specified by the key.
-   *
-   * @param string $key
-   *   Key that we are looking for.
-   *
-   * @return mixed
-   *   The value for this key.
-   */
-  function resolve($key = NULL) {
-    if (!isset($key)) {
-      // Find the top-level value.
-      return $this->data[''];
-    }
-    if (isset($this->data[$key])) {
-      // Look for explicit setting.
-      return $this->data[$key];
-    }
-    // Try wildcards.
-    return $this->wildcardValue($key);
-  }
-
-  /**
    * Helper: Resolve wildcards..
    *
    * @param string $key
@@ -135,7 +146,7 @@ class crumbs_Container_WildcardData implements ArrayAccess {
    * @return mixed
    *   The value for this key.
    */
-  function wildcardValue($key) {
+  protected function wildcardValue($key) {
     $fragments = explode('.', $key);
     $partial_key = array_shift($fragments);
     $value = $this->fallback;

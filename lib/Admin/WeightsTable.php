@@ -86,7 +86,7 @@ class crumbs_Admin_WeightsTable {
         $row = array_slice($row, 0, $cell_offset + 1);
       }
       $rule_key = substr($row_key, 6);
-      $row_weight = $this->pluginInfo->weightKeeper->findWeight($rule_key);
+      $row_weight = $this->pluginInfo->weightKeeper->valueAtKey($rule_key);
       $row[] = is_numeric($row_weight) ? t('!key:&nbsp;!value', array(
         '!key' => t('Weight'),
         '!value' => $row_weight,

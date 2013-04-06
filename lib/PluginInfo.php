@@ -1,7 +1,13 @@
 <?php
 
+/**
+ * Data provider object to plug into a crumbs_Container_LazyData.
+ */
 class crumbs_PluginInfo {
 
+  /**
+   * Which keys to load from persistent cache.
+   */
   function keysToCache() {
     return array('weights', 'pluginsCached', 'pluginOrder', 'basicPluginMethods', 'routePluginMethodsCached');
   }
@@ -25,7 +31,7 @@ class crumbs_PluginInfo {
    * (which are often wildcards)
    */
   function weightKeeper($container) {
-    return new crumbs_RuleWeightKeeper($container->weights);
+    return new crumbs_Container_WildcardDataSorted($container->weights);
   }
 
   /**
@@ -136,7 +142,7 @@ class crumbs_PluginInfo {
     foreach ($plugins as $plugin_key => $plugin) {
       // Let plugins know about the weights, if they want to.
       if (method_exists($plugin, 'initWeights')) {
-        $plugin->initWeights($container->weightKeeper->prefixedWeightKeeper($plugin_key));
+        $plugin->initWeights($container->weightKeeper->prefixedContainer($plugin_key));
       }
     }
     return $plugins;
@@ -173,18 +179,15 @@ class crumbs_PluginInfo {
     $weight_keeper = $container->weightKeeper;
     foreach ($container->plugins as $plugin_key => $plugin) {
       if ($plugin instanceof crumbs_MultiPlugin) {
-        $keeper = $weight_keeper->prefixedWeightKeeper($plugin_key);
-        $w_find = $keeper->getSmallestWeight();
+        $keeper = $weight_keeper->prefixedContainer($plugin_key);
+        $w_find = $keeper->smallestValue();
         if ($w_find !== FALSE) {
           $order['find'][$plugin_key] = $w_find;
         }
-        $w_alter = $keeper->findWeight();
-        if ($w_alter !== FALSE) {
-          $order['alter'][$plugin_key] = $w_alter;
-        }
+        // Multi plugins cannot participate in alter operations.
       }
       else {
-        $weight = $weight_keeper->findWeight($plugin_key);
+        $weight = $weight_keeper->valueAtKey($plugin_key);
         if ($weight !== FALSE) {
           $order['find'][$plugin_key] = $weight;
           $order['alter'][$plugin_key] = $weight;

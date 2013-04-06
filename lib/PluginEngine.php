@@ -10,8 +10,8 @@ class crumbs_PluginEngine {
   /**
    * @param array $plugins
    *   Plugins, not sorted.
-   * @param crumbs_RuleWeightKeeper $weight_keeper
-   *   The weight keeper
+   * @param crumbs_Container_WildcardDataSorted $weight_keeper
+   *   A container that can determine a weight for every plugin rule.
    */
   function __construct($plugin_info) {
     $this->pluginInfo = $plugin_info;
@@ -20,6 +20,9 @@ class crumbs_PluginEngine {
     $this->weightKeeper = $plugin_info->weightKeeper;
   }
 
+  /**
+   * Ask applicable plugins to "decorate" (alter) the breadcrumb.
+   */
   function decorateBreadcrumb($breadcrumb) {
     $plugin_methods = $this->pluginInfo->basicPluginMethods('decorateBreadcrumb');
     foreach ($plugin_methods as $plugin_key => $method) {
@@ -83,8 +86,8 @@ class crumbs_PluginEngine {
       $plugin = $this->plugins[$plugin_key];
       if ($plugin instanceof crumbs_MultiPlugin) {
         // That's a MultiPlugin
-        $keeper = $this->weightKeeper->prefixedWeightKeeper($plugin_key);
-        if ($best_candidate_weight <= $keeper->getSmallestWeight()) {
+        $keeper = $this->weightKeeper->prefixedContainer($plugin_key);
+        if ($best_candidate_weight <= $keeper->smallestValue()) {
           return $best_candidate;
         }
         if (!method_exists($plugin, $method)) {
@@ -97,7 +100,7 @@ class crumbs_PluginEngine {
         if (!empty($candidates)) {
           foreach ($candidates as $candidate_key => $candidate_raw) {
             if (isset($candidate_raw)) {
-              $candidate_weight = $keeper->findWeight($candidate_key);
+              $candidate_weight = $keeper->valueAtKey($candidate_key);
               $candidate = $processFindParent ? $this->processFindParent($candidate_raw) : $candidate_raw;
               $all_candidates["$plugin_key.$candidate_key"] = array($candidate_weight, $candidate_raw, $candidate);
               if ($best_candidate_weight > $candidate_weight && isset($candidate)) {
@@ -111,7 +114,7 @@ class crumbs_PluginEngine {
       }
       elseif ($plugin instanceof crumbs_MonoPlugin) {
         // That's a MonoPlugin
-        $candidate_weight = $this->weightKeeper->findWeight($plugin_key);
+        $candidate_weight = $this->weightKeeper->valueAtKey($plugin_key);
         if ($best_candidate_weight <= $candidate_weight) {
           return $best_candidate;
         }

@@ -22,7 +22,7 @@ class crumbs_CrumbsMultiPlugin_UserParent extends crumbs_CrumbsMultiPlugin_Entit
 
   function initWeights($weight_keeper) {
     foreach (user_roles(TRUE) as $rid => $role) {
-      $weight = $weight_keeper->findWeight($role);
+      $weight = $weight_keeper->valueAtKey($role);
       if (FALSE !== $weight) {
         $this->weights[$rid] = $weight;
       }

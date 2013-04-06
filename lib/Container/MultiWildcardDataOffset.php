@@ -11,7 +11,7 @@ class crumbs_Container_MultiWildcardDataOffset {
   }
 
   function __get($key) {
-    return $this->container->__get($key)->offsetGet($this->key);
+    return $this->container->__get($key)->valueAtKey($this->key);
   }
 
   function getAll($key) {
