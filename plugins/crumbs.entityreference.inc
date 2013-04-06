@@ -41,7 +41,7 @@ class entityreference_CrumbsEntityParentPlugin implements crumbs_EntityParentPlu
           $api->descWithLabel($instance['label'], t('Field'), $bundle_name);
         }
       }
-      $api->addDescription('(' . $this->fieldKey . ')');
+      // $api->addDescription('(' . $this->fieldKey . ')');
     }
   }
 

@@ -48,7 +48,7 @@ class taxonomy_CrumbsEntityParentPlugin_termReference implements crumbs_EntityPa
           $api->descWithLabel($instance['label'], t('Field'));
         }
       }
-      $api->addDescription('(' . $this->fieldKey . ')');
+      // $api->addDescription('(' . $this->fieldKey . ')');
     }
   }
 
