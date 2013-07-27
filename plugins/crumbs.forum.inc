@@ -38,7 +38,6 @@ class forum_CrumbsMonoPlugin_forumTerm implements crumbs_MonoPlugin {
     $term = is_numeric($term) ? taxonomy_term_load($term) : $term;
 
     $parents = taxonomy_get_parents($term->tid);
-    $result = array();
     foreach ($parents as $parent_tid => $parent_term) {
       if ($parent_term->vocabulary_machine_name == $term->vocabulary_machine_name) {
         // The parent forum

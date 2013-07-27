@@ -100,7 +100,7 @@ class taxonomy_CrumbsEntityParentPlugin_termReference implements crumbs_EntityPa
 class taxonomy_CrumbsMultiPlugin_termParent implements crumbs_MultiPlugin {
 
   function describe($api) {
-    foreach (taxonomy_get_vocabularies() as $voc_id => $voc) {
+    foreach (taxonomy_get_vocabularies() as $voc) {
       $api->ruleWithLabel($voc->machine_name, $voc->name, t('Vocabulary'));
     }
     // Now set a generic title for the entire plugin.
@@ -117,7 +117,6 @@ class taxonomy_CrumbsMultiPlugin_termParent implements crumbs_MultiPlugin {
     $term = is_numeric($term) ? taxonomy_term_load($term) : $term;
 
     $parents = taxonomy_get_parents($term->tid);
-    $result = array();
     foreach ($parents as $parent_tid => $parent_term) {
       if ($parent_term->vocabulary_machine_name == $term->vocabulary_machine_name) {
         $uri = entity_uri('taxonomy_term', $parent_term);
