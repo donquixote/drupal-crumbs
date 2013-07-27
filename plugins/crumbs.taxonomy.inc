@@ -70,10 +70,10 @@ class taxonomy_CrumbsEntityParentPlugin_termReference implements crumbs_EntityPa
         foreach ($walk as $tid => $true) {
           $parents = taxonomy_get_parents($tid);
           unset($walk[$tid]);
-          foreach ($parents as $tid => $parent) {
-            unset($terms[$tid]);
-            if (!isset($visited[$tid])) {
-              $walk[$tid] = $parent;
+          foreach ($parents as $parent_tid => $parent) {
+            unset($terms[$parent_tid]);
+            if (!isset($visited[$parent_tid])) {
+              $walk[$parent_tid] = $parent;
             }
           }
         }
