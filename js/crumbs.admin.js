@@ -173,7 +173,6 @@ jQuery(document).ready(function($) {
         // No change.
         return;
       }
-      console.log(key, row);
 
       if (row.isVisible) {
         row.$tr.removeClass('collapsed');
@@ -360,11 +359,9 @@ jQuery(document).ready(function($) {
           else {
             // Element was 'disabled' or 'auto' before.
             if (event.offsetX <= 10) {
-              // console.log('lower');
               tellOthers(currentValues[k]);
             }
             else {
-              // console.log('higher');
               tellOthers(currentValues[k]);
             }
           }
@@ -699,8 +696,6 @@ jQuery(document).ready(function($) {
         }
         normalize();
         updateInputs();
-        // console.log('widgets move', key, oldValue, values[key], queue);
-        // console.log('values:', values);
         for (var k in widgets) {
           widgets[k].move(key, oldValue, values[key], queue, values);
         }
