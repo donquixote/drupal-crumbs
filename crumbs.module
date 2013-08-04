@@ -157,6 +157,10 @@ function crumbs_theme($existing, $type, $theme, $path) {
       'file' => 'admin/crumbs.textual.inc',
       'render element' => 'element',
     ),
+    'crumbs_weights_expansible' => array(
+      'file' => 'admin/crumbs.expansible.inc',
+      'render element' => 'element',
+    ),
   );
 }
 
@@ -433,6 +437,9 @@ function crumbs_element_info() {
   $types['crumbs_weights_textual'] = array(
     '#theme' => 'crumbs_weights_textual',
   ) + $common;
+  $types['crumbs_weights_expansible'] = array(
+    '#theme' => 'crumbs_weights_expansible',
+  ) + $common;
   return $types;
 }
 
@@ -490,6 +497,9 @@ function _crumbs_element_object(&$element) {
         break;
       case 'crumbs_weights_textual':
         $obj = new crumbs_Admin_ElementObject_WeightsTextual($element);
+        break;
+      case 'crumbs_weights_expansible':
+        $obj = new crumbs_Admin_ElementObject_WeightsExpansible($element);
         break;
     }
     $element['#crumbs_element_object'] = $obj;

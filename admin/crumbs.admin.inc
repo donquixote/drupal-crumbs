@@ -24,6 +24,10 @@ function crumbs_admin_weights_form($form, $form_state, $type = 'tabledrag') {
       // You need to enable crumbs_labs to get this.
       $form['crumbs_weights']['#type'] = 'crumbs_weights_textual';
       break;
+    case 'expansible':
+      // You need to enable crumbs_labs to get this.
+      $form['crumbs_weights']['#type'] = 'crumbs_weights_expansible';
+      break;
     case 'tabledrag':
     default:
       $form['crumbs_weights']['#type'] = 'crumbs_weights_tabledrag';

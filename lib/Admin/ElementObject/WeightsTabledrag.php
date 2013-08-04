@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\krumong as k;
+
 class crumbs_Admin_ElementObject_WeightsTabledrag extends crumbs_Admin_ElementObject_WeightsAbstract {
 
   /**
