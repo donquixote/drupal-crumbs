@@ -723,6 +723,9 @@ jQuery(document).ready(function($) {
         }
         depths[k] = depth;
       }
+      if (!(values['*'] >= 0)) {
+        values['*'] = 0;
+      }
       normalize();
       for (var k in inputs) {
         widgets[k].init(values, queue);
