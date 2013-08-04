@@ -8,16 +8,16 @@ jQuery(document).ready(function($) {
     if (0 === str.length) {
       return 0;
     }
-    var hash = 0, i, char;
-    for (i = 0, l = str.length; i < l; i++) {
-      char  = str.charCodeAt(i);
-      hash  = ((hash<<5)-hash)+char;
+    var hash = 0, i, c;
+    for (i = 0; i < str.length; i++) {
+      c  = str.charCodeAt(i);
+      hash  = ((hash << 5) - hash) + c;
       hash |= 0; // Convert to 32bit integer
     }
     return Math.abs(hash) % range;
   }
 
-  function TableTreeWidget($table) {
+  function TableTreeWidget() {
 
     var rows = {};
 
@@ -57,9 +57,11 @@ jQuery(document).ready(function($) {
      * Some values have changed that might change the inExpandedTrail value.
      */
     function rowCheckChildrenVisibility(key) {
-      var row = rows[key];
+      var row = rows[key]
+        , kChild
+        ;
 
-      for (var kChild in row.children) {
+      for (kChild in row.children) {
         rowCheckVisibility(kChild);
       }
     }
@@ -185,9 +187,11 @@ jQuery(document).ready(function($) {
     }
 
     this.addRowWidget = function(key, $tr, rowWidget) {
-      var parts = key.split('.');
-      var depth = parts.length;
-      var name = parts.pop();
+      var parts = key.split('.')
+        , depth = parts.length
+        , name = parts.pop()
+        , row
+        ;
       if ('*' === name) {
         --depth;
         if (0 !== depth) {
@@ -220,7 +224,7 @@ jQuery(document).ready(function($) {
         ++rows[parentKey].nChildren;
       }
 
-      var row = {
+      row = {
         $tr: $tr,
         $button: $button,
         parentKeys: parentKeys,
@@ -240,7 +244,7 @@ jQuery(document).ready(function($) {
       };
 
       rows[key] = row;
-    }
+    };
 
     this.init = function(values) {
       for (var key in rows) {
@@ -269,7 +273,7 @@ jQuery(document).ready(function($) {
           rowCheckExpandIcon(key);
         })(key, rows[key], values[key]);
       }
-    }
+    };
 
     /**
      * Set a row value.
@@ -278,7 +282,7 @@ jQuery(document).ready(function($) {
       for (var key in values) {
         rowSetValue(key, values[key]);
       }
-    }
+    };
   }
 
   function determineParentKeys(key) {
@@ -286,9 +290,8 @@ jQuery(document).ready(function($) {
       return [];
     }
     var fragments = key.split('.');
-    var last = fragments.pop();
-    if ('*' === last) {
-      last = fragments.pop() + '.*';
+    if ('*' === fragments.pop()) {
+      fragments.pop();
     }
     var parents = ['*'];
     var parentBase = '';
@@ -328,9 +331,7 @@ jQuery(document).ready(function($) {
     var currentQueue;
     var currentValues;
     var boxes = {};
-    var positions = {};
     var $rowKeyBox;
-    var inheritFromKey;
     var effectiveKey;
     var effectiveValue;
     // $tdInput.hide();
@@ -372,11 +373,6 @@ jQuery(document).ready(function($) {
 
     /**
      * Values have changed.
-     *
-     * @param hierarchy
-     *   Weights of the element and all parents.
-     * @param queue
-     *   All elements that have a weight
      */
     function checkSliderWidth() {
 
@@ -477,7 +473,7 @@ jQuery(document).ready(function($) {
           $box.removeClass('beforeEffectiveBox');
         }
         else if (v < effectiveValue) {
-          $box.removeClass('afterEffectiveBox')
+          $box.removeClass('afterEffectiveBox');
           $box.addClass('beforeEffectiveBox');
         }
         else {
@@ -558,7 +554,7 @@ jQuery(document).ready(function($) {
       checkRowValue();
       checkQueueClasses();
       checkRowClasses();
-    }
+    };
 
     /**
      * Element has a new weight.
@@ -598,25 +594,19 @@ jQuery(document).ready(function($) {
       }
       currentQueue = queue;
       currentValues = values;
-      if (false && value >= 0) {
-        $enabled.css({'width': (20 * queue.length) + 'px', 'margin-left': '10px', 'padding-left': '0'});
-      }
-      else {
-        $enabled.css({'width': (20 * queue.length + 20) + 'px', 'margin-left': '0', 'padding-left': '10px'});
-      }
+      $enabled.css({'width': (20 * queue.length + 20) + 'px', 'margin-left': '0', 'padding-left': '10px'});
 
       checkSliderWidth();
       checkRowValue();
       checkQueueClasses();
       checkRowClasses();
-    }
+    };
   }
 
   function TableWidget($table, tableTreeWidget) {
 
     var values = {};
     var queue = [];
-    var hierarchies = {};
     var widgets = {};
     var inputs = {};
     var depths = {};
@@ -630,7 +620,7 @@ jQuery(document).ready(function($) {
       'Enabled, with weight',
       'Method',
       'Route',
-      'Description',
+      'Description'
     ];
     for (var i = 0; i < headCaptions.length; ++i) {
       $('<th>').html(headCaptions[i]).appendTo($trHead);
@@ -640,8 +630,9 @@ jQuery(document).ready(function($) {
      * Normalize the values variable.
      */
     function normalize() {
+      var k, i;
       queue = [];
-      for (var k in values) {
+      for (k in values) {
         if (!isNaN(parseFloat(values[k]))) {
           queue.push(k);
         }
@@ -652,19 +643,8 @@ jQuery(document).ready(function($) {
       queue.sort(function(k0, k1) {
         return values[k0] - values[k1];
       });
-      for (var i = 0; i < queue.length; ++i) {
+      for (i = 0; i < queue.length; ++i) {
         values[queue[i]] = i;
-      }
-
-      var hierarchy;
-      for (var k in values) {
-        var hierarchy_tmp = [];
-        for (var i = 0; i < depths[k] - 1; ++i) {
-          hierarchy_tmp.push(hierarchy[i]);
-        }
-        hierarchy_tmp.push(values[k]);
-        hierarchy = hierarchy_tmp;
-        hierarchies[k] = hierarchy;
       }
     }
 
@@ -682,7 +662,6 @@ jQuery(document).ready(function($) {
         // Illegal.
         return;
       }
-      var weight;
       if (values[key] !== value) {
         var oldValue = values[key];
         values[key] = value;
@@ -701,16 +680,17 @@ jQuery(document).ready(function($) {
         }
         tableTreeWidget.setValues(values);
       }
-    }
+    };
 
     this.addWeightWidget = function(key, weightWidget, $input) {
       widgets[key] = weightWidget;
       inputs[key] = $input;
-    }
+    };
 
     this.init = function() {
-      for (var k in inputs) {
-        var v = inputs[k].val();
+      var v, k;
+      for (k in inputs) {
+        v = inputs[k].val();
         values[k] = v;
         var depth = k.split('.').length;
         if ('*' === k[k.length - 1]) {
@@ -722,12 +702,12 @@ jQuery(document).ready(function($) {
         values['*'] = 0;
       }
       normalize();
-      for (var k in inputs) {
+      for (k in inputs) {
         widgets[k].init(values, queue);
       }
       updateInputs();
       tableTreeWidget.init(values);
-    }
+    };
   }
 
   function setDepthColor($tr, key) {
@@ -743,7 +723,7 @@ jQuery(document).ready(function($) {
 
   $('table#crumbs_weights_expansible').each(function(){
     var $table = $(this);
-    var tableTreeWidget = new TableTreeWidget($table);
+    var tableTreeWidget = new TableTreeWidget();
     var tableWidget = new TableWidget($table, tableTreeWidget);
     $('input.form-text', $table).each(function(){
       var $input = $(this);
