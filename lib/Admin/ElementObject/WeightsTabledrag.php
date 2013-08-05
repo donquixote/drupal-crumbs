@@ -44,15 +44,31 @@ class crumbs_Admin_ElementObject_WeightsTabledrag extends crumbs_Admin_ElementOb
 
     // Apologies for the stupid identifiers.
     $info = $element['#crumbs_plugin_info'];
+    $default_weights = $info->defaultWeights;
     $admin_info = $info->adminPluginInfo;
     $available_keys = $admin_info->collectedInfo();
 
-    // Set up sections
-    foreach (array(
+    $sections = array(
       'enabled' => t('Enabled'),
       'disabled' => t('Disabled'),
-      'auto' => t('Inherit / automatic'),
-    ) as $section_key => $section_title) {
+    );
+
+    foreach ($default_weights as $value) {
+      if (FALSE === $value) {
+        $sections['default:disabled'] =  t('Disabled by default');
+      }
+      else {
+        $sections["default:$value"] =  t('!key:&nbsp;!value', array(
+          '!key' => t('Default weight'),
+          '!value' => t('Disabled'),
+        ));
+      }
+    }
+
+    $sections['inherit'] = t('Inherit');
+
+    // Set up sections
+    foreach ($sections as $section_key => $section_title) {
       $element["sections.$section_key"] = array(
         '#tree' => TRUE,
         '#title' => $section_title,
@@ -74,10 +90,19 @@ class crumbs_Admin_ElementObject_WeightsTabledrag extends crumbs_Admin_ElementOb
           '#default_value' => -1,
           '#class' => array('crumbs-weight-element'),
         ),
-        '#section_key' => 'auto',
+        '#section_key' => 'inherit',
         '#crumbs_rule_info' => $meta,
       );
       $element["rules.$key"] = $child;
+    }
+
+    foreach ($default_weights as $key => $value) {
+      if (FALSE === $value) {
+        $element["rules.$key"]['#section_key'] = 'default:disabled';
+      }
+      else {
+        $element["rules.$key"]['#section_key'] = "default:$value";
+      }
     }
 
     if (is_array($element['#value'])) {
