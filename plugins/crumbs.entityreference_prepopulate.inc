@@ -3,13 +3,18 @@
 
 /**
  * Implements hook_crumbs_plugins().
+ *
+ * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
  */
 function entityreference_prepopulate_crumbs_plugins($api) {
   $api->multiPlugin('node');
 }
 
-class entityreference_prepopulate_CrumbsMultiPlugin_node implements crumbs_MultiPlugin {
+class entityreference_prepopulate_CrumbsMultiPlugin_node implements crumbs_MultiPlugin_FindParentInterface {
 
+  /**
+   * @inheritdoc
+   */
   function describe($api) {
     foreach (field_info_fields() as $field_name => $field_info) {
       if (1
@@ -29,6 +34,9 @@ class entityreference_prepopulate_CrumbsMultiPlugin_node implements crumbs_Multi
     }
   }
 
+  /**
+   * @inheritdoc
+   */
   function findParent($path, $item) {
     if (1
       // Start with a cheap-to-compute condition,

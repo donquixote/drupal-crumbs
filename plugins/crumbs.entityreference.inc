@@ -3,6 +3,8 @@
 
 /**
  * Implements hook_crumbs_plugins().
+ *
+ * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
  */
 function entityreference_crumbs_plugins($api) {
   foreach (field_info_fields() as $key => $info) {
@@ -25,6 +27,9 @@ class entityreference_CrumbsEntityParentPlugin implements crumbs_EntityParentPlu
     $this->bundlesByType = $bundles_by_type;
   }
 
+  /**
+   * @inheritdoc
+   */
   function describe($api, $entity_type, $keys) {
     if (!empty($this->bundlesByType[$entity_type])) {
       if ('user' === $entity_type) {
@@ -45,6 +50,9 @@ class entityreference_CrumbsEntityParentPlugin implements crumbs_EntityParentPlu
     }
   }
 
+  /**
+   * @inheritdoc
+   */
   function entityFindParent($entity, $entity_type, $distinction_key) {
     $items = field_get_items($entity_type, $entity, $this->fieldKey);
     if ($items) {

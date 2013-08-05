@@ -3,6 +3,8 @@
 
 /**
  * Implements hook_crumbs_plugins()
+ *
+ * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
  */
 function taxonomy_crumbs_plugins($api) {
 
@@ -32,6 +34,9 @@ class taxonomy_CrumbsEntityParentPlugin_termReference implements crumbs_EntityPa
     $this->bundlesByType = $bundles_by_type;
   }
 
+  /**
+   * @inheritdoc
+   */
   function describe($api, $entity_type, $keys) {
     if (!empty($this->bundlesByType[$entity_type])) {
       if ('user' === $entity_type) {
@@ -52,6 +57,9 @@ class taxonomy_CrumbsEntityParentPlugin_termReference implements crumbs_EntityPa
     }
   }
 
+  /**
+   * @inheritdoc
+   */
   function entityFindParent($entity, $entity_type, $distinction_key) {
 
     $terms = array();
@@ -99,6 +107,9 @@ class taxonomy_CrumbsEntityParentPlugin_termReference implements crumbs_EntityPa
 
 class taxonomy_CrumbsMultiPlugin_termParent implements crumbs_MultiPlugin {
 
+  /**
+   * @inheritdoc
+   */
   function describe($api) {
     foreach (taxonomy_get_vocabularies() as $voc) {
       $api->ruleWithLabel($voc->machine_name, $voc->name, t('Vocabulary'));

@@ -5,6 +5,8 @@
  * Implements hook_crumbs_plugins().
  *
  * This is the version for the og-7.x-1.x branch.
+ *
+ * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
  */
 function og_crumbs_plugins($api) {
   $api->multiPlugin('group_post');
@@ -23,6 +25,9 @@ function og_crumbs_plugins($api) {
  */
 class og_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin {
 
+  /**
+   * @inheritdoc
+   */
   function describe($api) {
     $types = node_type_get_types();
     foreach ($types as $type) {
@@ -86,6 +91,9 @@ class og_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin {
     $this->groupsOverviewPath = $groups_overview_path;
   }
 
+  /**
+   * @inheritdoc
+   */
   function describe($api) {
     $types = node_type_get_types();
     foreach ($types as $type) {
@@ -111,12 +119,18 @@ class og_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin {
 /**
  * Make t('Groups') the title for '/group-list'.
  */
-class og_CrumbsMonoPlugin_groups_overview_title implements crumbs_MonoPlugin {
+class og_CrumbsMonoPlugin_groups_overview_title implements crumbs_MonoPlugin_FindTitleInterface {
 
+  /**
+   * @inheritdoc
+   */
   function describe($api) {
     return t('Set "Group" as the title for item for "group-list".');
   }
 
+  /**
+   * @inheritdoc
+   */
   function findTitle($path, $item) {
     if ($item['route'] === 'group-list') {
       return t('Groups');
@@ -143,6 +157,9 @@ class og_CrumbsMultiPlugin_my_groups_overview implements crumbs_MultiPlugin {
     $this->myGroupsPath = $my_groups_path;
   }
 
+  /**
+   * @inheritdoc
+   */
   function describe($api) {
     $types = node_type_get_types();
     foreach ($types as $type) {

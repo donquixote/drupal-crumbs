@@ -3,6 +3,8 @@
 
 /**
  * Implements hook_crumbs_plugins().
+ *
+ * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
  */
 function forum_crumbs_plugins($api) {
 
@@ -19,6 +21,9 @@ function forum_crumbs_plugins($api) {
 
 class forum_CrumbsMonoPlugin_forumTerm implements crumbs_MonoPlugin {
 
+  /**
+   * @inheritdoc
+   */
   function describe($api) {
     $api->titleWithLabel(t('The parent forum'), t('Parent'));
   }
@@ -55,6 +60,9 @@ class forum_CrumbsMonoPlugin_forumTerm implements crumbs_MonoPlugin {
 
 class forum_CrumbsMonoPlugin_forumTermName implements crumbs_MonoPlugin {
 
+  /**
+   * @inheritdoc
+   */
   function describe($api) {
     $api->titleWithLabel(t('The forum\'s term name'), t('Title'));
   }
@@ -84,6 +92,9 @@ class forum_CrumbsMonoPlugin_forumTermName implements crumbs_MonoPlugin {
 
 class forum_CrumbsMonoPlugin_forumThread implements crumbs_MonoPlugin {
 
+  /**
+   * @inheritdoc
+   */
   function describe($api) {
     $api->titleWithLabel(t('The forum the node belongs to'), t('Parent'));
   }
@@ -106,8 +117,11 @@ class forum_CrumbsMonoPlugin_forumThread implements crumbs_MonoPlugin {
 // -----------------------------------------------------------------------------
 
 
-class forum_CrumbsMonoPlugin_forumThreadCreate implements crumbs_MonoPlugin {
+class forum_CrumbsMonoPlugin_forumThreadCreate implements crumbs_MonoPlugin_FindParentInterface {
 
+  /**
+   * @inheritdoc
+   */
   function describe($api) {
     $api->titleWithLabel(t('node/add/*/* in a forum'), t('Path'));
     $api->titleWithLabel(t('The forum where the node is going to be created.'), t('Parent'));
@@ -117,6 +131,8 @@ class forum_CrumbsMonoPlugin_forumThreadCreate implements crumbs_MonoPlugin {
    * Set a parent path for e.g. node/add/(type)/(tid), where
    * - (type) a forum-enabled node type, e.g. "forum".
    * - (tid) is the forum term tid.
+   *
+   * @inheritdoc
    */
   function findParent($path, $item) {
     if (
@@ -142,8 +158,11 @@ class forum_CrumbsMonoPlugin_forumThreadCreate implements crumbs_MonoPlugin {
 }
 
 
-class forum_CrumbsMonoPlugin_forumThreadCreateTitle implements crumbs_MonoPlugin {
+class forum_CrumbsMonoPlugin_forumThreadCreateTitle implements crumbs_MonoPlugin_FindTitleInterface {
 
+  /**
+   * @inheritdoc
+   */
   function describe($api) {
     $api->titleWithLabel(t('node/add/*/* in a forum'), t('Path'));
     $api->titleWithLabel('"' . t('New topic') . '"', t('Title'));
@@ -153,6 +172,8 @@ class forum_CrumbsMonoPlugin_forumThreadCreateTitle implements crumbs_MonoPlugin
    * Set a breadcrumb item title for e.g. node/add/(type)/(tid), where
    * - (type) a forum-enabled node type, e.g. "forum".
    * - (tid) is the forum term tid.
+   *
+   * @inheritdoc
    */
   function findTitle($path, $item) {
     if (

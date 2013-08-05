@@ -14,10 +14,10 @@ function menu_crumbs_plugins($api) {
 }
 
 
-class menu_CrumbsMultiPlugin_hierarchy implements crumbs_MultiPlugin {
+class menu_CrumbsMultiPlugin_hierarchy implements crumbs_MultiPlugin_FindParentInterface {
 
   /**
-   * @param crumbs_InjectedAPI_describeMultiPlugin $api
+   * @inheritdoc
    */
   function describe($api) {
     foreach (menu_get_menus() as $key => $title) {
@@ -26,6 +26,9 @@ class menu_CrumbsMultiPlugin_hierarchy implements crumbs_MultiPlugin {
     $api->addDescription(t('Menu link parent'));
   }
 
+  /**
+   * @inheritdoc
+   */
   function findParent($path, $item) {
 
     $q = db_select('menu_links', 'parent');
@@ -52,8 +55,11 @@ class menu_CrumbsMultiPlugin_hierarchy implements crumbs_MultiPlugin {
 }
 
 
-class menu_CrumbsMultiPlugin_link_title implements crumbs_MultiPlugin {
+class menu_CrumbsMultiPlugin_link_title implements crumbs_MultiPlugin_FindTitleInterface {
 
+  /**
+   * @inheritdoc
+   */
   function describe($api) {
     foreach (menu_get_menus() as $key => $title) {
       $api->ruleWithLabel($key, $title, t('Menu'));
@@ -64,6 +70,8 @@ class menu_CrumbsMultiPlugin_link_title implements crumbs_MultiPlugin {
   /**
    * Find all menu links with $path as the link path.
    * For each menu, find the one with the lowest depth.
+   *
+   * @inheritdoc
    */
   function findTitle($path, $item) {
 

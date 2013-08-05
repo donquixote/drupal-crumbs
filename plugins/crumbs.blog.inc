@@ -3,6 +3,8 @@
 
 /**
  * Implements hook_crumbs_plugins().
+ *
+ * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
  */
 function blog_crumbs_plugins($api) {
   $api->monoPlugin('authorPage');
@@ -12,6 +14,9 @@ function blog_crumbs_plugins($api) {
 
 class blog_CrumbsMonoPlugin_authorPage implements crumbs_MonoPlugin {
 
+  /**
+   * @inheritdoc
+   */
   function describe($api) {
     $api->titleWithLabel(t("The author's blog page"), t('Parent'));
   }
@@ -33,6 +38,9 @@ class blog_CrumbsMonoPlugin_authorPage implements crumbs_MonoPlugin {
 
 class blog_CrumbsMonoPlugin_authorName implements crumbs_MonoPlugin {
 
+  /**
+   * @inheritdoc
+   */
   function describe($api) {
     $api->titleWithLabel(t('"!name\'s blog", where !name is the author\'s username.'), t('Title'));
   }
