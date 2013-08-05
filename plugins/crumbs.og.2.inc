@@ -5,6 +5,8 @@
  * Implements hook_crumbs_plugins().
  *
  * This is the version for the og-7.x-2.x branch.
+ *
+ * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
  */
 function og_crumbs_plugins($api) {
   $api->multiPlugin('group_post');
@@ -21,6 +23,9 @@ function og_crumbs_plugins($api) {
  */
 class og_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin {
 
+  /**
+   * @inheritdoc
+   */
   function describe($api) {
     $types = node_type_get_types();
     foreach ($types as $type) {
@@ -39,6 +44,7 @@ class og_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin {
    *   The path, e.g. node/123
    * @param array $item
    *   The router item, as returned by crumbs_get_router_item()
+   * @return array
    */
   function findParent__node_x($path, $item) {
     $node = $item['map'][1];
@@ -121,10 +127,7 @@ class og_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin {
   }
 
   /**
-   * Tells Crumbs about available rules.
-   *
-   * @param crumbs_InjectedAPI_describeMultiPlugin $api
-   *   API object with methods that allow describing the plugin.
+   * @inheritdoc
    */
   function describe($api) {
     if (is_array($this->groupsOverviewPaths)) {
@@ -161,6 +164,7 @@ class og_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin {
    *
    * @param stdClass $group_node
    *   The node at this path, of which we know it is a group node.
+   * @return array
    */
   protected function getGroupsOverviewPath($group_node) {
     if (is_array($this->groupsOverviewPaths)) {
@@ -170,7 +174,7 @@ class og_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin {
       // If the node type is not in the array, we return nothing!
     }
     else {
-      return array($node->type => $this->groupsOverviewPaths);
+      return array($group_node->type => $this->groupsOverviewPaths);
     }
   }
 }
@@ -189,11 +193,12 @@ class og_CrumbsMultiPlugin_my_groups_overview extends og_CrumbsMultiPlugin_group
    *
    * @param stdClass $group_node
    *   The node at this path, of which we know it is a group node.
+   * @return array
    */
   protected function getGroupsOverviewPath($group_node) {
 
     // Check if the current user is a group member.
-    if (og_is_member('node', $node->nid)) {
+    if (og_is_member('node', $group_node->nid)) {
 
       // Use the parent implementation.
       return parent::getGroupsOverviewPath($group_node);
