@@ -4,7 +4,7 @@
  * Interface for plugin objects registered with hook_crumbs_plugins().
  *
  */
-interface crumbs_MultiPlugin {
+interface crumbs_MultiPlugin extends crumbs_PluginInterface {
 
   /**
    * @param $api :crumbs_InjectedAPI_describeMultiPlugin
