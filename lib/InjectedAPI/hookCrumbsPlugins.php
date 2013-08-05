@@ -101,8 +101,8 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
   }
 
   /**
-   * Register a "Multi" plugin.
-   * That is, a plugin that defines more than one rule.
+   * Register a "Mono" plugin.
+   * That is, a plugin that defines exactly one rule.
    *
    * @param $key
    *   Rule key, relative to module name.

@@ -15,7 +15,7 @@
 class crumbs_Container_WildcardDataSorted extends crumbs_Container_WildcardData {
 
   /**
-   * @param array $rule_weights
+   * @param array $data
    *   Weights with wildcards, as saved in the configuration form.
    */
   function __construct(array $data) {

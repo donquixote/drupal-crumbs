@@ -24,7 +24,8 @@ class crumbs_PluginOperation_describe {
   }
 
   /**
-   * To be called from _crumbs_load_available_keys()
+   * @param crumbs_PluginInterface $plugin
+   * @param $plugin_key
    */
   function invoke($plugin, $plugin_key) {
     $this->pluginKey = $plugin_key;

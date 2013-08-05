@@ -6,8 +6,14 @@
  */
 class crumbs_InjectedAPI_describeMultiPlugin {
 
+  /**
+   * @var crumbs_PluginOperation_describe
+   */
   protected $pluginOperation;
 
+  /**
+   * @param crumbs_PluginOperation_describe $plugin_operation
+   */
   function __construct($plugin_operation) {
     $this->pluginOperation = $plugin_operation;
   }
