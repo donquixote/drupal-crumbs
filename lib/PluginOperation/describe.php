@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * This class uses the PluginOperation pattern, but it does not implement any of
  * the PluginOperation interfaces. This is because it is not supposed to be used
@@ -126,10 +125,6 @@ class crumbs_PluginOperation_describe {
 
   function getKeysByPlugin() {
     return $this->keysByPlugin;
-  }
-
-  function pluginInfo($plugin_key) {
-    return $this->pluginInfo[$plugin_key];
   }
 
   function collectedInfo() {
