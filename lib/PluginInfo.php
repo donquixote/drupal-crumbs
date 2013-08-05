@@ -47,11 +47,15 @@ class crumbs_PluginInfo {
    * @return array
    */
   function defaultWeights($container) {
-    $weights = array();
-    foreach ($container->discovery['disabled_keys'] as $key) {
-      $weights[$key] = FALSE;
-    }
-    return $weights;
+    return $container->discovery->getDefaultValues();
+  }
+
+  /**
+   * @param crumbs_Container_LazyData $container
+   * @return array
+   */
+  function pluginRoutes($container) {
+    return $container->discovery->getPluginRoutes();
   }
 
   /**
@@ -146,21 +150,29 @@ class crumbs_PluginInfo {
    * @return array|bool
    */
   function routePluginMethodsCached($container, $method, $route) {
+    if (empty($route)) {
+      return FALSE;
+    }
     $only_basic = TRUE;
-    if (!empty($route)) {
-      $method_suffix = crumbs_Util::buildMethodSuffix($route);
-      if (!empty($method_suffix)) {
-        $method_with_suffix = $method . '__' . $method_suffix;
-        $result = array();
-        foreach ($container->pluginOrder['find'] as $plugin_key => $weight) {
-          $plugin = $container->plugins[$plugin_key];
-          if (method_exists($plugin, $method_with_suffix)) {
-            $result[$plugin_key] = $method_with_suffix;
-            $only_basic = FALSE;
-          }
-          elseif (method_exists($plugin, $method)) {
-            $result[$plugin_key] = $method;
-          }
+    $plugin_routes = $container->pluginRoutes;
+    $method_suffix = crumbs_Util::buildMethodSuffix($route);
+    if (!empty($method_suffix)) {
+      $method_with_suffix = $method . '__' . $method_suffix;
+    }
+    $result = array();
+    foreach ($container->pluginOrder['find'] as $plugin_key => $weight) {
+      $plugin = $container->plugins[$plugin_key];
+      if (!empty($method_suffix) && method_exists($plugin, $method_with_suffix)) {
+        $result[$plugin_key] = $method_with_suffix;
+        $only_basic = FALSE;
+      }
+      elseif (method_exists($plugin, $method)) {
+        if (!isset($plugin_routes[$plugin_key])) {
+          $result[$plugin_key] = $method;
+        }
+        elseif ($route === $plugin_routes[$plugin_key]) {
+          $only_basic = FALSE;
+          $result[$plugin_key] = $method;
         }
       }
     }
@@ -187,7 +199,7 @@ class crumbs_PluginInfo {
    * @return array
    */
   function pluginsCached($container) {
-    $plugins = $container->discovery['plugins'];
+    $plugins = $container->discovery->getPlugins();
     foreach ($plugins as $plugin_key => $plugin) {
       // Let plugins know about the weights, if they want to.
       if (method_exists($plugin, 'initWeights')) {
@@ -205,16 +217,16 @@ class crumbs_PluginInfo {
    */
   function discovery($container) {
     $container->includePluginFiles;
-    $plugins = array();
-    $disabled_keys = array();
-    $api = new crumbs_InjectedAPI_hookCrumbsPlugins($plugins, $disabled_keys);
+    $discovery_ongoing = TRUE;
+    $api = new crumbs_InjectedAPI_hookCrumbsPlugins($discovery_ongoing);
     foreach (module_implements('crumbs_plugins') as $module) {
       $function = $module .'_crumbs_plugins';
       $api->setModule($module);
       $function($api);
     }
+    $discovery_ongoing = FALSE;
     $api->finalize();
-    return compact('plugins', 'disabled_keys');
+    return $api;
   }
 
   /**

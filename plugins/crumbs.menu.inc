@@ -3,24 +3,27 @@
 
 /**
  * Implementation of hook_crumbs_plugins()
+ *
+ * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
  */
 function menu_crumbs_plugins($api) {
   $api->multiPlugin('hierarchy');
   $api->multiPlugin('link_title');
+  $api->disabledByDefault('hierarchy.*');
+  $api->disabledByDefault('link_title.*');
 }
 
 
 class menu_CrumbsMultiPlugin_hierarchy implements crumbs_MultiPlugin {
 
+  /**
+   * @param crumbs_InjectedAPI_describeMultiPlugin $api
+   */
   function describe($api) {
     foreach (menu_get_menus() as $key => $title) {
       $api->ruleWithLabel($key, $title, t('Menu'));
     }
     $api->addDescription(t('Menu link parent'));
-  }
-
-  function disabledByDefault() {
-    return array('*');
   }
 
   function findParent($path, $item) {
@@ -56,10 +59,6 @@ class menu_CrumbsMultiPlugin_link_title implements crumbs_MultiPlugin {
       $api->ruleWithLabel($key, $title, t('Menu'));
     }
     $api->addDescription(t('Menu link title'));
-  }
-
-  function disabledByDefault() {
-    return array('*');
   }
 
   /**

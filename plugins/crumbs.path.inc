@@ -3,10 +3,13 @@
 
 /**
  * Implements hook_crumbs_plugins().
+ *
+ * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
  */
 function path_crumbs_plugins($api) {
   // Just one plugin for the entire module.
   $api->monoPlugin();
+  $api->disabledByDefault();
 }
 
 
@@ -18,10 +21,6 @@ class path_CrumbsMonoPlugin implements crumbs_MonoPlugin {
 
   function describe($api) {
     return t('Chop off the last fragment of the path alias, consider the result as the parent path.');
-  }
-
-  function disabledByDefault() {
-    return TRUE;
   }
 
   function findParent($path, $item) {

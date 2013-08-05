@@ -8,17 +8,62 @@
 class crumbs_InjectedAPI_hookCrumbsPlugins {
 
   protected $module;
-  protected $plugins;
-  protected $disabledKeys;
+  protected $plugins = array();
+  protected $pluginRoutes = array();
+  protected $defaultValues = array();
   protected $entityRoutes = array();
   protected $entityParentPlugins = array();
+  protected $discoveryOngoing;
 
-  function __construct(&$plugins, &$disabled_keys) {
-    $this->plugins =& $plugins;
-    $this->disabledKeys =& $disabled_keys;
+  /**
+   * @param bool $discovery_ongoing
+   *   Switch to prevent some methods from being called from hook
+   *   implementations.
+   */
+  function __construct(&$discovery_ongoing) {
+    $this->discoveryOngoing = &$discovery_ongoing;
   }
 
+  /**
+   * @return array
+   * @throws Exception
+   */
+  function getPlugins() {
+    if ($this->discoveryOngoing) {
+      throw new \Exception("getPlugins() cannot be called from an implementation of hook_crumbs_plugins().");
+    }
+    return $this->plugins;
+  }
+
+  /**
+   * @return array
+   * @throws Exception
+   */
+  function getPluginRoutes() {
+    if ($this->discoveryOngoing) {
+      throw new \Exception("getPluginRoutes() cannot be called from an implementation of hook_crumbs_plugins().");
+    }
+    return $this->pluginRoutes;
+  }
+
+  /**
+   * @return array
+   * @throws Exception
+   */
+  function getDefaultValues() {
+    if ($this->discoveryOngoing) {
+      throw new \Exception("getDefaultValues() cannot be called from an implementation of hook_crumbs_plugins().");
+    }
+    return $this->defaultValues;
+  }
+
+  /**
+   * @throws Exception
+   */
   function finalize() {
+    if ($this->discoveryOngoing) {
+      throw new \Exception("finalize() cannot be called from an implementation of hook_crumbs_plugins().");
+    }
     $build = array();
     foreach ($this->entityParentPlugins as $key => $y) {
       list($entity_plugin, $types) = $y;
@@ -42,7 +87,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
       if (!empty($build[$entity_type])) {
         if (empty($class)) {
           foreach ($build[$entity_type] as $key => $entity_plugin) {
-            $this->plugins[$key] = new crumbs_MultiPlugin_EntityParent($entity_type, $route, $bundle_key, $entity_plugin);
+            $this->plugins[$key] = new crumbs_CrumbsMultiPlugin_EntityParent($entity_type, $route, $bundle_key, $entity_plugin);
           }
         }
         else {
@@ -60,7 +105,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    * Modules can call this directly if they want to let other modules talk to
    * the API object.
    *
-   * @param $module
+   * @param string $module
    *   The module name.
    */
   function setModule($module) {
@@ -68,6 +113,9 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
   }
 
   /**
+   * Register an entity route.
+   * This should be called by those modules that define entity types and routes.
+   *
    * @param string $entity_type
    * @param string $route
    * @param string $class_suffix
@@ -82,8 +130,10 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
   }
 
   /**
+   * Register an entity parent plugin.
+   *
    * @param string $key
-   * @param crumbs_EntityParentPlugin|string $entity_plugin
+   * @param string|crumbs_EntityParentPlugin $entity_plugin
    * @param array $types
    */
   function entityParentPlugin($key, $entity_plugin = NULL, $types = NULL) {
@@ -104,9 +154,9 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    * Register a "Mono" plugin.
    * That is, a plugin that defines exactly one rule.
    *
-   * @param $key
+   * @param string $key
    *   Rule key, relative to module name.
-   * @param Crumbs_MonoPlugin|string $plugin
+   * @param Crumbs_MonoPlugin $plugin
    *   Plugin object. Needs to implement crumbs_MultiPlugin.
    *   Or NULL, to have the plugin object automatically created based on a
    *   class name guessed from the $key parameter and the module name.
@@ -130,16 +180,20 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
     if (!($plugin instanceof crumbs_MonoPlugin)) {
       throw new Exception("$class must implement class_MonoPlugin.");
     }
-    $this->plugins[$key] = $plugin;
-    if (method_exists($plugin, 'disabledByDefault')) {
-      $disabled_by_default = $plugin->disabledByDefault();
-      if ($disabled_by_default === TRUE) {
-        $this->disabledKeys[$key] = $key;
-      }
-      elseif ($disabled_by_default !== FALSE && $disabled_by_default !== NULL) {
-        throw new Exception("$class::disabledByDefault() must return TRUE, FALSE or NULL.");
-      }
+    if (isset($this->plugins[$key])) {
+      throw new Exception("There already is a plugin with key '$key'.");
     }
+    $this->plugins[$key] = $plugin;
+  }
+
+  /**
+   * @param string $route
+   * @param string $key
+   * @param crumbs_MonoPlugin $plugin
+   */
+  function routeMonoPlugin($route, $key = NULL, crumbs_MonoPlugin $plugin = NULL) {
+    $this->monoPlugin($key, $plugin);
+    $this->pluginRoutes[$key] = $route;
   }
 
   /**
@@ -148,13 +202,13 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    *
    * @param $key
    *   Rule key, relative to module name.
-   * @param crumbs_MultiPlugin|string $plugin
+   * @param crumbs_MultiPlugin $plugin
    *   Plugin object. Needs to implement crumbs_MultiPlugin.
    *   Or NULL, to have the plugin object automatically created based on a
    *   class name guessed from the $key parameter and the module name.
    * @throws Exception
    */
-  function multiPlugin($key, $plugin = NULL) {
+  function multiPlugin($key, crumbs_MultiPlugin $plugin = NULL) {
     if (!isset($key)) {
       $class = $this->module . '_CrumbsMultiPlugin';
       $plugin = new $class();
@@ -173,29 +227,22 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
       throw new Exception("$class must implement class_MultiPlugin.");
     }
     $this->plugins[$plugin_key] = $plugin;
-    if (method_exists($plugin, 'disabledByDefault')) {
-      $disabled_by_default = $plugin->disabledByDefault();
-      if ($disabled_by_default !== NULL) {
-        if (!is_array($disabled_by_default)) {
-          throw new Exception("$class::disabledByDefault() must return an array or NULL.");
-        }
-        foreach ($disabled_by_default as $suffix) {
-          if (!isset($suffix) || $suffix === '') {
-            throw new Exception("$class::disabledByDefault() - returned array contains an empty key.");
-          }
-          else {
-            $key = $plugin_key . '.' . $suffix;
-            $disabled_keys[$key] = $key;
-          }
-        }
-      }
-    }
+  }
+
+  /**
+   * @param string $route
+   * @param string $key
+   * @param crumbs_MultiPlugin $plugin
+   */
+  function routeMultiPlugin($route, $key = NULL, crumbs_MultiPlugin $plugin = NULL) {
+    $this->multiPlugin($key, $plugin);
+    $this->pluginRoutes[$key] = $route;
   }
 
   /**
    * Set specific rules as disabled by default.
    *
-   * @param $keys
+   * @param array|string $keys
    *   Array of keys, relative to the module name, OR
    *   a single string key, relative to the module name.
    */
@@ -212,6 +259,6 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
 
   protected function _disabledByDefault($key) {
     $key = isset($key) ? ($this->module . '.' . $key) : $this->module;
-    $this->disabledKeys[$key] = $key;
+    $this->defaultValues[$key] = FALSE;
   }
 }
