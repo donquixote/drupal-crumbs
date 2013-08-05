@@ -105,6 +105,14 @@ class crumbs_PluginOperation_describe {
     $this->_addDescription($this->pluginKey, $title);
   }
 
+  function setRoute($route) {
+    $this->collectedInof['routes'][$this->pluginKey] = array($route);
+  }
+
+  function setRoutes(array $routes) {
+    $this->collectedInfo['routes'][$this->pluginKey] = $routes;
+  }
+
   protected function _addRule($key) {
     $fragments = explode('.', $key);
     $partial_key = array_shift($fragments);

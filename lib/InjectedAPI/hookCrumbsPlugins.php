@@ -67,6 +67,12 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
     $this->module = $module;
   }
 
+  /**
+   * @param string $entity_type
+   * @param string $route
+   * @param string $class_suffix
+   * @param string $bundle_key
+   */
   function entityRoute($entity_type, $route, $class_suffix, $bundle_key) {
     $class = $this->module . '_CrumbsMultiPlugin_' . $class_suffix;
     if (!class_exists($class)) {
@@ -75,7 +81,12 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
     $this->entityRoutes[$entity_type] = array($route, $class, $bundle_key);
   }
 
-  function entityParentPlugin($key, $entity_plugin, $types = NULL) {
+  /**
+   * @param string $key
+   * @param crumbs_EntityParentPlugin|string $entity_plugin
+   * @param array $types
+   */
+  function entityParentPlugin($key, $entity_plugin = NULL, $types = NULL) {
     if (!isset($entity_plugin)) {
       $class = $this->module . '_CrumbsEntityParentPlugin';
       $entity_plugin = new $class();
@@ -89,30 +100,19 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
     }
   }
 
-  protected function buildEntityParentPlugin($entity_plugin, $entity_type) {
-    switch ($entity_type) {
-      case 'node':
-        return new crumbs_MultiPlugin_NodeParent($entity_plugin);
-      case 'user':
-        return new crumbs_MultiPlugin_UserParent($entity_plugin);
-      case 'taxonomy_term':
-        return new crumbs_MultiPlugin_TaxonomyTermParent($entity_plugin);
-    }
-  }
-
   /**
    * Register a "Mono" plugin.
    * That is, a plugin that defines exactly one rule.
    *
    * @param $key
    *   Rule key, relative to module name.
-   * @param $plugin
+   * @param Crumbs_MonoPlugin|string $plugin
    *   Plugin object. Needs to implement crumbs_MultiPlugin.
    *   Or NULL, to have the plugin object automatically created based on a
    *   class name guessed from the $key parameter and the module name.
    * @throws Exception
    */
-  function monoPlugin($key = NULL, $plugin = NULL) {
+  function monoPlugin($key = NULL, crumbs_MonoPlugin $plugin = NULL) {
     if (!isset($key)) {
       $class = $this->module . '_CrumbsMonoPlugin';
       $plugin = new $class();
@@ -148,7 +148,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    *
    * @param $key
    *   Rule key, relative to module name.
-   * @param $plugin
+   * @param crumbs_MultiPlugin|string $plugin
    *   Plugin object. Needs to implement crumbs_MultiPlugin.
    *   Or NULL, to have the plugin object automatically created based on a
    *   class name guessed from the $key parameter and the module name.
