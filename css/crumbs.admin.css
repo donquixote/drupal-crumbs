@@ -19,7 +19,7 @@ table#crumbs_weights_expansible tr.collapsed td > * {
 
 table#crumbs_weights_expansible tr.useDefaultValue td,
 table#crumbs_weights_expansible tr.inheritValue td {
-  opacity:0.6;
+  /* opacity:0.6; */
 }
 
 table#crumbs_weights_expansible td:after {
@@ -54,6 +54,18 @@ table#crumbs_weights_expansible td .state-disabled {
   border-radius:10px;
   position:relative;
   cursor:pointer;
+}
+
+table#crumbs_weights_expansible tr.effectivelyEnabled td {
+  color:#070;
+}
+
+table#crumbs_weights_expansible tr.effectivelyDisabled td {
+  color:#a00;
+}
+
+table#crumbs_weights_expansible tr.hasExplicitValue td {
+  /* font-weight:bold; */
 }
 
 table#crumbs_weights_expansible tr.effectivelyDisabled .state-disabled {

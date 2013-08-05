@@ -199,7 +199,8 @@ jQuery(document).ready(function($) {
         }
       }
       var $tdFirst = $('td:first-child', $tr);
-      var $label = $('<div class="crumbs-admin-row-label">').html(key).css('margin-left', (20 * depth) + 'px');
+      var $label = $('<div class="crumbs-admin-row-label">').css('margin-left', (20 * depth) + 'px');
+      $('<span class="rowText">').html(key).appendTo($label);
       var $button = $('<div class="crumbs-admin-expand-icon">').html('+').prependTo($label);
       $tdFirst.html('').append($label);
       var parentKeys = [];
@@ -716,7 +717,8 @@ jQuery(document).ready(function($) {
       --depth;
     }
     // Determine a color.
-    var rgba = [255 - 7 * depth, 255 - 7 * depth, 255, 1];
+    var lum = Math.round(255 * Math.pow(0.97, depth));
+    var rgba = [lum, lum, lum, 1];
     var color = 'rgba(' + rgba.join(',') + ')';
     $tr.css('background-color', color);
   }
