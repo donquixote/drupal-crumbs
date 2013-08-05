@@ -110,6 +110,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    *   Plugin object. Needs to implement crumbs_MultiPlugin.
    *   Or NULL, to have the plugin object automatically created based on a
    *   class name guessed from the $key parameter and the module name.
+   * @throws Exception
    */
   function monoPlugin($key = NULL, $plugin = NULL) {
     if (!isset($key)) {
@@ -151,6 +152,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    *   Plugin object. Needs to implement crumbs_MultiPlugin.
    *   Or NULL, to have the plugin object automatically created based on a
    *   class name guessed from the $key parameter and the module name.
+   * @throws Exception
    */
   function multiPlugin($key, $plugin = NULL) {
     if (!isset($key)) {
