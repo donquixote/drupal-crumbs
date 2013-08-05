@@ -7,7 +7,7 @@
 interface crumbs_MultiPlugin extends crumbs_PluginInterface {
 
   /**
-   * @param $api :crumbs_InjectedAPI_describeMultiPlugin
+   * @param crumbs_InjectedAPI_describeMultiPlugin $api
    *   Injected API object, with methods that allow the plugin to further
    *   describe itself.
    *   The plugin is supposed to tell Crumbs about all possible rule keys, and

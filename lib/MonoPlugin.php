@@ -6,7 +6,7 @@
 interface crumbs_MonoPlugin extends crumbs_PluginInterface {
 
   /**
-   * @param $api :crumbs_InjectedAPI_describeMonoPlugin
+   * @param crumbs_InjectedAPI_describeMonoPlugin $api
    *   Injected API object, with methods that allows the plugin to further
    *   describe itself.
    *
