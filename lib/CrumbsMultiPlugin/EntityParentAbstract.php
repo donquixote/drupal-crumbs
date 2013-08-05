@@ -17,6 +17,7 @@ abstract class crumbs_CrumbsMultiPlugin_EntityParentAbstract implements crumbs_M
    */
   protected function describeGeneric($api, $entity_type, $label) {
     $info = entity_get_info($entity_type);
+    $keys = array();
     foreach ($info['bundles'] as $bundle_key => $bundle) {
       $keys[$bundle_key] = t('!key: !value', array(
         '!key' => $label,
@@ -24,7 +25,8 @@ abstract class crumbs_CrumbsMultiPlugin_EntityParentAbstract implements crumbs_M
       ));
     }
     if (method_exists($this->plugin, 'describe')) {
-      return $this->plugin->describe($api, $entity_type, $keys);
+      $keys = $this->plugin->describe($api, $entity_type, $keys);
+      return $keys;
     }
     else {
       return $keys;

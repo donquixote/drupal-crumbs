@@ -80,7 +80,7 @@ class crumbs_PluginInfo {
    */
   function adminPluginInfo($container) {
 
-    $op = new crumbs_PluginOperation_describe();
+    $op = new crumbs_PluginOperation_describe($container->pluginRoutes);
     /**
      * @var crumbs_PluginInterface $plugin
      */

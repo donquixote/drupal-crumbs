@@ -3,45 +3,39 @@
 class crumbs_CrumbsMultiPlugin_EntityParent extends crumbs_CrumbsMultiPlugin_EntityParentAbstract {
 
   protected $entityType;
-  protected $route;
   protected $bundleKey;
+  protected $bundleName;
 
   /**
+   * @param crumbs_EntityParentPlugin $plugin
+   *   The object that can actually determine a parent path for the entity.
    * @param string $entity_type
    *   The entity type.
-   * @param string $route
-   *   The route, e.g. node/%.
    * @param string $bundle_key
    *   The key on the $entiy object to determine the bundle.
-   * @param object $plugin
-   *   The object that can actually determine a parent path for the entity.
+   * @param string $bundle_name
+   *   The label for the bundle, e.g. "Node type" or "Vocabulary".
+   *   This is an untranslated string.
    */
-  function __construct($entity_type, $route, $bundle_key, $plugin) {
+  function __construct($plugin, $entity_type, $bundle_key, $bundle_name) {
     $this->entityType = $entity_type;
-    $this->route = $route;
     $this->bundleKey = $bundle_key;
+    $this->bundleName = $bundle_name;
     parent::__construct($plugin);
   }
 
+  /**
+   * @inheritdoc
+   */
   function describe($api) {
-    return $this->describeGeneric($api, $this->entityType, t('Bundle'));
+    return $this->describeGeneric($api, $this->entityType, t($this->bundleName));
   }
 
   /**
-   * Find candidates for the parent path.
-   *
-   * @param string $path
-   *   The path that we want to find a parent for.
-   * @param array $item
-   *   Item as returned from crumbs_get_router_item()
-   *
-   * @return array
-   *   Parent path candidates
+   * @inheritdoc
    */
   function findParent($path, $item) {
-    if ($item['route'] !== $this->route) {
-      return;
-    }
+
     $entity = end($item['map']);
     // Load the entity if it hasn't been loaded due to a missing wildcard loader.
     $entity = is_numeric($entity) ? entity_load($this->entity_type, $entity) : $entity;

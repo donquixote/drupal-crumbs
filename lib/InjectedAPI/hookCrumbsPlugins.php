@@ -64,11 +64,13 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
     if ($this->discoveryOngoing) {
       throw new \Exception("finalize() cannot be called from an implementation of hook_crumbs_plugins().");
     }
+
     $build = array();
     foreach ($this->entityParentPlugins as $key => $y) {
       list($entity_plugin, $types) = $y;
       if (!isset($types)) {
-        foreach ($this->entityRoutes as $entity_type => $x) {
+        foreach ($this->entityRoutes as $route => $x) {
+          list($entity_type) = $x;
           $build[$entity_type][$key . '.' . $entity_type] = $entity_plugin;
         }
       }
@@ -82,17 +84,20 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
         $build[$entity_type][$key] = $entity_plugin;
       }
     }
-    foreach ($this->entityRoutes as $entity_type => $x) {
-      list($route, $class, $bundle_key) = $x;
+
+    foreach ($this->entityRoutes as $route => $x) {
+      list($entity_type, $class, $bundle_key, $bundle_name) = $x;
       if (!empty($build[$entity_type])) {
         if (empty($class)) {
           foreach ($build[$entity_type] as $key => $entity_plugin) {
-            $this->plugins[$key] = new crumbs_CrumbsMultiPlugin_EntityParent($entity_type, $route, $bundle_key, $entity_plugin);
+            $this->plugins[$key] = new crumbs_CrumbsMultiPlugin_EntityParent($entity_plugin, $entity_type, $bundle_key, $bundle_name);
+            $this->pluginRoutes[$key] = $route;
           }
         }
         else {
           foreach ($build[$entity_type] as $key => $entity_plugin) {
             $this->plugins[$key] = new $class($entity_plugin);
+            $this->pluginRoutes[$key] = $route;
           }
         }
       }
@@ -118,15 +123,24 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    *
    * @param string $entity_type
    * @param string $route
-   * @param string $class_suffix
    * @param string $bundle_key
+   * @param string $bundle_name
    */
-  function entityRoute($entity_type, $route, $class_suffix, $bundle_key) {
-    $class = $this->module . '_CrumbsMultiPlugin_' . $class_suffix;
+  function entityRoute($entity_type, $route, $bundle_key, $bundle_name) {
+    $this->entityRoutes[$route] = array($entity_type, NULL, $bundle_key, $bundle_name);
+  }
+
+  /**
+   * @param $entity_type
+   * @param $route
+   * @param $class
+   * @throws Exception
+   */
+  function entityRouteSpecial($entity_type, $route, $class) {
     if (!class_exists($class)) {
-      $class = NULL;
+      throw new Exception("Class '$class' does not exist.");
     }
-    $this->entityRoutes[$entity_type] = array($route, $class, $bundle_key);
+    $this->entityRoutes[$route] = array($entity_type, $class, NULL, NULL);
   }
 
   /**
@@ -137,6 +151,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    * @param array $types
    */
   function entityParentPlugin($key, $entity_plugin = NULL, $types = NULL) {
+
     if (!isset($entity_plugin)) {
       $class = $this->module . '_CrumbsEntityParentPlugin';
       $entity_plugin = new $class();

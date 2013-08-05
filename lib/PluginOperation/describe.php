@@ -7,6 +7,9 @@
  */
 class crumbs_PluginOperation_describe {
 
+  // Initial data
+  protected $pluginRoutes;
+
   // Collected data
   protected $keys = array('*' => TRUE);
   protected $keysByPlugin = array();
@@ -17,9 +20,10 @@ class crumbs_PluginOperation_describe {
   protected $injectedAPI_mono;
   protected $injectedAPI_multi;
 
-  function __construct() {
+  function __construct($plugin_routes) {
     $this->injectedAPI_mono = new crumbs_InjectedAPI_describeMonoPlugin($this);
     $this->injectedAPI_multi = new crumbs_InjectedAPI_describeMultiPlugin($this);
+    $this->pluginRoutes = $plugin_routes;
   }
 
   /**
@@ -45,7 +49,15 @@ class crumbs_PluginOperation_describe {
       }
       else {
         if (in_array($method, array('findParent', 'findTitle', 'decorateBreadcrumb'))) {
-          $basic_methods[$method] = $method;
+          if (!isset($this->pluginRoutes[$plugin_key])) {
+            $basic_methods[$method] = $method;
+          }
+          else {
+            $route = $this->pluginRoutes[$plugin_key];
+            if (!isset($route_methods[$method][$route])) {
+              $route_methods[$method][$route] = $method;
+            }
+          }
         }
       }
     }
