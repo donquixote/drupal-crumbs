@@ -7,14 +7,14 @@
  * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
  */
 function crumbs_crumbs_plugins($api) {
-  $api->entityRoute('node', 'node/%', 'NodeParent', 'type');
-  $api->entityRoute('user', 'user/%', 'UserParent', NULL);
+  $api->entityRoute('node', 'node/%', 'type', 'Node type');
+  $api->entityRouteSpecial('user', 'user/%', 'crumbs_CrumbsMultiPlugin_UserParent');
   if (module_exists('taxonomy')) {
-    $api->entityRoute('taxonomy_term', 'taxonomy/term/%', 'TaxonomyTermParent', 'vocabulary_machine_name');
+    $api->entityRoute('taxonomy_term', 'taxonomy/term/%', 'vocabulary_machine_name', 'Vocabulary');
   }
 
   $api->monoPlugin('home_title');
-  $suffix = module_exists('token') ? 'TokenEnabled' : NULL;
+  $suffix = module_exists('token') ? 'TokenEnabled' : 'TokenDisabled';
   $api->entityParentPlugin('entityParent', $suffix);
 }
 
@@ -40,80 +40,6 @@ class crumbs_CrumbsMonoPlugin_home_title implements crumbs_MonoPlugin_FindTitleI
   function findTitle($path, $item) {
     if ($path === $this->frontNormalPath) {
       return t('Home');
-    }
-  }
-}
-
-
-class crumbs_CrumbsEntityParentPlugin implements crumbs_EntityParentPlugin {
-
-  /**
-   * @inheritdoc
-   */
-  function describe($api, $entity_type, $keys) {
-    $patterns = variable_get('crumbs_' . $entity_type . '_parent_patterns', array());
-    foreach ($keys as $key => $title) {
-      if (empty($patterns[$key])) {
-        unset($keys[$key]);
-      }
-      else {
-        $api->addRule($key, $title);
-        $api->descWithLabel('"' . check_plain($patterns[$key]) . '"', t('Parent'), $key);
-      }
-    }
-  }
-
-  /**
-   * @inheritdoc
-   */
-  function entityFindParent($entity, $entity_type, $distinction_key) {
-
-    // This is cached..
-    $patterns = variable_get('crumbs_' . $entity_type . '_parent_patterns', array());
-
-    if (!empty($patterns[$distinction_key])) {
-      $parent = $patterns[$distinction_key];
-      // Only accept candidates where all tokens are fully resolved.
-      // This means we can't have literal '[' in the path - so be it.
-      if (FALSE === strpos($parent, '[')) {
-        return $parent;
-      }
-    }
-  }
-}
-
-
-class crumbs_CrumbsEntityParentPlugin_TokenEnabled extends crumbs_CrumbsEntityParentPlugin {
-
-  /**
-   * @inheritdoc
-   */
-  function entityFindParent($entity, $entity_type, $distinction_key) {
-
-    // This is cached..
-    $patterns = variable_get('crumbs_' . $entity_type . '_parent_patterns', array());
-
-    if (!empty($patterns[$distinction_key])) {
-
-      // Use token to resolve the pattern.
-      $info = entity_get_info($entity_type);
-      $parent = token_replace($patterns[$distinction_key],
-        array(
-          $info['token type'] => $entity,
-        ),
-        array(
-          'language' => $GLOBALS['language'],
-          'callback' => 'crumbs_clean_token_values',
-        )
-      );
-
-      if (!empty($parent)) {
-        // Only accept candidates where all tokens are fully resolved.
-        // This means we can't have literal '[' in the path - so be it.
-        if (FALSE === strpos($parent, '[')) {
-          return $parent;
-        }
-      }
     }
   }
 }
