@@ -2,10 +2,18 @@
 
 abstract class crumbs_CrumbsMultiPlugin_EntityParentAbstract implements crumbs_MultiPlugin {
 
+  /**
+   * @var crumbs_EntityParentPlugin
+   */
   protected $plugin;
 
   /**
    * Helper method for describe()
+   *
+   * @param crumbs_InjectedAPI_describeMultiPlugin $api
+   * @param string $entity_type
+   * @param string $label
+   * @return array
    */
   protected function describeGeneric($api, $entity_type, $label) {
     $info = entity_get_info($entity_type);
@@ -24,7 +32,7 @@ abstract class crumbs_CrumbsMultiPlugin_EntityParentAbstract implements crumbs_M
   }
 
   /**
-   * @param object $plugin
+   * @param crumbs_EntityParentPlugin $plugin
    *   The object that can actually determine a parent path for the entity.
    */
   function __construct($plugin) {
