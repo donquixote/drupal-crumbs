@@ -12,12 +12,30 @@
  */
 class crumbs_CurrentPageInfo {
 
+  /**
+   * @var crumbs_Container_LazyDataByPath
+   */
   protected $trails;
+
+  /**
+   * @var crumbs_BreadcrumbBuilder
+   */
   protected $breadcrumbBuilder;
 
-  function __construct($trails, $breadcrumbBuilder) {
+  /**
+   * @var crumbs_Router
+   */
+  protected $router;
+
+  /**
+   * @param crumbs_Container_LazyDataByPath $trails
+   * @param crumbs_BreadcrumbBuilder $breadcrumbBuilder
+   * @param crumbs_Router $router
+   */
+  function __construct($trails, $breadcrumbBuilder, $router) {
     $this->trails = $trails;
     $this->breadcrumbBuilder = $breadcrumbBuilder;
+    $this->router = $router;
   }
 
   /**
@@ -134,7 +152,7 @@ class crumbs_CurrentPageInfo {
     if (empty($breadcrumb_items)) {
       return array();
     }
-    $router_item = crumbs_get_router_item($page->path);
+    $router_item = $this->router->getRouterItem($page->path);
     // Allow modules to alter the breadcrumb, if possible, as that is much
     // faster than rebuilding an entirely new active trail.
     drupal_alter('menu_breadcrumb', $breadcrumb_items, $router_item);

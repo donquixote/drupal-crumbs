@@ -13,6 +13,11 @@ class crumbs_ParentFinder {
   protected $pluginEngine;
 
   /**
+   * @var crumbs_Router;
+   */
+  protected $router;
+
+  /**
    * @var array
    *   Cached parent paths
    */
@@ -20,9 +25,11 @@ class crumbs_ParentFinder {
 
   /**
    * @param crumbs_PluginEngine $pluginEngine
+   * @param crumbs_Router $router
    */
-  function __construct($pluginEngine) {
+  function __construct($pluginEngine, $router) {
     $this->pluginEngine = $pluginEngine;
+    $this->router = $router;
   }
 
   /**
@@ -53,7 +60,7 @@ class crumbs_ParentFinder {
       }
     }
     // fallback: chop off the last fragment of the system path.
-    $parent_path = crumbs_reduce_path($path);
+    $parent_path = $this->router->reducePath($path);
     return isset($parent_path) ? $parent_path : FALSE;
   }
 }

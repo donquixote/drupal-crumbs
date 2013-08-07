@@ -15,7 +15,7 @@ class crumbs_Router {
    *   The path for which the corresponding router item is returned.
    *   For example, node/5.
    *
-   * @return
+   * @return array|null
    *   The router item.
    */
   function getRouterItem($path) {
@@ -67,7 +67,7 @@ class crumbs_Router {
     while (count($fragments) > 1 && $depth !== 0) {
       array_pop($fragments);
       $parent_path = implode('/', $fragments);
-      $parent_item = crumbs_get_router_item($parent_path);
+      $parent_item = $this->getRouterItem($parent_path);
       if ($parent_item && $parent_item['href'] === $parent_item['link_path']) {
         return $parent_item['link_path'];
       }

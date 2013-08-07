@@ -18,7 +18,7 @@ class crumbs_ServiceFactory {
    * Available as crumbs('trailFinder').
    */
   function trailFinder($cache) {
-    return new crumbs_TrailFinder($cache->parentFinder);
+    return new crumbs_TrailFinder($cache->parentFinder, $cache->router);
   }
 
   /**
@@ -27,7 +27,7 @@ class crumbs_ServiceFactory {
    * Available as crumbs('parentFinder').
    */
   function parentFinder($cache) {
-    return new crumbs_ParentFinder($cache->pluginEngine);
+    return new crumbs_ParentFinder($cache->pluginEngine, $cache->router);
   }
 
   /**
@@ -56,7 +56,7 @@ class crumbs_ServiceFactory {
    * Available as crumbs('page').
    */
   function page($cache) {
-    $source = new crumbs_CurrentPageInfo($cache->trails, $cache->breadcrumbBuilder);
+    $source = new crumbs_CurrentPageInfo($cache->trails, $cache->breadcrumbBuilder, $cache->router);
     return new crumbs_Container_LazyData($source);
   }
 
@@ -64,11 +64,18 @@ class crumbs_ServiceFactory {
    * Service that can provide/calculate trails for different paths.
    *
    * Available as crumbs('trails').
+   *
+   * @param crumbs_Container_LazyServices $cache
+   * @return crumbs_Container_LazyDataByPath
    */
   function trails($cache) {
     return new crumbs_Container_LazyDataByPath($cache->trailFinder);
   }
 
+  /**
+   * @param crumbs_Container_LazyServices $cache
+   * @return crumbs_Router
+   */
   function router($cache) {
     return new crumbs_Router();
   }
