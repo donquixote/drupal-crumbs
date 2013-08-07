@@ -21,10 +21,7 @@ class views_CrumbsMonoPlugin implements crumbs_MonoPlugin {
     if ($item['page_callback'] === 'views_page') {
       $breadcrumb = $this->drupalBreadcrumb();
       $url = url($item['href']);
-      dpm($item);
       if (isset($breadcrumb[$url])) {
-        dpm($breadcrumb);
-        dpm($url);
         return $breadcrumb[$url];
       }
     }
