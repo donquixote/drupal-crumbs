@@ -115,13 +115,16 @@ class crumbs_PluginInfo {
    */
   function basicPluginMethods($container, $method) {
     $type = ('decorateBreadcrumb' === $method) ? 'alter' : 'find';
+    $plugin_routes = $container->pluginRoutes;
     $result = array();
     /**
      * @var crumbs_PluginInterface $plugin
      */
     foreach ($container->pluginsSorted[$type] as $plugin_key => $plugin) {
       if (method_exists($plugin, $method)) {
-        $result[$plugin_key] = $method;
+        if (!isset($plugin_routes[$plugin_key])) {
+          $result[$plugin_key] = $method;
+        }
       }
     }
     return $result;
