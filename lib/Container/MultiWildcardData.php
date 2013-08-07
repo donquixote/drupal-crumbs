@@ -33,7 +33,7 @@ class crumbs_Container_MultiWildcardData implements ArrayAccess, IteratorAggrega
   }
 
   function offsetExists($key) {
-    throw new Exception("offsetExists not supported.");
+    return isset($this->keys[$key]);
   }
 
   function offsetUnset($key) {

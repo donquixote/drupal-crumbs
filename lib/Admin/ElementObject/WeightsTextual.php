@@ -11,8 +11,7 @@ class crumbs_Admin_ElementObject_WeightsTextual extends crumbs_Admin_ElementObje
       return isset($element['#default_value']) ? $element['#default_value'] : array();
     }
 
-    list($plugins, $disabled_keys) = crumbs_get_plugins();
-    list($available_keys, $keys_by_plugin) = $this->loadAvailableKeys($plugins);
+    $available_keys = $element['#crumbs_plugin_info']->adminPluginInfo->collectedInfo();
 
     $weights = array();
     $weight = 0;
@@ -42,12 +41,15 @@ class crumbs_Admin_ElementObject_WeightsTextual extends crumbs_Admin_ElementObje
    */
   function process($element, $form_state) {
 
-    $text = $this->getDefaultText($element['#value']);
+    $text = $this->getDefaultText($element);
     $element['text'] = array(
       '#tree' => TRUE,
       '#type' => 'textarea',
       '#rows' => 24,
       '#default_value' => $text,
+      '#attributes' => array(
+        'style' => 'font-family: monospace;',
+      ),
     );
     return $element;
   }
@@ -55,19 +57,11 @@ class crumbs_Admin_ElementObject_WeightsTextual extends crumbs_Admin_ElementObje
   /**
    * Get the text for the textarea
    */
-  protected function getDefaultText($weights) {
+  protected function getDefaultText($element) {
 
-    list($plugins, $disabled_keys) = crumbs_get_plugins();
-    list($available_keys, $keys_by_plugin) = $this->loadAvailableKeys($plugins);
-    $weights = crumbs('pluginInfo')->userWeights;
-
-    return $this->buildDefaultText($available_keys, $keys_by_plugin, $weights, $disabled_keys);
-  }
-
-  /**
-   * Build the text for the textarea
-   */
-  protected function buildDefaultText(array $available_keys, array $keys_by_plugin, array $weights, array $disabled_keys) {
+    $available_keys = $element['#crumbs_plugin_info']->adminPluginInfo->collectedInfo();
+    $weights = $element['#value'];
+    $default_weights = $element['#crumbs_plugin_info']->defaultWeights;
 
     $key_lengths = array();
     foreach ($available_keys as $key => $title) {
@@ -75,19 +69,22 @@ class crumbs_Admin_ElementObject_WeightsTextual extends crumbs_Admin_ElementObje
     }
     $ideal_length = $this->findIdealLength($key_lengths);
 
-    foreach ($available_keys as $key => $title) {
+    $key_lines = array();
+    foreach ($available_keys as $key => $meta) {
       $string = $key;
-      if (is_string($title)) {
+      $desc = $meta->descriptions;
+      if (!empty($desc[0])) {
+        $title = $desc[0];
         if (strlen($string) < $ideal_length) {
           $string .= str_repeat(' ', $ideal_length - strlen($string));
         }
         $string .= ' - '. $title;
       }
-      $available_keys[$key] = $string;
+      $key_lines[$key] = $string;
     }
 
     $lines = array(
-      'inherit' => $available_keys,
+      'inherit' => $key_lines,
       'disabled_by_default' => array(),
       'enabled' => array(),
       'disabled' => array(),
@@ -96,8 +93,8 @@ class crumbs_Admin_ElementObject_WeightsTextual extends crumbs_Admin_ElementObje
     foreach ($weights as $key => $weight) {
       $section = ($weight === FALSE) ? 'disabled' : 'enabled';
       $string = $key;
-      if (isset($available_keys[$key])) {
-        $string = $available_keys[$key];
+      if (isset($key_lines[$key])) {
+        $string = $key_lines[$key];
       }
       else if ($key !== '*') {
         // an orphan setting.
@@ -110,21 +107,26 @@ class crumbs_Admin_ElementObject_WeightsTextual extends crumbs_Admin_ElementObje
       unset($lines['inherit'][$key]);
     }
 
-    foreach ($disabled_keys as $key => $disabled) {
-      if (isset($lines['inherit'][$key])) {
+    foreach ($default_weights as $key => $default_weight) {
+      if (isset($lines['inherit'][$key]) && FALSE === $default_weight) {
         $lines['disabled_by_default'][$key] = $lines['inherit'][$key];
         unset($lines['inherit'][$key]);
       }
     }
 
-    foreach ($keys_by_plugin as $plugin_key => $keys_for_this_plugin) {
-      $lines['inherit'][$plugin_key .':NEWLINE:'] = "";
-    }
-
     ksort($lines['inherit']);
+    $module = FALSE;
     foreach ($lines['inherit'] as $key => $line) {
       if (isset($prev) && $prev === '' && $line === '') {
         unset($lines['inherit'][$key]);
+      }
+      $pieces = explode('.', $key);
+      if ($module !== $pieces[0]) {
+        if (FALSE !== $module) {
+          // Add in a blank line.
+          $lines['inherit'][$key] = "\n" . $line;
+        }
+        $module = $pieces[0];
       }
       $prev = $line;
     }

@@ -313,39 +313,6 @@ function crumbs_get_trail($path = NULL) {
 }
 
 /**
- * Returns an array of loaded plugins and disabled plugin keys.
- *
- * @return
- *   An array containing two arrays:
- *   - An array of loaded plugins keyed by plugin key.
- *   - An array of disabled plugin keys.
- */
-function crumbs_get_plugins() {
-  $discovery = crumbs('pluginInfo')->discovery;
-  return array(
-    $discovery['plugins'],
-    $discovery['disabled_keys'],
-  );
-}
-
-/**
- * Returns an array of plugin keys and their weights.
- *
- * Make sure to distinguish the weight 0 from FALSE, which denotes a disabled
- * plugin.
- *
- * The "*" plugin key is a wildcard that triggers inheritance (runs all
- * implicitly enabled plugins that aren't in the provided list).
- * It always has the biggest weight.
- *
- * @return
- *   An array of plugin keys and their weights, sorted by weight.
- */
-function crumbs_get_weights() {
-  return crumbs('pluginInfo')->weights;
-}
-
-/**
  * Returns a router item.
  *
  * This is a wrapper around menu_get_item() that sets additional keys
