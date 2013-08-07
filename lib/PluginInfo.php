@@ -312,7 +312,8 @@ class crumbs_PluginInfo {
       'path',
       'taxonomy',
       'forum',
-      'entityreference_prepopulate'
+      'entityreference_prepopulate',
+      'views',
     );
 
     // Include Crumbs-provided plugins.
