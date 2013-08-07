@@ -3,12 +3,22 @@
 
 class crumbs_TrailFinder {
 
+  /**
+   * @var crumbs_ParentFinder
+   */
   protected $parentFinder;
 
+  /**
+   * @param crumbs_ParentFinder $parent_finder
+   */
   function __construct($parent_finder) {
     $this->parentFinder = $parent_finder;
   }
 
+  /**
+   * @param string $path
+   * @return array
+   */
   function getForPath($path) {
     return $this->buildTrail($path);
   }

@@ -7,15 +7,29 @@
  */
 class crumbs_ParentFinder {
 
+  /**
+   * @var crumbs_PluginEngine
+   */
   protected $pluginEngine;
 
-  // Cached parent paths
+  /**
+   * @var array
+   *   Cached parent paths
+   */
   protected $parents = array();
 
+  /**
+   * @param crumbs_PluginEngine $pluginEngine
+   */
   function __construct($pluginEngine) {
     $this->pluginEngine = $pluginEngine;
   }
 
+  /**
+   * @param string $path
+   * @param array &$item
+   * @return string
+   */
   function getParentPath($path, &$item) {
     if (!isset($this->parents[$path])) {
       $parent_path = $this->_findParentPath($path, $item);
