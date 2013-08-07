@@ -8,7 +8,7 @@
  */
 function crumbs_crumbs_plugins($api) {
   $api->entityRoute('node', 'node/%', 'type', 'Node type');
-  $api->entityRouteSpecial('user', 'user/%', 'crumbs_CrumbsMultiPlugin_UserParent');
+  $api->entityRouteSpecial('user', 'user/%', 'crumbs_MultiPlugin_UserParent');
   if (module_exists('taxonomy')) {
     $api->entityRoute('taxonomy_term', 'taxonomy/term/%', 'vocabulary_machine_name', 'Vocabulary');
   }

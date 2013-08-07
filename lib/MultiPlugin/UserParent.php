@@ -1,6 +1,6 @@
 <?php
 
-class crumbs_CrumbsMultiPlugin_UserParent extends crumbs_CrumbsMultiPlugin_EntityParentAbstract {
+class crumbs_MultiPlugin_UserParent extends crumbs_MultiPlugin_EntityParentAbstract {
 
   protected $weights = array();
 

@@ -90,7 +90,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
       if (!empty($build[$entity_type])) {
         if (empty($class)) {
           foreach ($build[$entity_type] as $key => $entity_plugin) {
-            $this->plugins[$key] = new crumbs_CrumbsMultiPlugin_EntityParent($entity_plugin, $entity_type, $bundle_key, $bundle_name);
+            $this->plugins[$key] = new crumbs_MultiPlugin_EntityParent($entity_plugin, $entity_type, $bundle_key, $bundle_name);
             $this->pluginRoutes[$key] = $route;
           }
         }
