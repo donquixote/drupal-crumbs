@@ -100,6 +100,19 @@ function crumbs_menu() {
     'weight' => 10,
     'type' => MENU_LOCAL_TASK,
   );
+  $items["$base/custom"] = array(
+    'title' => 'Custom',
+    'weight' => 11,
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items["$base/custom/simple"] = array(
+    'title' => 'Simple',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('crumbs_admin_custom_simple_form'),
+    'access arguments' => array('administer crumbs'),
+    'file' => 'admin/crumbs.custom.inc',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
   $items["$base/debug"] = array(
     'title' => 'Debug',
     'page callback' => 'crumbs_debug_page',

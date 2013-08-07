@@ -16,6 +16,21 @@ function crumbs_crumbs_plugins($api) {
   $api->monoPlugin('home_title');
   $suffix = module_exists('token') ? 'TokenEnabled' : 'TokenDisabled';
   $api->entityParentPlugin('entityParent', $suffix);
+
+  $custom_simple = variable_get('crumbs_custom_simple', array());
+  if (!empty($custom_simple['parent'])) {
+    foreach ($custom_simple['parent'] as $route => $path) {
+      $name = str_replace('.', ':', $route);
+      $api->routeMonoPlugin($route, "customParent.$name", new crumbs_MonoPlugin_CustomParentPath($path));
+    }
+  }
+
+  if (!empty($custom_simple['title'])) {
+    foreach ($custom_simple['title'] as $route => $title) {
+      $name = str_replace('.', ':', $route);
+      $api->routeMonoPlugin($route, "customTitle.$name", new crumbs_MonoPlugin_CustomTitle($title));
+    }
+  }
 }
 
 
