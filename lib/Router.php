@@ -2,8 +2,10 @@
 
 class crumbs_Router {
 
-  function __construct() {
-  }
+  /**
+   * @var string
+   */
+  private $frontNormalPath;
 
   /**
    * Returns a router item.
@@ -57,9 +59,9 @@ class crumbs_Router {
   /**
    * Chop off path fragments until we find a valid path.
    *
-   * @param $path
+   * @param string $path
    *   Starting path or alias
-   * @param $depth
+   * @param int $depth
    *   Max number of fragments we try to chop off. -1 means no limit.
    */
   function reducePath($path, $depth = -1) {
@@ -74,4 +76,31 @@ class crumbs_Router {
       --$depth;
     }
   }
+
+  /**
+   * @param string $path
+   * @return string
+   */
+  function getNormalPath($path) {
+    return drupal_get_normal_path($path);
+  }
+
+  /**
+   * @param string $url
+   * @return string
+   */
+  function urlIsExternal($url) {
+    return url_is_external($url);
+  }
+
+  /**
+   * @return string
+   */
+  function getFrontNormalPath() {
+    if (isset($this->frontNormalPath)) {
+      return $this->frontNormalPath;
+    }
+    return $this->frontNormalPath = drupal_get_normal_path(variable_get('site_frontpage', 'node'));
+  }
+
 }

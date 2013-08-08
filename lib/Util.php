@@ -51,6 +51,10 @@ class crumbs_Util {
     return FALSE;
   }
 
+  /**
+   * @param string $method_suffix
+   * @return string
+   */
   static function routeFromMethodSuffix($method_suffix) {
     $route = strtr($method_suffix, array('_' => '/'));
     $route = preg_replace(array('#/x/#', '#/x$#'), array('/%/', '/%'), $route);
@@ -64,8 +68,7 @@ class crumbs_Util {
    *
    * @param $label
    *   String used to identify the measured time.
-   *
-   * @param
+   * @return null|string
    *   A string with the measurement, or NULL if the function was run for the
    *   first time.
    */

@@ -7,6 +7,8 @@ class crumbs_PluginInfo {
 
   /**
    * Which keys to load from persistent cache.
+   *
+   * @return array
    */
   function keysToCache() {
     return array('weights', 'pluginsCached', 'pluginOrder', 'basicPluginMethods', 'routePluginMethodsCached');
@@ -165,7 +167,7 @@ class crumbs_PluginInfo {
     $result = array();
     foreach ($container->pluginOrder['find'] as $plugin_key => $weight) {
       $plugin = $container->plugins[$plugin_key];
-      if (!empty($method_suffix) && method_exists($plugin, $method_with_suffix)) {
+      if (isset($method_with_suffix) && method_exists($plugin, $method_with_suffix)) {
         $result[$plugin_key] = $method_with_suffix;
         $only_basic = FALSE;
       }

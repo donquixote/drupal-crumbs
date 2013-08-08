@@ -40,8 +40,12 @@ class crumbs_CurrentPageInfo {
 
   /**
    * Check if the breadcrumb is to be suppressed altogether.
+   *
+   * @param crumbs_Container_LazyData $page
+   * @return bool
    */
   function breadcrumbSuppressed($page) {
+    // @todo Make this work!
     return FALSE;
     $existing_breadcrumb = drupal_get_breadcrumb();
     // If the existing breadcrumb is empty, that means a module has
@@ -51,6 +55,9 @@ class crumbs_CurrentPageInfo {
 
   /**
    * Assemble all breadcrumb data.
+   *
+   * @param crumbs_Container_LazyData $page
+   * @return array
    */
   function breadcrumbData($page) {
     if (empty($page->breadcrumbItems)) {
@@ -65,6 +72,9 @@ class crumbs_CurrentPageInfo {
 
   /**
    * Build the Crumbs trail.
+   *
+   * @param crumbs_Container_LazyData $page
+   * @return array
    */
   function trail($page) {
     return $this->trails->getForPath($page->path);
@@ -78,7 +88,10 @@ class crumbs_CurrentPageInfo {
    * - title: The title of the breadcrumb item as received from a plugin.
    * - localized_options: An array of options passed to l() if needed.
    *
-   * The altering will happen in a separate step, so 
+   * The altering will happen in a separate step, so
+   *
+   * @param crumbs_Container_LazyData $page
+   * @return array
    */
   function rawBreadcrumbItems($page) {
     if ($page->breadcrumbSuppressed) {
@@ -107,6 +120,9 @@ class crumbs_CurrentPageInfo {
 
   /**
    * Determine if we want to show the breadcrumb item for the current page.
+   *
+   * @param crumbs_Container_LazyData $page
+   * @return bool
    */
   function showCurrentPage($page) {
     return variable_get('crumbs_show_current_page', FALSE);
@@ -114,6 +130,9 @@ class crumbs_CurrentPageInfo {
 
   /**
    * Determine if we want to show the breadcrumb item for the front page.
+   *
+   * @param crumbs_Container_LazyData $page
+   * @return bool
    */
   function showFrontPage($page) {
     return variable_get('crumbs_show_front_page', TRUE);
@@ -121,6 +140,9 @@ class crumbs_CurrentPageInfo {
 
   /**
    * If there are fewer trail items than this, we hide the breadcrumb.
+   *
+   * @param crumbs_Container_LazyData $page
+   * @return int
    */
   function minTrailItems($page) {
     return variable_get('crumbs_minimum_trail_items', 2);
@@ -132,6 +154,9 @@ class crumbs_CurrentPageInfo {
    * - The frontpage item might be hidden based on a setting.
    * - The current page item might be hidden based on a setting.
    * - Any item where the title is FALSE will be hidden / skipped over.
+   *
+   * @param crumbs_Container_LazyData $page
+   * @return int
    */
   function minVisibleItems($page) {
     $n = $page->minTrailItems;
@@ -146,6 +171,9 @@ class crumbs_CurrentPageInfo {
 
   /**
    * Build altered breadcrumb items.
+   *
+   * @param crumbs_Container_LazyData $page
+   * @return array
    */
   function breadcrumbItems($page) {
     $breadcrumb_items = $page->rawBreadcrumbItems;
@@ -161,6 +189,9 @@ class crumbs_CurrentPageInfo {
 
   /**
    * Build the breadcrumb HTML.
+   *
+   * @param crumbs_Container_LazyData $page
+   * @return string
    */
   function breadcrumbHtml($page) {
     $breadcrumb_items = $page->breadcrumbItems;
@@ -187,6 +218,9 @@ class crumbs_CurrentPageInfo {
 
   /**
    * Determine current path.
+   *
+   * @param crumbs_Container_LazyData $page
+   * @return string
    */
   function path($page) {
     return $_GET['q'];

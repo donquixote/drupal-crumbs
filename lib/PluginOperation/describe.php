@@ -20,6 +20,9 @@ class crumbs_PluginOperation_describe {
   protected $injectedAPI_mono;
   protected $injectedAPI_multi;
 
+  /**
+   * @param array $plugin_routes
+   */
   function __construct($plugin_routes) {
     $this->injectedAPI_mono = new crumbs_InjectedAPI_describeMonoPlugin($this);
     $this->injectedAPI_multi = new crumbs_InjectedAPI_describeMultiPlugin($this);
@@ -84,6 +87,9 @@ class crumbs_PluginOperation_describe {
 
   /**
    * To be called from crumbs_InjectedAPI_describeMultiPlugin::addRule()
+   *
+   * @param string $key_suffix
+   * @param string $title
    */
   function addRule($key_suffix, $title) {
     $key = $this->pluginKey . '.' . $key_suffix;
@@ -94,6 +100,9 @@ class crumbs_PluginOperation_describe {
   /**
    * Add a description at an arbitrary wildcard key.
    * To be called from crumbs_InjectedAPI_describeMultiPlugin::addDescription()
+   *
+   * @param string $description
+   * @param string $key_suffix
    */
   function addDescription($description, $key_suffix) {
     if (isset($key_suffix)) {
@@ -105,26 +114,27 @@ class crumbs_PluginOperation_describe {
     $this->_addDescription($key, $description);
   }
 
-  function _addDescription($key, $description) {
+  /**
+   * @param string $key
+   * @param string $description
+   */
+  protected function _addDescription($key, $description) {
     $this->collectedInfo['descriptions'][$key][] = $description;
   }
 
   /**
    * To be called from crumbs_InjectedAPI_describeMonoPlugin::setTitle()
+   *
+   * @param string $title
    */
   function setTitle($title) {
     $this->_addRule($this->pluginKey);
     $this->_addDescription($this->pluginKey, $title);
   }
 
-  function setRoute($route) {
-    $this->collectedInof['routes'][$this->pluginKey] = array($route);
-  }
-
-  function setRoutes(array $routes) {
-    $this->collectedInfo['routes'][$this->pluginKey] = $routes;
-  }
-
+  /**
+   * @param string $key
+   */
   protected function _addRule($key) {
     $fragments = explode('.', $key);
     $partial_key = array_shift($fragments);
@@ -139,14 +149,23 @@ class crumbs_PluginOperation_describe {
     $this->keysByPlugin[$this->pluginKey][$key] = $key;
   }
 
+  /**
+   * @return array
+   */
   function getKeys() {
     return $this->keys;
   }
 
+  /**
+   * @return array
+   */
   function getKeysByPlugin() {
     return $this->keysByPlugin;
   }
 
+  /**
+   * @return crumbs_Container_MultiWildcardData
+   */
   function collectedInfo() {
     $container = new crumbs_Container_MultiWildcardData($this->keys);
     $container->__set('key', $this->keys);

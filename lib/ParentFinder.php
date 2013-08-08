@@ -41,13 +41,18 @@ class crumbs_ParentFinder {
     if (!isset($this->parents[$path])) {
       $parent_path = $this->_findParentPath($path, $item);
       if (is_string($parent_path)) {
-        $parent_path = drupal_get_normal_path($parent_path);
+        $parent_path = $this->router->getNormalPath($parent_path);
       }
       $this->parents[$path] = $parent_path;
     }
     return $this->parents[$path];
   }
 
+  /**
+   * @param string $path
+   * @param array &$item
+   * @return string|bool
+   */
   protected function _findParentPath($path, &$item) {
     if ($item) {
       if (!$item['access']) {

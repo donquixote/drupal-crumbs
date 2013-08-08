@@ -1,11 +1,14 @@
 <?php
 
-use Drupal\krumong as k;
-
 class crumbs_Admin_ElementObject_WeightsExpansible extends crumbs_Admin_ElementObject_WeightsAbstract {
 
   /**
    * Callback for $element['#value_callback']
+   *
+   * @param array $element
+   * @param array|bool $input
+   * @param array $form_state
+   * @return array
    */
   function value_callback(&$element, $input = FALSE, $form_state = array()) {
     if ($input === FALSE) {
@@ -31,6 +34,10 @@ class crumbs_Admin_ElementObject_WeightsExpansible extends crumbs_Admin_ElementO
   /**
    * Callback for $element['#process']
    * Create one textfield element per rule.
+   *
+   * @param array $element
+   * @param array $form_state
+   * @return array
    */
   function process($element, $form_state) {
 

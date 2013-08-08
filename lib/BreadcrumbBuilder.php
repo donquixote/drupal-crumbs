@@ -3,12 +3,22 @@
 
 class crumbs_BreadcrumbBuilder {
 
+  /**
+   * @var crumbs_PluginEngine
+   */
   protected $pluginEngine;
 
+  /**
+   * @param crumbs_PluginEngine $pluginEngine
+   */
   function __construct($pluginEngine) {
     $this->pluginEngine = $pluginEngine;
   }
 
+  /**
+   * @param array $trail
+   * @return array
+   */
   function buildBreadcrumb($trail) {
     $breadcrumb = array();
     foreach ($trail as $path => $item) {

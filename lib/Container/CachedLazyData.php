@@ -2,10 +2,27 @@
 
 class crumbs_Container_CachedLazyData {
 
+  /**
+   * @var array
+   */
   protected $data = array();
+
+  /**
+   * @var crumbs_PluginInfo
+   */
   protected $source;
+
+  /**
+   * @var array
+   */
   protected $keysToCache = array();
 
+  /**
+   * @todo Add an interface for $source.
+   *   Don't restrict it to crumbs_PluginInfo.
+   *
+   * @param crumbs_PluginInfo $source
+   */
   function __construct($source) {
     $this->source = $source;
     foreach ($source->keysToCache() as $key) {
@@ -13,6 +30,9 @@ class crumbs_Container_CachedLazyData {
     }
   }
 
+  /**
+   * Flush cached data.
+   */
   function flushCaches() {
     $this->data = array();
     foreach ($this->keysToCache as $key => $true) {
@@ -20,6 +40,11 @@ class crumbs_Container_CachedLazyData {
     }
   }
 
+  /**
+   * @param string $key
+   * @return mixed
+   * @throws Exception
+   */
   function __get($key) {
     if (!isset($this->data[$key])) {
       if (!empty($this->keysToCache[$key])) {

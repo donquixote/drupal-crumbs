@@ -2,8 +2,19 @@
 
 class crumbs_Container_WildcardData {
 
+  /**
+   * @var array
+   */
   protected $data;
+
+  /**
+   * @var mixed
+   */
   protected $fallback;
+
+  /**
+   * @var array
+   */
   protected $prefixedContainers = array();
 
   /**

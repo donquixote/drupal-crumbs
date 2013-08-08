@@ -5,13 +5,20 @@
  */
 class crumbs_Admin_WeightsTable {
 
+  /**
+   * @var crumbs_Container_CachedLazyData
+   */
   protected $pluginInfo;
+
   protected $sections = array();
   protected $section;
   protected $sectionKey;
   protected $sortEnabled = array();
   protected $descriptions = array();
 
+  /**
+   * @param crumbs_Container_CachedLazyData $plugin_info
+   */
   function __construct($plugin_info) {
     $this->pluginInfo = $plugin_info;
   }
@@ -116,7 +123,6 @@ class crumbs_Admin_WeightsTable {
   }
 
   function addSectionHeader($section_key, $key, $child) {
-    $description = @$child['#description'];
     $title = $child['#title'];
     unset($child['#description']);
     unset($child['#title']);
@@ -126,6 +132,9 @@ class crumbs_Admin_WeightsTable {
 
   protected function addRow($section_key, $key, $child) {
 
+    /**
+     * @var crumbs_Container_MultiWildcardDataOffset $meta
+     */
     $meta = $child['#crumbs_rule_info'];
     $child['weight']['#attributes']['class'][] = 'crumbs-weight-element';
     $title = $child['#title'];

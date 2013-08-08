@@ -7,6 +7,9 @@ class crumbs_ServiceFactory {
    * A service that can build a breadcrumb from a trail.
    *
    * Available as crumbs('breadcrumbBuilder').
+   *
+   * @param crumbs_Container_LazyServices $cache
+   * @return crumbs_BreadcrumbBuilder
    */
   function breadcrumbBuilder($cache) {
     return new crumbs_BreadcrumbBuilder($cache->pluginEngine);
@@ -16,6 +19,9 @@ class crumbs_ServiceFactory {
    * A service that can build a trail for a given path.
    *
    * Available as crumbs('trailFinder').
+   *
+   * @param crumbs_Container_LazyServices $cache
+   * @return crumbs_TrailFinder
    */
   function trailFinder($cache) {
     return new crumbs_TrailFinder($cache->parentFinder, $cache->router);
@@ -25,6 +31,9 @@ class crumbs_ServiceFactory {
    * A service that attempts to find a parent path for a given path.
    *
    * Available as crumbs('parentFinder').
+   *
+   * @param crumbs_Container_LazyServices $cache
+   * @return crumbs_ParentFinder
    */
   function parentFinder($cache) {
     return new crumbs_ParentFinder($cache->pluginEngine, $cache->router);
@@ -35,15 +44,21 @@ class crumbs_ServiceFactory {
    * and can run plugin operations on those plugins.
    *
    * Available as crumbs('pluginEngine').
+   *
+   * @param crumbs_Container_LazyServices $cache
+   * @return crumbs_PluginEngine
    */
   function pluginEngine($cache) {
-    return new crumbs_PluginEngine($cache->pluginInfo);
+    return new crumbs_PluginEngine($cache->pluginInfo, $cache->router);
   }
 
   /**
    * A service that knows all plugins and their configuration/weights.
    *
    * Available as crumbs('pluginInfo').
+   *
+   * @param crumbs_Container_LazyServices $cache
+   * @return crumbs_Container_CachedLazyData
    */
   function pluginInfo($cache) {
     $source = new crumbs_PluginInfo();
@@ -54,6 +69,9 @@ class crumbs_ServiceFactory {
    * Service that can provide information related to the current page.
    *
    * Available as crumbs('page').
+   *
+   * @param crumbs_Container_LazyServices $cache
+   * @return crumbs_Container_LazyData
    */
   function page($cache) {
     $source = new crumbs_CurrentPageInfo($cache->trails, $cache->breadcrumbBuilder, $cache->router);

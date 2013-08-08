@@ -3,18 +3,33 @@
 
 class crumbs_PluginEngine {
 
+  /**
+   * @var crumbs_Container_CachedLazyData
+   */
   protected $pluginInfo;
+
+  /**
+   * @var crumbs_Router
+   */
+  protected $router;
+
+  /**
+   * @var array
+   */
   protected $plugins;
+
+  /**
+   * @var crumbs_Container_WildcardDataSorted
+   */
   protected $weightKeeper;
 
   /**
-   * @param array $plugins
-   *   Plugins, not sorted.
-   * @param crumbs_Container_WildcardDataSorted $weight_keeper
-   *   A container that can determine a weight for every plugin rule.
+   * @param crumbs_Container_CachedLazyData $plugin_info
+   * @param crumbs_Router $router
    */
-  function __construct($plugin_info) {
+  function __construct($plugin_info, $router) {
     $this->pluginInfo = $plugin_info;
+    $this->router = $router;
     // These are for quicker access.
     $this->plugins = $plugin_info->plugins;
     $this->weightKeeper = $plugin_info->weightKeeper;
@@ -22,10 +37,15 @@ class crumbs_PluginEngine {
 
   /**
    * Ask applicable plugins to "decorate" (alter) the breadcrumb.
+   *
+   * @param array $breadcrumb
    */
   function decorateBreadcrumb($breadcrumb) {
     $plugin_methods = $this->pluginInfo->basicPluginMethods('decorateBreadcrumb');
     foreach ($plugin_methods as $plugin_key => $method) {
+      /**
+       * @var crumbs_PluginInterface $plugin
+       */
       $plugin = $this->plugins[$plugin_key];
       if (!method_exists($plugin, 'decorateBreadcrumb')) {
         // This means the code has changed, without the cache being cleared.
@@ -42,6 +62,9 @@ class crumbs_PluginEngine {
    *
    * @param string $path
    * @param array $item
+   * @param array $all_candidates
+   * @param null $best_candidate_key
+   * @return mixed|null|void
    */
   function findParent($path, $item, &$all_candidates = array(), &$best_candidate_key = NULL) {
     $plugin_methods = $this->pluginInfo->routePluginMethods('findParent', $item['route']);
@@ -49,12 +72,16 @@ class crumbs_PluginEngine {
     return $result;
   }
 
+  /**
+   * @param string $parent_raw
+   * @return string
+   */
   protected function processFindParent($parent_raw) {
-    if (url_is_external($parent_raw)) {
+    if ($this->router->urlIsExternal($parent_raw)) {
       // Always discard external paths.
       return NULL;
     }
-    return drupal_get_normal_path($parent_raw);
+    return $this->router->getNormalPath($parent_raw);
   }
 
   /**
@@ -63,6 +90,9 @@ class crumbs_PluginEngine {
    * @param string $path
    * @param array $item
    * @param array $breadcrumb
+   * @param array $all_candidates
+   * @param string $best_candidate_key
+   * @return mixed|null|void
    */
   function findTitle($path, $item, $breadcrumb, &$all_candidates = array(), &$best_candidate_key = NULL) {
     $plugin_methods = $this->pluginInfo->routePluginMethods('findTitle', $item['route']);
@@ -75,9 +105,11 @@ class crumbs_PluginEngine {
    *
    * @param array $plugin_methods
    * @param array $args
+   * @param bool $processFindParent
    * @param array &$all_candidates
    *   Collect information during the operation.
    * @param string &$best_candidate_key
+   * @return mixed|null|void
    */
   protected function find($plugin_methods, $args, $processFindParent = FALSE, &$all_candidates = array(), &$best_candidate_key = NULL) {
     $best_candidate = NULL;
@@ -86,6 +118,9 @@ class crumbs_PluginEngine {
       $plugin = $this->plugins[$plugin_key];
       if ($plugin instanceof crumbs_MultiPlugin) {
         // That's a MultiPlugin
+        /**
+         * @var crumbs_Container_WildcardDataSorted $keeper
+         */
         $keeper = $this->weightKeeper->prefixedContainer($plugin_key);
         if ($best_candidate_weight <= $keeper->smallestValue()) {
           return $best_candidate;

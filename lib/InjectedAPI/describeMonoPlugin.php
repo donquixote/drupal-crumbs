@@ -18,10 +18,17 @@ class crumbs_InjectedAPI_describeMonoPlugin {
     $this->pluginOperation = $plugin_operation;
   }
 
+  /**
+   * @param string $title
+   */
   function setTitle($title) {
     $this->pluginOperation->setTitle($title);
   }
 
+  /**
+   * @param string $title
+   * @param string $label
+   */
   function titleWithLabel($title, $label) {
     $this->setTitle(t('!key: !value', array(
       '!key' => $label,

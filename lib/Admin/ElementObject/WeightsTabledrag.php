@@ -1,11 +1,14 @@
 <?php
 
-use Drupal\krumong as k;
-
 class crumbs_Admin_ElementObject_WeightsTabledrag extends crumbs_Admin_ElementObject_WeightsAbstract {
 
   /**
    * Callback for $element['#value_callback']
+   *
+   * @param array $element
+   * @param array|bool $input
+   * @param array $form_state
+   * @return array
    */
   function value_callback(&$element, $input = FALSE, $form_state = array()) {
 
@@ -15,6 +18,7 @@ class crumbs_Admin_ElementObject_WeightsTabledrag extends crumbs_Admin_ElementOb
     else {
       $weights = array();
       $i = 0;
+      $section_key = NULL;
       foreach ($input as $row_key => $row_values) {
         if (substr($row_key, 0, 9) === 'sections.') {
           $section_key = substr($row_key, 9);

@@ -4,6 +4,9 @@ class crumbs_MultiPlugin_UserParent extends crumbs_MultiPlugin_EntityParentAbstr
 
   protected $weights = array();
 
+  /**
+   * @inheritdoc
+   */
   function describe($api) {
     $roles = array();
     foreach (user_roles(TRUE) as $rid => $role) {
@@ -20,6 +23,9 @@ class crumbs_MultiPlugin_UserParent extends crumbs_MultiPlugin_EntityParentAbstr
     }
   }
 
+  /**
+   * @param crumbs_Container_WildcardDataSorted $weight_keeper
+   */
   function initWeights($weight_keeper) {
     foreach (user_roles(TRUE) as $rid => $role) {
       $weight = $weight_keeper->valueAtKey($role);

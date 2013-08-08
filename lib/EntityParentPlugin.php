@@ -6,6 +6,13 @@
 interface crumbs_EntityParentPlugin {
 
   /**
+   * @param crumbs_InjectedAPI_describeMultiPlugin $api
+   * @param string $entity_type
+   * @param array $keys
+   */
+  function describe($api, $entity_type, $keys);
+
+  /**
    * @param object $entity
    *   The entity on this path.
    * @param string $entity_type

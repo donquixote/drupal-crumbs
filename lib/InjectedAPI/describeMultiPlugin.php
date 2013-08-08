@@ -18,10 +18,19 @@ class crumbs_InjectedAPI_describeMultiPlugin {
     $this->pluginOperation = $plugin_operation;
   }
 
+  /**
+   * @param string $key_suffix
+   * @param bool $title
+   */
   function addRule($key_suffix, $title = TRUE) {
     $this->pluginOperation->addRule($key_suffix, $title);
   }
 
+  /**
+   * @param string $key_suffix
+   * @param string $title
+   * @param string $label
+   */
   function ruleWithLabel($key_suffix, $title, $label) {
     $this->addRule($key_suffix, t('!key: !value', array(
       '!key' => $label,
@@ -29,10 +38,19 @@ class crumbs_InjectedAPI_describeMultiPlugin {
     )));
   }
 
+  /**
+   * @param string $description
+   * @param string $key_suffix
+   */
   function addDescription($description, $key_suffix = '*') {
     $this->pluginOperation->addDescription($description, $key_suffix);
   }
 
+  /**
+   * @param string $description
+   * @param string $label
+   * @param string $key_suffix
+   */
   function descWithLabel($description, $label, $key_suffix = '*') {
     $this->addDescription(t('!key: !value', array(
       '!key' => $label,

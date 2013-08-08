@@ -32,11 +32,14 @@ class crumbs_TrailFinder {
 
   /**
    * Build the raw trail.
+   *
+   * @param string $path
+   * @return array
    */
   function buildTrail($path) {
-    $path = drupal_get_normal_path($path);
+    $path = $this->router->getNormalPath($path);
     $trail_reverse = array();
-    $front_normal_path = drupal_get_normal_path(variable_get('site_frontpage', 'node'));
+    $front_normal_path = $this->router->getFrontNormalPath();
     $front_menu_item = $this->router->getRouterItem($front_normal_path);
     $front_menu_item['href'] = '<front>';
     while (strlen($path) && $path !== '<front>' && $path !== $front_normal_path) {

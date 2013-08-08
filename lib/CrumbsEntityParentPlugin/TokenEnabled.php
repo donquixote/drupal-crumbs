@@ -1,6 +1,6 @@
 <?php
 
-class crumbs_CrumbsEntityParentPlugin_TokenEnabled extends crumbs_CrumbsEntityParentPlugin {
+class crumbs_CrumbsEntityParentPlugin_TokenEnabled extends crumbs_CrumbsEntityParentPlugin_TokenDisabled {
 
   /**
    * @inheritdoc
