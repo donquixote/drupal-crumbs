@@ -77,8 +77,8 @@ class crumbs_Admin_ElementObject_WeightsExpansible extends crumbs_Admin_ElementO
       'data' => $settings,
       'type' => 'setting',
     );
-    $element['#attached']['js'][] = drupal_get_path('module', 'crumbs') . '/js/crumbs.admin.js';
-    $element['#attached']['css'][] = drupal_get_path('module', 'crumbs') . '/css/crumbs.admin.css';
+    $element['#attached']['js'][] = drupal_get_path('module', 'crumbs') . '/js/crumbs.admin.expansible.js';
+    $element['#attached']['css'][] = drupal_get_path('module', 'crumbs') . '/css/crumbs.admin.expansible.css';
 
     return $element;
   }
