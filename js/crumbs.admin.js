@@ -306,7 +306,7 @@ jQuery(document).ready(function($) {
   function RowWidget($tdInput, rowKey, tellOthers) {
 
     var defaultBoxes = {
-      'disabled': $('<div class="default-box crumbs-admin-slider-box">').html('Z')
+      'disabled': $('<div class="default-box crumbs-admin-slider-box">')
     };
 
     var $tr = $tdInput.parent();
