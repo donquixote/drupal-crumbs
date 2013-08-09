@@ -1,7 +1,5 @@
 <?php
 
-use Drupal\krumong as k;
-
 function theme_crumbs_weights_expansible(&$vars) {
 
   $element = $vars['element'];
