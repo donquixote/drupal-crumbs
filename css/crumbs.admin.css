@@ -166,13 +166,8 @@ table#crumbs_weights_expansible td .crumbs-admin-slider-box.beforeEffectiveBox {
   cursor:pointer;
 }
 
-table#crumbs_weights_expansible td .crumbs-admin-slider-box.afterEffectiveBox {
-  opacity:0.001;
-  cursor:se-resize;
-  cursor:pointer;
-}
-
-table#crumbs_weights_expansible tr.explicitlyDisabled .state-enabled .crumbs-admin-slider-box {
+table#crumbs_weights_expansible td .crumbs-admin-slider-box.afterEffectiveBox,
+table#crumbs_weights_expansible tr.effectivelyDisabled .state-enabled .crumbs-admin-slider-box {
   opacity:0.001;
   cursor:pointer;
 }
