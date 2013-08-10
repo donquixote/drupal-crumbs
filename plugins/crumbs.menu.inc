@@ -180,7 +180,7 @@ class menu_CrumbsMonoPlugin_specialItems implements crumbs_MonoPlugin_FindParent
   function findParent($path, $item) {
 
     $menu_link = end($item['map']);
-    if (empty($menu_link['plid'])) {
+    if (empty($menu_link) || !is_array($menu_link) || empty($menu_link['plid'])) {
       return;
     }
     $parent_link = menu_link_load($menu_link['plid']);
