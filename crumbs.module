@@ -5,6 +5,11 @@
  *   Provides an API for building breadcrumbs.
  */
 
+define('CRUMBS_SHOW_CURRENT_PAGE', 1);
+define('CRUMBS_TRAILING_SEPARATOR', 2);
+define('CRUMBS_SHOW_CURRENT_PAGE_SPAN', 5);
+define('CRUMBS_SHOW_CURRENT_PAGE_LINK', 9);
+
 // Register the module-provided autoloader if xautoload is missing.
 if (!module_exists('xautoload')) {
   spl_autoload_register('_crumbs_autoload');
@@ -147,7 +152,7 @@ function crumbs_theme($existing, $type, $theme, $path) {
       'item' => NULL,
     ),
     'crumbs_breadcrumb_current_page' => array(
-      'item' => NULL,
+      'variables' => array('item' => NULL, 'show_current_page' => TRUE),
     ),
     'crumbs_weights_tabledrag' => array(
       'file' => 'admin/crumbs.tabledrag.inc',
@@ -162,6 +167,18 @@ function crumbs_theme($existing, $type, $theme, $path) {
       'render element' => 'element',
     ),
   );
+}
+
+/**
+ * Implements hook_theme_registry_alter()
+ */
+function crumbs_theme_registry_alter(array &$registry) {
+  if (!isset($registry['breadcrumb']['function'])) {
+    return;
+  }
+  if ('theme_breadcrumb' === $registry['breadcrumb']['function']) {
+    $registry['breadcrumb']['function'] = 'crumbs_theme_breadcrumb';
+  }
 }
 
 /**
@@ -234,6 +251,39 @@ function crumbs_preprocess_page(&$vars) {
 // Theme implementations
 // -----------------------------------------------------------------------------
 
+function crumbs_theme_breadcrumb($variables) {
+  $breadcrumb = $variables['breadcrumb'];
+
+  if (empty($breadcrumb)) {
+    return;
+  }
+
+  // These settings may be missing, if theme('breadcrumb') is called from
+  // somewhere outside of Crumbs, or if another module is messing with the theme
+  // registry.
+  $variables += array(
+    'crumbs_trailing_separator' => FALSE,
+    'crumbs_separator' => ' &raquo; ',
+    'crumbs_separator_span' => FALSE,
+  );
+
+  $separator = $variables['crumbs_separator'];
+  if ($variables['crumbs_separator_span']) {
+    $separator = '<span class="crumbs-separator">' . $separator . '</span>';
+  }
+
+  $output = implode($separator, $breadcrumb);
+  if ($variables['crumbs_trailing_separator']) {
+    $output .= $separator;
+  }
+
+  $output = '<div class="breadcrumb">' . $output . '</div>';
+
+  // Provide a navigational heading to give context for breadcrumb links to
+  // screen-reader users. Make the heading invisible with .element-invisible.
+  return '<h2 class="element-invisible">' . t('You are here') . '</h2>' . $output;
+}
+
 /**
  * Default theme implementation for theme('crumbs_breadcrumb_link').
  */
@@ -245,8 +295,17 @@ function theme_crumbs_breadcrumb_link(array $item) {
 /**
  * Default theme implementation for theme('crumbs_breadcrumb_current_page').
  */
-function theme_crumbs_breadcrumb_current_page(array $item) {
-  return check_plain($item['title']);
+function theme_crumbs_breadcrumb_current_page(array $variables) {
+  $item = $variables['item'];
+  switch ($variables['show_current_page']) {
+    case CRUMBS_SHOW_CURRENT_PAGE_SPAN:
+      return '<span class="crumbs-current-page">' . check_plain($item['title']) . '</span>';
+    case CRUMBS_SHOW_CURRENT_PAGE_LINK:
+      $options = isset($item['localized_options']) ? $item['localized_options'] : array();
+      return l($item['title'], $item['href'], $options);
+    default:
+      return check_plain($item['title']);
+  }
 }
 
 /**

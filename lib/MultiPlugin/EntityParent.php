@@ -38,7 +38,7 @@ class crumbs_MultiPlugin_EntityParent extends crumbs_MultiPlugin_EntityParentAbs
 
     $entity = end($item['map']);
     // Load the entity if it hasn't been loaded due to a missing wildcard loader.
-    $entity = is_numeric($entity) ? entity_load($this->entity_type, $entity) : $entity;
+    $entity = is_numeric($entity) ? entity_load($this->entityType, array($entity)) : $entity;
     if (empty($entity) || !is_object($entity)) {
       return;
     }

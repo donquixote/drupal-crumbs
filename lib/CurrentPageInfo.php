@@ -135,7 +135,15 @@ class crumbs_CurrentPageInfo {
    * @return bool
    */
   function showCurrentPage($page) {
-    return variable_get('crumbs_show_current_page', FALSE);
+    return variable_get('crumbs_show_current_page', FALSE) & ~CRUMBS_TRAILING_SEPARATOR;
+  }
+
+  /**
+   * @param crumbs_Container_LazyData $page
+   * @return bool
+   */
+  function trailingSeparator($page) {
+    return variable_get('crumbs_show_current_page', FALSE) & CRUMBS_TRAILING_SEPARATOR;
   }
 
   /**
@@ -156,6 +164,26 @@ class crumbs_CurrentPageInfo {
    */
   function minTrailItems($page) {
     return variable_get('crumbs_minimum_trail_items', 2);
+  }
+
+  /**
+   * Determine separator string, e.g. ' &raquo; ' or ' &gt; '.
+   *
+   * @param crumbs_Container_LazyData $page
+   * @return string
+   */
+  function separator($page) {
+    return variable_get('crumbs_separator', ' &raquo; ');
+  }
+
+  /**
+   * Determine separator string, e.g. ' &raquo; ' or ' &gt; '.
+   *
+   * @param crumbs_Container_LazyData $page
+   * @return string
+   */
+  function separatorSpan($page) {
+    return variable_get('crumbs_separator_span', FALSE);
   }
 
   /**
@@ -209,20 +237,25 @@ class crumbs_CurrentPageInfo {
       return '';
     }
     $links = array();
-    $i_last_item = count($breadcrumb_items) - 1;
+    if ($page->showCurrentPage) {
+      $last = array_pop($breadcrumb_items);
+    }
     foreach ($breadcrumb_items as $i => $item) {
-      if ($page->showCurrentPage && $i === $i_last_item) {
-        // The current page should be styled differently (no link).
-        $links[$i] = theme('crumbs_breadcrumb_current_page', $item);
-      }
-      else {
-        $links[$i] = theme('crumbs_breadcrumb_link', $item);
-      }
+      $links[$i] = theme('crumbs_breadcrumb_link', $item);
+    }
+    if ($page->showCurrentPage) {
+      $links[] = theme('crumbs_breadcrumb_current_page', array(
+        'item' => $last,
+        'show_current_page' => $page->showCurrentPage,
+      ));
     }
     return theme('breadcrumb', array(
       'breadcrumb' => $links,
       'crumbs_breadcrumb_items' => $breadcrumb_items,
       'crumbs_trail' => $page->trail,
+      'crumbs_separator' => $page->separator,
+      'crumbs_separator_span' => $page->separatorSpan,
+      'crumbs_trailing_separator' => $page->trailingSeparator,
     ));
   }
 
