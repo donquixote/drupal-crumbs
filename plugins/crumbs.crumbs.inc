@@ -21,20 +21,13 @@ function crumbs_crumbs_plugins($api) {
 
 class crumbs_CrumbsMonoPlugin_home_title implements crumbs_MonoPlugin_FindTitleInterface {
 
-  protected $frontNormalPath;
-  protected $homeTitle;
-
-  function __construct() {
-    $this->frontNormalPath = drupal_get_normal_path(variable_get('site_frontpage', 'node'));
-    $this->homeTitle = variable_get('crumbs_home_link_title', 'Home');
-  }
-
   /**
    * @inheritdoc
    */
   function describe($api) {
+    $home_title = variable_get('crumbs_home_link_title', 'Home');
     return t('Set t("@title") as the title for the root item.', array(
-      '@title' => $this->homeTitle,
+      '@title' => $home_title,
     ));
   }
 
@@ -42,8 +35,9 @@ class crumbs_CrumbsMonoPlugin_home_title implements crumbs_MonoPlugin_FindTitleI
    * @inheritdoc
    */
   function findTitle($path, $item) {
-    if ($path === $this->frontNormalPath) {
-      return t($this->homeTitle);
+    if ('<front>' === $item['href']) {
+      $home_title = variable_get('crumbs_home_link_title', 'Home');
+      return t($home_title);
     }
   }
 }
