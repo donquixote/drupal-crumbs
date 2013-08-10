@@ -32,28 +32,30 @@ class crumbs_Router {
     }
 
     // Some additional keys.
-    if (!empty($item) && is_array($item)) {
-      // 'route' is a less ambiguous name for a router path than 'path'.
-      $item['route'] = $item['path'];
-      // 'href' sounds more like it had already run through url().
-      $item['link_path'] = $normalpath;
-      $item['alias'] = drupal_get_path_alias($normalpath);
-      $item['fragments'] = explode('/', $normalpath);
-
-      if (!isset($item['localized_options'])) {
-        $item['localized_options'] = array();
-      }
-
-      if ($normalpath !== $item['href']) {
-        $pos = strlen($item['href']);
-        $item['variadic_suffix'] = substr($normalpath, $pos);
-      }
-      else {
-        $item['variadic_suffix'] = NULL;
-      }
-
-      return $item;
+    if (empty($item) || !is_array($item)) {
+      return NULL;
     }
+
+    // 'route' is a less ambiguous name for a router path than 'path'.
+    $item['route'] = $item['path'];
+    // 'href' sounds more like it had already run through url().
+    $item['link_path'] = $normalpath;
+    $item['alias'] = drupal_get_path_alias($normalpath);
+    $item['fragments'] = explode('/', $normalpath);
+
+    if (!isset($item['localized_options'])) {
+      $item['localized_options'] = array();
+    }
+
+    if ($normalpath !== $item['href']) {
+      $pos = strlen($item['href']);
+      $item['variadic_suffix'] = substr($normalpath, $pos);
+    }
+    else {
+      $item['variadic_suffix'] = NULL;
+    }
+
+    return $item;
   }
 
   /**
