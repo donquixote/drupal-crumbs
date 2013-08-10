@@ -4,6 +4,11 @@
 class crumbs_PluginEngine {
 
   /**
+   * @var crumbs_Debug_CandidateLogger
+   */
+  protected $candidateLogger;
+
+  /**
    * @var crumbs_Container_CachedLazyData
    */
   protected $pluginInfo;
@@ -36,6 +41,13 @@ class crumbs_PluginEngine {
   }
 
   /**
+   * @param crumbs_Debug_CandidateLogger $candidate_logger
+   */
+  function setCandidateLogger($candidate_logger) {
+    $this->candidateLogger = $candidate_logger;
+  }
+
+  /**
    * Ask applicable plugins to "decorate" (alter) the breadcrumb.
    *
    * @param array $breadcrumb
@@ -62,13 +74,14 @@ class crumbs_PluginEngine {
    *
    * @param string $path
    * @param array $item
-   * @param array $all_candidates
-   * @param null $best_candidate_key
    * @return mixed|null|void
    */
-  function findParent($path, $item, &$all_candidates = array(), &$best_candidate_key = NULL) {
+  function findParent($path, $item) {
     $plugin_methods = $this->pluginInfo->routePluginMethods('findParent', $item['route']);
-    $result = $this->find($plugin_methods, array($path, $item), TRUE, $all_candidates, $best_candidate_key);
+    $result = $this->find($plugin_methods, array($path, $item), TRUE);
+    if ($this->candidateLogger) {
+      $this->candidateLogger->endFindParent($path, $item);
+    }
     return $result;
   }
 
@@ -90,13 +103,14 @@ class crumbs_PluginEngine {
    * @param string $path
    * @param array $item
    * @param array $breadcrumb
-   * @param array $all_candidates
-   * @param string $best_candidate_key
    * @return mixed|null|void
    */
-  function findTitle($path, $item, $breadcrumb, &$all_candidates = array(), &$best_candidate_key = NULL) {
+  function findTitle($path, $item, $breadcrumb) {
     $plugin_methods = $this->pluginInfo->routePluginMethods('findTitle', $item['route']);
-    $result = $this->find($plugin_methods, array($path, $item, $breadcrumb), FALSE, $all_candidates, $best_candidate_key);
+    $result = $this->find($plugin_methods, array($path, $item, $breadcrumb), FALSE);
+    if ($this->candidateLogger) {
+      $this->candidateLogger->endFindTitle($path, $item, $breadcrumb);
+    }
     return $result;
   }
 
@@ -114,6 +128,7 @@ class crumbs_PluginEngine {
   protected function find($plugin_methods, $args, $processFindParent = FALSE, &$all_candidates = array(), &$best_candidate_key = NULL) {
     $best_candidate = NULL;
     $best_candidate_weight = 999999;
+    $best_candidate_key = NULL;
     foreach ($plugin_methods as $plugin_key => $method) {
       $plugin = $this->plugins[$plugin_key];
       if ($plugin instanceof crumbs_MultiPlugin) {
@@ -137,11 +152,15 @@ class crumbs_PluginEngine {
             if (isset($candidate_raw)) {
               $candidate_weight = $keeper->valueAtKey($candidate_key);
               $candidate = $processFindParent ? $this->processFindParent($candidate_raw) : $candidate_raw;
-              $all_candidates["$plugin_key.$candidate_key"] = array($candidate_weight, $candidate_raw, $candidate);
+              if ($this->candidateLogger) {
+                $this->candidateLogger->addCandidate("$plugin_key.$candidate_key", $candidate_weight, $candidate_raw, $candidate);
+              }
               if ($best_candidate_weight > $candidate_weight && isset($candidate)) {
                 $best_candidate = $candidate;
                 $best_candidate_weight = $candidate_weight;
-                $best_candidate_key = $candidate_key;
+                if ($this->candidateLogger) {
+                  $this->candidateLogger->setBestCandidateKey("$plugin_key.$candidate_key");
+                }
               }
             }
           }
@@ -162,11 +181,15 @@ class crumbs_PluginEngine {
         $candidate_raw = call_user_func_array(array($plugin, $method), $args);
         if (isset($candidate_raw)) {
           $candidate = $processFindParent ? $this->processFindParent($candidate_raw) : $candidate_raw;
-          $all_candidates[$plugin_key] = array($candidate_weight, $candidate_raw, $candidate);
+          if ($this->candidateLogger) {
+            $this->candidateLogger->addCandidate($plugin_key, $candidate_weight, $candidate_raw, $candidate);
+          }
           if (isset($candidate)) {
             $best_candidate = $candidate;
             $best_candidate_weight = $candidate_weight;
-            $best_candidate_key = $plugin_key;
+            if ($this->candidateLogger) {
+              $this->candidateLogger->setBestCandidateKey($plugin_key);
+            }
           }
         }
       }

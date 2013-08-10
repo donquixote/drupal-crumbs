@@ -97,6 +97,16 @@ class crumbs_CurrentPageInfo {
     if ($page->breadcrumbSuppressed) {
       return array();
     }
+    if (user_access('administer crumbs')) {
+      // Remember which pages we are visiting,
+      // for the autocomplete on admin/structure/crumbs/debug.
+      unset($_SESSION['crumbs.admin.debug.history'][$page->path]);
+      $_SESSION['crumbs.admin.debug.history'][$page->path] = TRUE;
+      // Never remember more than 15 links.
+      while (15 < count($_SESSION['crumbs.admin.debug.history'])) {
+        array_shift($_SESSION['crumbs.admin.debug.history']);
+      }
+    }
     $trail = $page->trail;
     if (count($trail) < $page->minTrailItems) {
       return array();
@@ -199,9 +209,9 @@ class crumbs_CurrentPageInfo {
       return '';
     }
     $links = array();
-    $last_item = end($breadcrumb_items);
+    $i_last_item = count($breadcrumb_items) - 1;
     foreach ($breadcrumb_items as $i => $item) {
-      if ($page->showCurrentPage && $item == $last_item) {
+      if ($page->showCurrentPage && $i === $i_last_item) {
         // The current page should be styled differently (no link).
         $links[$i] = theme('crumbs_breadcrumb_current_page', $item);
       }

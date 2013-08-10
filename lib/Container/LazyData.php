@@ -32,4 +32,12 @@ class crumbs_Container_LazyData {
     }
     return $this->data[$key];
   }
+
+  /**
+   * @param string $key
+   * @param mixed $value
+   */
+  function set($key, $value) {
+    $this->data[$key] = $value;
+  }
 }
