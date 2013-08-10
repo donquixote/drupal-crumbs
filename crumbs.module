@@ -140,7 +140,32 @@ function crumbs_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
 
+  if (module_exists('menu')) {
+    $items['crumbs/special-menu-item/%menu_link'] = array(
+      'access callback' => TRUE,
+      'page callback' => 'crumbs_special_menu_link_page',
+      'page arguments' => array(2),
+      'title callback' => 'crumbs_special_menu_link_title',
+      'title arguments' => array(2),
+      'type' => MENU_CALLBACK,
+    );
+  }
+
   return $items;
+}
+
+/**
+ * @param array $menu_link
+ */
+function crumbs_special_menu_link_page(array $menu_link) {
+  drupal_goto('<front>');
+}
+
+/**
+ * @param array $menu_link
+ */
+function crumbs_special_menu_link_title(array $menu_link) {
+  return $menu_link['title'];
 }
 
 /**
@@ -288,8 +313,13 @@ function crumbs_theme_breadcrumb($variables) {
  * Default theme implementation for theme('crumbs_breadcrumb_link').
  */
 function theme_crumbs_breadcrumb_link(array $item) {
-  $options = isset($item['localized_options']) ? $item['localized_options'] : array();
-  return l($item['title'], $item['href'], $options);
+  if ('<nolink>' === $item['href']) {
+    return check_plain($item['title']);
+  }
+  else {
+    $options = isset($item['localized_options']) ? $item['localized_options'] : array();
+    return l($item['title'], $item['href'], $options);
+  }
 }
 
 /**

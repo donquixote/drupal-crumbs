@@ -47,6 +47,10 @@ class crumbs_Router {
       $item['localized_options'] = array();
     }
 
+    if ('crumbs_special_menu_link_page' === $item['page_callback']) {
+      $item['href'] = '<nolink>';
+    }
+
     if ($normalpath !== $item['href']) {
       $pos = strlen($item['href']);
       $item['variadic_suffix'] = substr($normalpath, $pos);

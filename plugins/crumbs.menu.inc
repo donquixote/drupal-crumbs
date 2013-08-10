@@ -11,6 +11,7 @@ function menu_crumbs_plugins($api) {
   $api->multiPlugin('link_title');
   $api->disabledByDefault('hierarchy.*');
   $api->disabledByDefault('link_title.*');
+  $api->routeMonoPlugin('crumbs/special-menu-item/%', 'specialItems');
 }
 
 
@@ -35,19 +36,25 @@ class menu_CrumbsMultiPlugin_hierarchy implements crumbs_MultiPlugin_FindParentI
     $q->innerJoin('menu_links', 'child', 'parent.mlid = child.plid');
     $q->addExpression('parent.link_path', 'parent_path');
     $q->addExpression('parent.menu_name', 'menu_name');
+    $q->addExpression('child.plid', 'plid');
     $q->condition('child.link_path', $path);
 
     // Top-level links have higher priority.
     $q->orderBy('parent.depth', 'ASC');
 
-    // Ignore placeholder or separator menu items added by special_menu_items.
-    $q->condition('parent.link_path', array('<nolink>', '<separator>'), 'NOT IN');
+    // Ignore separator menu items added by special_menu_items.
+    $q->condition('parent.link_path', array('<separator>'), 'NOT IN');
 
     // Collect candidates for the parent path, keyed by menu name.
     $candidates = array();
     foreach ($q->execute() as $row) {
       if (!isset($candidates[$row->menu_name])) {
-        $candidates[$row->menu_name] = $row->parent_path;
+        if ('<nolink>' === $row->parent_path) {
+          $candidates[$row->menu_name] = 'crumbs/special-menu-item/' . $row->plid;
+        }
+        else {
+          $candidates[$row->menu_name] = $row->parent_path;
+        }
       }
     }
     return $candidates;
@@ -156,4 +163,42 @@ class menu_CrumbsMultiPlugin_link_title implements crumbs_MultiPlugin_FindTitleI
     }
     return $titles;
   }
+}
+
+class menu_CrumbsMonoPlugin_specialItems implements crumbs_MonoPlugin_FindParentInterface {
+
+  /**
+   * @inheritdoc
+   */
+  function describe($api) {
+    return 'Special menu items';
+  }
+
+  /**
+   * @inheritdoc
+   */
+  function findParent($path, $item) {
+
+    $menu_link = end($item['map']);
+    if (empty($menu_link['plid'])) {
+      return;
+    }
+    $parent_link = menu_link_load($menu_link['plid']);
+
+    if (empty($parent_link['link_path'])) {
+      return;
+    }
+
+    $parent_path = $parent_link['link_path'];
+    if ('<nolink>' === $parent_path) {
+      return 'crumbs/special-menu-item/' . $menu_link['plid'];
+    }
+
+    if ('<separator>' === $parent_path) {
+      return;
+    }
+
+    return $parent_path;
+  }
+
 }
