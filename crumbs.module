@@ -281,7 +281,7 @@ function _crumbs_themekey_path2trailpaths($path) {
  * Breadcrumbs with one item are also ignored, to prevent the breadcrumb
  * from being shown on the frontpage.
  *
- * @return
+ * @return array
  *   An associative array with the following keys:
  *   - trail: An array containing the menu trail of the current page.
  *   - items: An array containing the built breadcrumb.
