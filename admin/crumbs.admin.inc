@@ -165,10 +165,15 @@ function crumbs_admin_display_form() {
       '#options' => $theme_override_options,
       '#html' => TRUE,
       '#default_value' => variable_get('crumbs_override_theme_breadcrumb', array('(other)')),
-      '#title' => t('Override theme implementations of theme_breadcrumb().'),
-      '#description' => t('Use !crumbs_module_implementation instead of the respective theme implementation.', array(
-        '!crumbs_module_implementation' => '<code>crumbs_theme_breadcrumb()</code>',
-      )),
+      '#title' => t('Override theme implementations'),
+    );
+    $form['theme_override_settings']['notes'] = array(
+      '#type' => 'markup',
+      '#markup' =>
+        '<p>' . t('Use !crumbs_module_implementation instead of the respective theme implementation.', array(
+            '!crumbs_module_implementation' => '<code>crumbs_theme_breadcrumb()</code>',
+          )) . '<br/>' .
+        t('You need to flush the theme registry for this setting to take effect!') . '</p>',
     );
   }
   if (!empty($form['theme_override_settings'])) {
