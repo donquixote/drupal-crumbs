@@ -201,8 +201,19 @@ function crumbs_theme_registry_alter(array &$registry) {
   if (!isset($registry['breadcrumb']['function'])) {
     return;
   }
-  if ('theme_breadcrumb' === $registry['breadcrumb']['function']) {
-    $registry['breadcrumb']['function'] = 'crumbs_theme_breadcrumb';
+  $f = &$registry['breadcrumb']['function'];
+  $settings = variable_get('crumbs_override_theme_breadcrumb', array('(other)'));
+  if ('theme_breadcrumb' === $f) {
+    $theme_name = '(other)';
+  }
+  elseif ('_breadcrumb' === substr($f, -11)) {
+    $theme_name = substr($f, 0, -11);
+  }
+  else {
+    return;
+  }
+  if (in_array($theme_name, $settings)) {
+    $f = 'crumbs_theme_breadcrumb';
   }
 }
 
