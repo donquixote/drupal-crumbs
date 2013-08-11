@@ -87,7 +87,7 @@ function crumbs_menu() {
     'file' => 'admin/crumbs.admin.inc',
   );
   $items["$base/weights"] = array(
-    'title' => 'Weights',
+    'title' => 'Plugin weights',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
