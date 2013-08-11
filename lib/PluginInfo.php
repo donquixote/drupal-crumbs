@@ -105,7 +105,7 @@ class crumbs_PluginInfo {
    * @return mixed
    */
   function adminKeysByPlugin($container) {
-    return $container->adminPluginInfo->getKeysByPlugin();
+    return $container->aqgdminPluginInfo->getKeysByPlugin();
   }
 
   /**
@@ -308,37 +308,31 @@ class crumbs_PluginInfo {
    */
   function includePluginFiles($container) {
 
-    $modules = array(
-      'blog',
-      'comment',
-      'crumbs',
-      'entityreference',
-      'menu',
-      'path',
-      'taxonomy',
-      'forum',
-      'entityreference_prepopulate',
-      'views',
-    );
+    $dir = drupal_get_path('module', 'crumbs') . '/plugins';
 
-    // Include Crumbs-provided plugins.
-    foreach ($modules as $module) {
-      if (module_exists($module)) {
-        module_load_include('inc', 'crumbs', 'plugins/crumbs.'. $module);
+    $files = array();
+    foreach (scandir($dir) as $candidate) {
+      if (preg_match('/^crumbs\.(.+)\.inc$/', $candidate, $m)) {
+        if (module_exists($m[1])) {
+          $files[$m[1]] = $dir . '/' . $candidate;
+        }
       }
     }
 
     // Organic groups is a special case,
     // because 7.x-2.x behaves different from 7.x-1.x.
-    if (module_exists('og')) {
-      if (function_exists('og_get_group')) {
-        // We are using the og-7.x-1.x branch.
-        module_load_include('inc', 'crumbs', 'plugins/crumbs.og');
-      }
-      else {
-        // We are using the og-7.x-2.x branch.
-        module_load_include('inc', 'crumbs', 'plugins/crumbs.og.2');
-      }
+    if (1
+      && isset($files['og'])
+      && !function_exists('og_get_group')
+    ) {
+      // We are using the og-7.x-1.x branch.
+      $files['og'] = $dir . '/crumbs.og.2.inc';
+    }
+
+    // Since the directory order may be anything, sort alphabetically.
+    ksort($files);
+    foreach ($files as $file) {
+      require_once $file;
     }
 
     return TRUE;
