@@ -42,10 +42,10 @@ class crumbs_Admin_ElementObject_WeightsExpansible extends crumbs_Admin_ElementO
   function process($element, $form_state) {
 
     // Apologies for the stupid identifiers.
-    $available_keys = $element['#crumbs_plugin_info']->adminPluginInfo->collectedInfo();
+    $available_keys_meta = $element['#crumbs_plugin_info']->availableKeysMeta;
 
     // Set up table rows
-    foreach ($available_keys as $key => $meta) {
+    foreach ($available_keys_meta as $key => $meta) {
       $element[$key] = array(
         '#type' => 'textfield',
         '#size' => 10,
@@ -67,7 +67,7 @@ class crumbs_Admin_ElementObject_WeightsExpansible extends crumbs_Admin_ElementO
 
     // Calculate md5 hashes for keys, because javascript sucks at it.
     $keys_md5 = array();
-    foreach ($available_keys as $key => $meta) {
+    foreach ($available_keys_meta as $key => $meta) {
       $keys_md5[$key] = md5($key);
     }
 

@@ -164,6 +164,14 @@ class crumbs_PluginOperation_describe {
   }
 
   /**
+   * @param string $key
+   * @param int $weight
+   */
+  function setDefaultWeight($key, $weight) {
+    $this->keys[$key] = $key;
+  }
+
+  /**
    * @return crumbs_Container_MultiWildcardData
    */
   function collectedInfo() {

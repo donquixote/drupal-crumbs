@@ -11,14 +11,14 @@ class crumbs_Admin_ElementObject_WeightsTextual extends crumbs_Admin_ElementObje
       return isset($element['#default_value']) ? $element['#default_value'] : array();
     }
 
-    $available_keys = $element['#crumbs_plugin_info']->adminPluginInfo->collectedInfo();
+    $available_keys_meta = $element['#crumbs_plugin_info']->availableKeysMeta;
 
     $weights = array();
     $weight = 0;
     foreach (explode("\n", $input['text']) as $line) {
       $line = trim($line);
       list($key, $title) = explode(' ', $line, 2) + array(NULL, NULL);
-      if (isset($available_keys[$key])) {
+      if (isset($available_keys_meta[$key])) {
         $weights[$key] = $weight;
         ++$weight;
       }

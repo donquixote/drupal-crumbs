@@ -49,8 +49,7 @@ class crumbs_Admin_ElementObject_WeightsTabledrag extends crumbs_Admin_ElementOb
     // Apologies for the stupid identifiers.
     $info = $element['#crumbs_plugin_info'];
     $default_weights = $info->defaultWeights;
-    $admin_info = $info->adminPluginInfo;
-    $available_keys = $admin_info->collectedInfo();
+    $available_keys_meta = $info->availableKeysMeta;
 
     $sections = array(
       'enabled' => t('Enabled'),
@@ -85,7 +84,7 @@ class crumbs_Admin_ElementObject_WeightsTabledrag extends crumbs_Admin_ElementOb
     }
 
     // Set up tabledrag rows
-    foreach ($available_keys as $key => $meta) {
+    foreach ($available_keys_meta as $key => $meta) {
       $child = array(
         '#title' => $key,
         'weight' => array(

@@ -74,14 +74,10 @@ class crumbs_PluginInfo {
   }
 
   /**
-   * Info from the plugins' describe() method, plus reflection info.
-   * This is used on the weights form for the sake of information.
-   *
    * @param crumbs_Container_LazyData $container
-   * @return crumbs_PluginOperation_describe
+   * @return crumbs_Container_MultiWildcardData
    */
-  function adminPluginInfo($container) {
-
+  function availableKeysMeta($container) {
     $op = new crumbs_PluginOperation_describe($container->pluginRoutes);
     /**
      * @var crumbs_PluginInterface $plugin
@@ -89,23 +85,10 @@ class crumbs_PluginInfo {
     foreach ($container->plugins as $plugin_key => $plugin) {
       $op->invoke($plugin, $plugin_key);
     }
-    return $op;
-  }
-
-  /**
-   * @param crumbs_Container_LazyData $container
-   * @return array
-   */
-  function adminAvailableKeys($container) {
-    return $container->adminPluginInfo->getKeys();
-  }
-
-  /**
-   * @param crumbs_Container_LazyData $container
-   * @return mixed
-   */
-  function adminKeysByPlugin($container) {
-    return $container->aqgdminPluginInfo->getKeysByPlugin();
+    foreach ($container->defaultWeights as $key => $default_weight) {
+      $op->setDefaultWeight($key, $default_weight);
+    }
+    return $op->collectedInfo();
   }
 
   /**
