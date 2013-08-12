@@ -216,7 +216,8 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    */
   function routeMonoPlugin($route, $key = NULL, crumbs_MonoPlugin $plugin = NULL) {
     $this->monoPlugin($key, $plugin);
-    $this->pluginRoutes[$key] = $route;
+    $plugin_key = empty($key) ? $this->module : $this->module . '.' . $key;
+    $this->pluginRoutes[$plugin_key] = $route;
   }
 
   /**
@@ -259,7 +260,34 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    */
   function routeMultiPlugin($route, $key = NULL, crumbs_MultiPlugin $plugin = NULL) {
     $this->multiPlugin($key, $plugin);
-    $this->pluginRoutes[$key] = $route;
+    $plugin_key = empty($key) ? $this->module : $this->module . '.' . $key;
+    $this->pluginRoutes[$plugin_key] = $route;
+  }
+
+  /**
+   * @param string $route
+   * @param string $key
+   * @param string $parent_path
+   */
+  function routeParentPath($route, $key, $parent_path) {
+    $this->routeMonoPlugin($route, $key, new crumbs_MonoPlugin_FixedParentPath($parent_path));
+  }
+
+  /**
+   * @param string $route
+   * @param string $key
+   * @param string $title
+   */
+  function routeTranslateTitle($route, $key, $title) {
+    $this->routeMonoPlugin($route, $key, new crumbs_MonoPlugin_TranslateTitle($title));
+  }
+
+  /**
+   * @param string $route
+   * @param string $key
+   */
+  function routeSkipItem($route, $key) {
+    $this->routeMonoPlugin($route, $key, new crumbs_MonoPlugin_SkipItem());
   }
 
   /**
