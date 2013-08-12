@@ -148,6 +148,9 @@ class crumbs_PluginEngine {
           foreach ($candidates as $candidate_key => $candidate_raw) {
             if (isset($candidate_raw)) {
               $candidate_weight = $keeper->valueAtKey($candidate_key);
+              if (FALSE === $candidate_weight) {
+                continue;
+              }
               $candidate = $processFindParent ? $this->processFindParent($candidate_raw) : $candidate_raw;
               if ($this->candidateLogger) {
                 $this->candidateLogger->addCandidate("$plugin_key.$candidate_key", $candidate_weight, $candidate_raw, $candidate);
