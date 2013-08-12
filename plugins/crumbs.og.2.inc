@@ -132,7 +132,7 @@ class og_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin {
   function describe($api) {
     if (is_array($this->groupsOverviewPaths)) {
       foreach ($this->groupsOverviewPaths as $type => $parent_path) {
-        $api->addRule($type->type);
+        $api->addRule($type);
       }
     }
     else {
