@@ -115,6 +115,20 @@ class crumbs_PluginOperation_describe {
   }
 
   /**
+   * @param array $paths
+   * @param string $key_suffix
+   */
+  function setRoutes(array $paths, $key_suffix) {
+    if (isset($key_suffix)) {
+      $key = $this->pluginKey . '.' . $key_suffix;
+    }
+    else {
+      $key = $this->pluginKey;
+    }
+    $this->collectedInfo['routes'][$key] = $paths;
+  }
+
+  /**
    * @param string $key
    * @param string $description
    */

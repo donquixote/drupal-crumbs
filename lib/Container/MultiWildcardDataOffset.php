@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Class crumbs_Container_MultiWildcardDataOffset
+ *
+ * @property array $basicMethods
+ * @property array $routeMethods
+ * @property array $routes
+ */
 class crumbs_Container_MultiWildcardDataOffset {
 
   /**

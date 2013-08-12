@@ -154,6 +154,10 @@ class crumbs_Admin_WeightsTable {
     $this->descriptions[$key] = $meta->getAll('descriptions');
   }
 
+  /**
+   * @param array $cells
+   * @param crumbs_Container_MultiWildcardDataOffset $meta
+   */
   protected function rowAddMethodInfo(&$cells, $meta) {
     $methods = array();
     $routes = array();
@@ -165,10 +169,15 @@ class crumbs_Admin_WeightsTable {
         }
       }
     }
+    if (is_array($meta->routes)) {
+      $routes = array_merge($routes, $meta->routes);
+    }
     if (is_array($meta->basicMethods)) {
       foreach ($meta->basicMethods as $method) {
         $methods[] = $method . '()';
-        $routes[] = '-';
+        if (!is_array($meta->routes)) {
+          $routes[] = '-';
+        }
       }
     }
     $cells[] = '<code>' . implode('<br/>', $methods) . '</code>';

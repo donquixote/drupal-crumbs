@@ -47,6 +47,14 @@ class crumbs_InjectedAPI_describeMultiPlugin {
   }
 
   /**
+   * @param array $paths
+   * @param string $key_suffix
+   */
+  function setRoutes(array $paths, $key_suffix = '*') {
+    $this->pluginOperation->setRoutes($paths, $key_suffix);
+  }
+
+  /**
    * @param string $description
    * @param string $label
    * @param string $key_suffix
