@@ -17,19 +17,23 @@ class entityreference_prepopulate_CrumbsMultiPlugin_node implements crumbs_Multi
    */
   function describe($api) {
     foreach (field_info_fields() as $field_name => $field_info) {
-      if (1
-        && $field_info['type'] === 'entityreference'
-        && !empty($field_info['bundles']['node'])
+      if (0
+        || $field_info['type'] !== 'entityreference'
+        || empty($field_info['bundles']['node'])
       ) {
-        foreach ($field_info['bundles']['node'] as $type) {
-          $instance = field_info_instance('node', $field_name, $type);
-          if (1
-            && !empty($instance['default_value_function'])
-            && $instance['default_value_function'] === 'entityreference_prepopulate_field_default_value'
-          ) {
-            $api->addRule("$field_name.$type");
-          }
+        continue;
+      }
+
+      foreach ($field_info['bundles']['node'] as $type) {
+        $instance = field_info_instance('node', $field_name, $type);
+        if (0
+          || empty($instance['default_value_function'])
+          || 'entityreference_prepopulate_field_default_value' !== $instance['default_value_function']
+        ) {
+          continue;
         }
+
+        $api->addRule("$field_name.$type");
       }
     }
   }
