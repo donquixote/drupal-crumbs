@@ -9,8 +9,11 @@ function views_crumbs_plugins($api) {
 }
 
 
-class views_CrumbsMultiPlugin_argTitle implements crumbs_MultiPlugin {
+class views_CrumbsMultiPlugin_argTitle implements crumbs_MultiPlugin_FindTitleInterface {
 
+  /**
+   * @inheritdoc
+   */
   function describe($api) {
     // We try to get all views pages but avoid views_get_all_view() for performance.
     $q = db_select('menu_router', 'mr');
@@ -25,6 +28,9 @@ class views_CrumbsMultiPlugin_argTitle implements crumbs_MultiPlugin {
     }
   }
 
+  /**
+   * @inheritdoc
+   */
   function findTitle($path, $item) {
 
     if ('views_page' !== $item['page_callback']) {
@@ -32,6 +38,10 @@ class views_CrumbsMultiPlugin_argTitle implements crumbs_MultiPlugin {
     }
 
     if (count($item['page_arguments']) < 3) {
+      return;
+    }
+
+    if (isset($item['title']) && is_string($item['title']) && '' !== $item['title']) {
       return;
     }
 
@@ -48,18 +58,19 @@ class views_CrumbsMultiPlugin_argTitle implements crumbs_MultiPlugin {
     $view->build_title();
 
     // Check the last argument for a breadcrumb item title.
-    $last_arg = end($view->argument);
-    if (!is_object($last_arg)) {
-      return;
+    $argument = $view->argument;
+    while (!empty($argument)) {
+      $last_arg = array_pop($argument);
+      if (1
+        && is_object($last_arg)
+        && !$last_arg->is_exception()
+        && isset($last_arg->argument)
+      ) {
+        if ($last_arg_title = $last_arg->get_title()) {
+          return array("$view_name.$view_display_id" => $last_arg_title);
+        }
+        break;
+      }
     }
-    elseif ($last_arg->is_exception()) {
-      return;
-      // $last_arg_title = $last_arg->exception_title();
-    }
-    else {
-      $last_arg_title = $last_arg->get_title();
-    }
-
-    return array("$view_name.$view_display_id" => $last_arg_title);
   }
 }
