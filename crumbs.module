@@ -453,7 +453,7 @@ function crumbs_reduce_path($path, $depth = -1) {
  *   An array of options used to generate the replacements.
  */
 function crumbs_clean_token_values(&$replacements, $data = array(), $options = array()) {
-  return crumbs_Util::cleanTokenValues($replacements, $data, $options);
+  crumbs_Util::cleanTokenValues($replacements, $data, $options);
 }
 
 
@@ -568,6 +568,8 @@ function _crumbs_element_object(&$element) {
       case 'crumbs_weights_expansible':
         $obj = new crumbs_Admin_ElementObject_WeightsExpansible($element);
         break;
+      default:
+        throw new Exception('Unknown element type "' . $element['#type'] . '".');
     }
     $element['#crumbs_element_object'] = $obj;
   }

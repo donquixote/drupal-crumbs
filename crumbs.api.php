@@ -4,8 +4,7 @@
 /**
  * A hook to register crumbs plugins.
  *
- * @param $api
- *   :crumbs_InjectedAPI_hookCrumbsPlugins
+ * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
  *   An object with methods to register plugins.
  *   See the class definition of crumbs_InjectedAPI_hookCrumbsPlugins, which
  *   methods are available.
