@@ -30,7 +30,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    */
   function getPlugins() {
     if ($this->discoveryOngoing) {
-      throw new \Exception("getPlugins() cannot be called from an implementation of hook_crumbs_plugins().");
+      throw new Exception("getPlugins() cannot be called from an implementation of hook_crumbs_plugins().");
     }
     return $this->plugins;
   }
@@ -41,7 +41,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    */
   function getPluginRoutes() {
     if ($this->discoveryOngoing) {
-      throw new \Exception("getPluginRoutes() cannot be called from an implementation of hook_crumbs_plugins().");
+      throw new Exception("getPluginRoutes() cannot be called from an implementation of hook_crumbs_plugins().");
     }
     return $this->pluginRoutes;
   }
@@ -52,7 +52,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    */
   function getDefaultValues() {
     if ($this->discoveryOngoing) {
-      throw new \Exception("getDefaultValues() cannot be called from an implementation of hook_crumbs_plugins().");
+      throw new Exception("getDefaultValues() cannot be called from an implementation of hook_crumbs_plugins().");
     }
     return $this->defaultValues;
   }
@@ -62,7 +62,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    */
   function finalize() {
     if ($this->discoveryOngoing) {
-      throw new \Exception("finalize() cannot be called from an implementation of hook_crumbs_plugins().");
+      throw new Exception("finalize() cannot be called from an implementation of hook_crumbs_plugins().");
     }
 
     $build = array();
