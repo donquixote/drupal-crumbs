@@ -11,7 +11,7 @@ class crumbs_PluginInfo {
    * @return array
    */
   function keysToCache() {
-    return array('weights', 'pluginsCached', 'pluginOrder', 'basicPluginMethods', 'routePluginMethodsCached');
+    return array('weights', 'pluginsCached', 'defaultWeights', 'pluginRoutes', 'pluginOrder');
   }
 
   /**
