@@ -1,6 +1,6 @@
 <?php
 
-abstract class crumbs_EntityParentPlugin_Field_Abstract implements crumbs_EntityParentPlugin {
+abstract class crumbs_EntityPlugin_Field_Abstract implements crumbs_EntityPlugin {
 
   /**
    * @var string
@@ -42,5 +42,28 @@ abstract class crumbs_EntityParentPlugin_Field_Abstract implements crumbs_Entity
       }
       // $api->addDescription('(' . $this->fieldKey . ')');
     }
+  }
+
+  /**
+   * @inheritdoc
+   */
+  function entityFindCandidate($entity, $entity_type, $distinction_key) {
+    $items = field_get_items($entity_type, $entity, $this->fieldKey);
+    if ($items) {
+      return $this->fieldFindCandidate($items);
+    }
+  }
+
+  /**
+   * @param array $items
+   * @return string
+   */
+  abstract protected function fieldFindCandidate(array $items);
+
+  /**
+   * @return array
+   */
+  protected function getFieldInfo() {
+    return field_info_field($this->fieldKey);
   }
 }

@@ -12,7 +12,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
   protected $pluginRoutes = array();
   protected $defaultValues = array();
   protected $entityRoutes = array();
-  protected $entityParentPlugins = array();
+  protected $entityPlugins = array();
   protected $discoveryOngoing;
 
   /**
@@ -66,37 +66,38 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
     }
 
     $build = array();
-    foreach ($this->entityParentPlugins as $key => $y) {
-      list($entity_plugin, $types) = $y;
-      if (!isset($types)) {
-        foreach ($this->entityRoutes as $route => $x) {
-          list($entity_type) = $x;
-          $build[$entity_type][$key . '.' . $entity_type] = $entity_plugin;
+    foreach ($this->entityPlugins as $type => $plugins) {
+      foreach ($plugins as $key => $y) {
+        list($entity_plugin, $types) = $y;
+        if (!isset($types)) {
+          foreach ($this->entityRoutes as $route => $x) {
+            list($entity_type) = $x;
+            $build[$entity_type][$type][$key . '.' . $entity_type] = $entity_plugin;
+          }
         }
-      }
-      elseif (is_array($types)) {
-        foreach ($types as $entity_type) {
-          $build[$entity_type][$key . '.' . $entity_type] = $entity_plugin;
+        elseif (is_array($types)) {
+          foreach ($types as $entity_type) {
+            $build[$entity_type][$type][$key . '.' . $entity_type] = $entity_plugin;
+          }
         }
-      }
-      elseif (is_string($types)) {
-        $entity_type = $types;
-        $build[$entity_type][$key] = $entity_plugin;
+        elseif (is_string($types)) {
+          $entity_type = $types;
+          $build[$entity_type][$type][$key] = $entity_plugin;
+        }
       }
     }
 
     foreach ($this->entityRoutes as $route => $x) {
-      list($entity_type, $class, $bundle_key, $bundle_name) = $x;
+      list($entity_type, $bundle_key, $bundle_name) = $x;
       if (!empty($build[$entity_type])) {
-        if (empty($class)) {
-          foreach ($build[$entity_type] as $key => $entity_plugin) {
-            $this->plugins[$key] = new crumbs_MultiPlugin_EntityParent($entity_plugin, $entity_type, $bundle_key, $bundle_name);
-            $this->pluginRoutes[$key] = $route;
-          }
-        }
-        else {
-          foreach ($build[$entity_type] as $key => $entity_plugin) {
-            $this->plugins[$key] = new $class($entity_plugin);
+        foreach ($build[$entity_type] as $type => $plugins) {
+          foreach ($plugins as $key => $entity_plugin) {
+            if ('parent' === $type) {
+              $this->plugins[$key] = new crumbs_MultiPlugin_EntityParent($entity_plugin, $entity_type, $bundle_key, $bundle_name);
+            }
+            else {
+              $this->plugins[$key] = new crumbs_MultiPlugin_EntityTitle($entity_plugin, $entity_type, $bundle_key, $bundle_name);
+            }
             $this->pluginRoutes[$key] = $route;
           }
         }
@@ -127,41 +128,48 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    * @param string $bundle_name
    */
   function entityRoute($entity_type, $route, $bundle_key, $bundle_name) {
-    $this->entityRoutes[$route] = array($entity_type, NULL, $bundle_key, $bundle_name);
-  }
-
-  /**
-   * @param $entity_type
-   * @param $route
-   * @param $class
-   * @throws Exception
-   */
-  function entityRouteSpecial($entity_type, $route, $class) {
-    if (!class_exists($class)) {
-      throw new Exception("Class '$class' does not exist.");
-    }
-    $this->entityRoutes[$route] = array($entity_type, $class, NULL, NULL);
+    $this->entityRoutes[$route] = array($entity_type, $bundle_key, $bundle_name);
   }
 
   /**
    * Register an entity parent plugin.
    *
    * @param string $key
-   * @param string|crumbs_EntityParentPlugin $entity_plugin
+   * @param string|crumbs_EntityPlugin $entity_plugin
    * @param array $types
    */
   function entityParentPlugin($key, $entity_plugin = NULL, $types = NULL) {
+    $this->entityPlugin('parent', $key, $entity_plugin, $types);
+  }
 
+  /**
+   * Register an entity title plugin.
+   *
+   * @param string $key
+   * @param string|crumbs_EntityPlugin $entity_plugin
+   * @param array $types
+   */
+  function entityTitlePlugin($key, $entity_plugin = NULL, $types = NULL) {
+    $this->entityPlugin('title', $key, $entity_plugin, $types);
+  }
+
+  /**
+   * @param string $type
+   * @param string $key
+   * @param string|crumbs_EntityPlugin $entity_plugin
+   * @param array $types
+   */
+  protected function entityPlugin($type, $key, $entity_plugin, $types) {
     if (!isset($entity_plugin)) {
-      $class = $this->module . '_CrumbsEntityParentPlugin';
+      $class = $this->module . '_CrumbsEntityPlugin';
       $entity_plugin = new $class();
     }
     elseif (is_string($entity_plugin)) {
-      $class = $this->module . '_CrumbsEntityParentPlugin_' . $entity_plugin;
+      $class = $this->module . '_CrumbsEntityPlugin_' . $entity_plugin;
       $entity_plugin = new $class();
     }
-    if ($entity_plugin instanceof crumbs_EntityParentPlugin) {
-      $this->entityParentPlugins[$this->module . '.' . $key] = array($entity_plugin, $types);
+    if ($entity_plugin instanceof crumbs_EntityPlugin) {
+      $this->entityPlugins[$type][$this->module . '.' . $key] = array($entity_plugin, $types);
     }
   }
 

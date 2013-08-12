@@ -1,9 +1,9 @@
 <?php
 
-abstract class crumbs_MultiPlugin_EntityParentAbstract implements crumbs_MultiPlugin {
+abstract class crumbs_MultiPlugin_EntityFindAbstract implements crumbs_MultiPlugin {
 
   /**
-   * @var crumbs_EntityParentPlugin
+   * @var crumbs_EntityPlugin
    */
   protected $plugin;
 
@@ -34,7 +34,7 @@ abstract class crumbs_MultiPlugin_EntityParentAbstract implements crumbs_MultiPl
   }
 
   /**
-   * @param crumbs_EntityParentPlugin $plugin
+   * @param crumbs_EntityPlugin $plugin
    *   The object that can actually determine a parent path for the entity.
    */
   function __construct($plugin) {

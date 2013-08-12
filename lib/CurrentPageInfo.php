@@ -239,15 +239,18 @@ class crumbs_CurrentPageInfo {
     $links = array();
     if ($page->showCurrentPage) {
       $last = array_pop($breadcrumb_items);
-    }
-    foreach ($breadcrumb_items as $i => $item) {
-      $links[$i] = theme('crumbs_breadcrumb_link', $item);
-    }
-    if ($page->showCurrentPage) {
+      foreach ($breadcrumb_items as $i => $item) {
+        $links[$i] = theme('crumbs_breadcrumb_link', $item);
+      }
       $links[] = theme('crumbs_breadcrumb_current_page', array(
         'item' => $last,
         'show_current_page' => $page->showCurrentPage,
       ));
+    }
+    else {
+      foreach ($breadcrumb_items as $i => $item) {
+        $links[$i] = theme('crumbs_breadcrumb_link', $item);
+      }
     }
     return theme('breadcrumb', array(
       'breadcrumb' => $links,

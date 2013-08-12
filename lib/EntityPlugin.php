@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Interface for entity parent plugins registered with hook_crumbs_plugins().
+ * Interface for entity title plugins registered with hook_crumbs_plugins().
  */
-interface crumbs_EntityParentPlugin {
+interface crumbs_EntityPlugin {
 
   /**
    * @param crumbs_InjectedAPI_describeMultiPlugin $api
@@ -23,7 +23,7 @@ interface crumbs_EntityParentPlugin {
    *   (this might be called more than once per user)
    *
    * @return string
-   *   A candidate for the parent path.
+   *   A candidate for the parent path or title.
    */
-  function entityFindParent($entity, $entity_type, $distinction_key);
+  function entityFindCandidate($entity, $entity_type, $distinction_key);
 }

@@ -120,12 +120,9 @@ class crumbs_PluginEngine {
    * @param array $plugin_methods
    * @param array $args
    * @param bool $processFindParent
-   * @param array &$all_candidates
-   *   Collect information during the operation.
-   * @param string &$best_candidate_key
    * @return mixed|null|void
    */
-  protected function find($plugin_methods, $args, $processFindParent = FALSE, &$all_candidates = array(), &$best_candidate_key = NULL) {
+  protected function find($plugin_methods, $args, $processFindParent = FALSE) {
     $best_candidate = NULL;
     $best_candidate_weight = 999999;
     $best_candidate_key = NULL;

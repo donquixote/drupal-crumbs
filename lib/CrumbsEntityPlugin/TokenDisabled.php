@@ -1,7 +1,7 @@
 <?php
 
 
-class crumbs_CrumbsEntityParentPlugin_TokenDisabled implements crumbs_EntityParentPlugin {
+class crumbs_CrumbsEntityPlugin_TokenDisabled implements crumbs_EntityPlugin {
 
   /**
    * @inheritdoc
@@ -22,7 +22,7 @@ class crumbs_CrumbsEntityParentPlugin_TokenDisabled implements crumbs_EntityPare
   /**
    * @inheritdoc
    */
-  function entityFindParent($entity, $entity_type, $distinction_key) {
+  function entityFindCandidate($entity, $entity_type, $distinction_key) {
 
     // This is cached..
     $patterns = variable_get('crumbs_' . $entity_type . '_parent_patterns', array());
