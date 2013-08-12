@@ -19,12 +19,18 @@ class views_CrumbsMultiPlugin_argTitle implements crumbs_MultiPlugin_FindTitleIn
     $q = db_select('menu_router', 'mr');
     $q->condition('page_callback', 'views_page');
     $q->fields('mr', array('path', 'page_arguments'));
+    $paths_all = array();
     foreach ($q->execute() as $row) {
       $args = unserialize($row->page_arguments);
       if (count($args) > 2) {
         list($view_name, $view_display_id) = $args;
-        $api->addRule("$view_name.$view_display_id", $row->path);
+        $key = "$view_name.$view_display_id";
+        $paths_all[$key][] = $row->path;
       }
+    }
+    foreach ($paths_all as $key => $paths) {
+      $api->addRule($key, $key);
+      $api->setRoutes($paths, $key);
     }
   }
 
