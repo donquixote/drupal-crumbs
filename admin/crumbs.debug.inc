@@ -91,11 +91,11 @@ function _crumbs_admin_debug_matrix($path_to_test) {
     }
   }
 
-  list($matrix, $best_cells) = $candidate_logger->getAsMatrix(array_reverse($trail));
+  list($matrix, $best_cells, $weights) = $candidate_logger->getAsMatrix(array_reverse($trail));
 
-  $matrix_thead_tr_first = '<td></td>';
-  $matrix_thead_tr_second = '<td></td>';
-  $matrix_thead_tr_third = '<th>' . t('Candidate key') . '</th>';
+  $matrix_thead_tr_first = '<td></td><td></td>';
+  $matrix_thead_tr_second = '<td></td><td></td>';
+  $matrix_thead_tr_third = '<th>' . t('Candidate key') . '</th><th>' . t('Weight') . '</th>';
 
   foreach (array_reverse(array_keys($trail)) as $i => $path) {
     $title = isset($titles[$path]) ? l($titles[$path], $path) : FALSE;
@@ -128,7 +128,7 @@ function _crumbs_admin_debug_matrix($path_to_test) {
   $matrix_tbody = '';
   $odd = TRUE;
   foreach ($matrix as $key => $row_cells) {
-    $row_html = '<td>' . $key . '</td>';
+    $row_html = '<td>' . $key . '</td><td>' . $weights[$key] . '</td>';
     foreach ($row_cells as $col_key => $cell) {
       if (':parent' === substr($col_key, -7)) {
         $cell = '<code>' . $cell . '</code>';

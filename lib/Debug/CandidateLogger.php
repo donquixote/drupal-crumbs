@@ -98,9 +98,10 @@ class crumbs_Debug_CandidateLogger {
     foreach ($weights as $key => $weight) {
       $matrix[$key] = $rows[$key];
     }
+    $weights['(default)'] = '-';
     $matrix['(default)'] = $default_row;
 
-    return array($matrix, $best_cells);
+    return array($matrix, $best_cells, $weights);
   }
 
   /**
