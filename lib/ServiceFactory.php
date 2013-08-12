@@ -58,11 +58,11 @@ class crumbs_ServiceFactory {
    * Available as crumbs('pluginInfo').
    *
    * @param crumbs_Container_LazyServices $cache
-   * @return crumbs_Container_CachedLazyData
+   * @return crumbs_Container_CachedLazyPluginInfo
    */
   function pluginInfo($cache) {
     $source = new crumbs_PluginInfo();
-    return new crumbs_Container_CachedLazyData($source);
+    return new crumbs_Container_CachedLazyPluginInfo($source);
   }
 
   /**
@@ -71,11 +71,11 @@ class crumbs_ServiceFactory {
    * Available as crumbs('page').
    *
    * @param crumbs_Container_LazyServices $cache
-   * @return crumbs_Container_LazyData
+   * @return crumbs_Container_LazyPageData
    */
   function page($cache) {
     $source = new crumbs_CurrentPageInfo($cache->trails, $cache->breadcrumbBuilder, $cache->router);
-    return new crumbs_Container_LazyData($source);
+    return new crumbs_Container_LazyPageData($source);
   }
 
   /**

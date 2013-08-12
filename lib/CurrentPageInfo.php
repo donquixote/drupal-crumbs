@@ -41,7 +41,7 @@ class crumbs_CurrentPageInfo {
   /**
    * Check if the breadcrumb is to be suppressed altogether.
    *
-   * @param crumbs_Container_LazyData $page
+   * @param crumbs_Container_LazyPageData $page
    * @return bool
    */
   function breadcrumbSuppressed($page) {
@@ -56,7 +56,7 @@ class crumbs_CurrentPageInfo {
   /**
    * Assemble all breadcrumb data.
    *
-   * @param crumbs_Container_LazyData $page
+   * @param crumbs_Container_LazyPageData $page
    * @return array
    */
   function breadcrumbData($page) {
@@ -73,7 +73,7 @@ class crumbs_CurrentPageInfo {
   /**
    * Build the Crumbs trail.
    *
-   * @param crumbs_Container_LazyData $page
+   * @param crumbs_Container_LazyPageData $page
    * @return array
    */
   function trail($page) {
@@ -90,7 +90,7 @@ class crumbs_CurrentPageInfo {
    *
    * The altering will happen in a separate step, so
    *
-   * @param crumbs_Container_LazyData $page
+   * @param crumbs_Container_LazyPageData $page
    * @return array
    */
   function rawBreadcrumbItems($page) {
@@ -131,7 +131,7 @@ class crumbs_CurrentPageInfo {
   /**
    * Determine if we want to show the breadcrumb item for the current page.
    *
-   * @param crumbs_Container_LazyData $page
+   * @param crumbs_Container_LazyPageData $page
    * @return bool
    */
   function showCurrentPage($page) {
@@ -139,7 +139,7 @@ class crumbs_CurrentPageInfo {
   }
 
   /**
-   * @param crumbs_Container_LazyData $page
+   * @param crumbs_Container_LazyPageData $page
    * @return bool
    */
   function trailingSeparator($page) {
@@ -149,7 +149,7 @@ class crumbs_CurrentPageInfo {
   /**
    * Determine if we want to show the breadcrumb item for the front page.
    *
-   * @param crumbs_Container_LazyData $page
+   * @param crumbs_Container_LazyPageData $page
    * @return bool
    */
   function showFrontPage($page) {
@@ -159,7 +159,7 @@ class crumbs_CurrentPageInfo {
   /**
    * If there are fewer trail items than this, we hide the breadcrumb.
    *
-   * @param crumbs_Container_LazyData $page
+   * @param crumbs_Container_LazyPageData $page
    * @return int
    */
   function minTrailItems($page) {
@@ -169,7 +169,7 @@ class crumbs_CurrentPageInfo {
   /**
    * Determine separator string, e.g. ' &raquo; ' or ' &gt; '.
    *
-   * @param crumbs_Container_LazyData $page
+   * @param crumbs_Container_LazyPageData $page
    * @return string
    */
   function separator($page) {
@@ -179,7 +179,7 @@ class crumbs_CurrentPageInfo {
   /**
    * Determine separator string, e.g. ' &raquo; ' or ' &gt; '.
    *
-   * @param crumbs_Container_LazyData $page
+   * @param crumbs_Container_LazyPageData $page
    * @return string
    */
   function separatorSpan($page) {
@@ -193,7 +193,7 @@ class crumbs_CurrentPageInfo {
    * - The current page item might be hidden based on a setting.
    * - Any item where the title is FALSE will be hidden / skipped over.
    *
-   * @param crumbs_Container_LazyData $page
+   * @param crumbs_Container_LazyPageData $page
    * @return int
    */
   function minVisibleItems($page) {
@@ -210,7 +210,7 @@ class crumbs_CurrentPageInfo {
   /**
    * Build altered breadcrumb items.
    *
-   * @param crumbs_Container_LazyData $page
+   * @param crumbs_Container_LazyPageData $page
    * @return array
    */
   function breadcrumbItems($page) {
@@ -228,7 +228,7 @@ class crumbs_CurrentPageInfo {
   /**
    * Build the breadcrumb HTML.
    *
-   * @param crumbs_Container_LazyData $page
+   * @param crumbs_Container_LazyPageData $page
    * @return string
    */
   function breadcrumbHtml($page) {
@@ -265,7 +265,7 @@ class crumbs_CurrentPageInfo {
   /**
    * Determine current path.
    *
-   * @param crumbs_Container_LazyData $page
+   * @param crumbs_Container_LazyPageData $page
    * @return string
    */
   function path($page) {

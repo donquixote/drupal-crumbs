@@ -9,7 +9,7 @@ class crumbs_PluginEngine {
   protected $candidateLogger;
 
   /**
-   * @var crumbs_Container_CachedLazyData
+   * @var crumbs_Container_CachedLazyPluginInfo
    */
   protected $pluginInfo;
 
@@ -29,7 +29,7 @@ class crumbs_PluginEngine {
   protected $weightKeeper;
 
   /**
-   * @param crumbs_Container_CachedLazyData $plugin_info
+   * @param crumbs_Container_CachedLazyPluginInfo $plugin_info
    * @param crumbs_Router $router
    */
   function __construct($plugin_info, $router) {

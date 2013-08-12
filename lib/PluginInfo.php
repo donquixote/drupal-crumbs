@@ -17,7 +17,7 @@ class crumbs_PluginInfo {
   /**
    * Combination of user-defined weights and default weights
    *
-   * @param crumbs_Container_LazyData $container
+   * @param crumbs_Container_CachedLazyPluginInfo $container
    * @return array
    */
   function weights($container) {
@@ -35,7 +35,7 @@ class crumbs_PluginInfo {
    * Object that can calculate rule weights based on the weight settings.
    * (which are often wildcards)
    *
-   * @param crumbs_Container_LazyData $container
+   * @param crumbs_Container_CachedLazyPluginInfo $container
    * @return crumbs_Container_WildcardDataSorted
    */
   function weightKeeper($container) {
@@ -45,7 +45,7 @@ class crumbs_PluginInfo {
   /**
    * Default weights without the user configuration
    *
-   * @param crumbs_Container_LazyData $container
+   * @param crumbs_Container_CachedLazyPluginInfo $container
    * @return array
    */
   function defaultWeights($container) {
@@ -53,7 +53,7 @@ class crumbs_PluginInfo {
   }
 
   /**
-   * @param crumbs_Container_LazyData $container
+   * @param crumbs_Container_CachedLazyPluginInfo $container
    * @return array
    */
   function pluginRoutes($container) {
@@ -63,8 +63,8 @@ class crumbs_PluginInfo {
   /**
    * User-defined weights
    *
-   * @param crumbs_Container_LazyData $container
-   * @return mixed
+   * @param crumbs_Container_CachedLazyPluginInfo $container
+   * @return array
    */
   function userWeights($container) {
     return variable_get('crumbs_weights', array(
@@ -74,7 +74,7 @@ class crumbs_PluginInfo {
   }
 
   /**
-   * @param crumbs_Container_LazyData $container
+   * @param crumbs_Container_CachedLazyPluginInfo $container
    * @return crumbs_Container_MultiWildcardData
    */
   function availableKeysMeta($container) {
@@ -94,7 +94,7 @@ class crumbs_PluginInfo {
   /**
    * Prepared list of plugins and methods for a given operation.
    *
-   * @param crumbs_Container_LazyData $container
+   * @param crumbs_Container_CachedLazyPluginInfo $container
    * @param string $method
    * @return array
    */
@@ -118,7 +118,7 @@ class crumbs_PluginInfo {
   /**
    * Prepared list of plugins and methods for a given find operation and route.
    *
-   * @param crumbs_Container_LazyData $container
+   * @param crumbs_Container_CachedLazyPluginInfo $container
    * @param string $method
    * @param string $route
    * @return array
@@ -132,7 +132,7 @@ class crumbs_PluginInfo {
    * Prepared list of plugins and methods for a given find operation and route.
    * This is the version to be cached.
    *
-   * @param crumbs_Container_LazyData $container
+   * @param crumbs_Container_CachedLazyPluginInfo $container
    * @param string $method
    * @param string $route
    * @return array|bool
@@ -170,7 +170,7 @@ class crumbs_PluginInfo {
   /**
    * Plugins, not sorted, but already with the weights information.
    *
-   * @param crumbs_Container_LazyData $container
+   * @param crumbs_Container_CachedLazyPluginInfo $container
    * @return array
    */
   function plugins($container) {
@@ -183,7 +183,7 @@ class crumbs_PluginInfo {
   /**
    * Plugins, not sorted, but already with the weights information.
    *
-   * @param crumbs_Container_LazyData $container
+   * @param crumbs_Container_CachedLazyPluginInfo $container
    * @return array
    */
   function pluginsCached($container) {
@@ -200,8 +200,8 @@ class crumbs_PluginInfo {
   /**
    * Information returned from hook_crumbs_plugins()
    *
-   * @param crumbs_Container_LazyData $container
-   * @return array
+   * @param crumbs_Container_CachedLazyPluginInfo $container
+   * @return crumbs_InjectedAPI_hookCrumbsPlugins
    */
   function discovery($container) {
     $container->includePluginFiles;
@@ -220,7 +220,7 @@ class crumbs_PluginInfo {
   /**
    * Order of plugins, for 'find' and 'alter' operations.
    *
-   * @param crumbs_Container_LazyData $container
+   * @param crumbs_Container_CachedLazyPluginInfo $container
    * @return array
    */
   function pluginOrder($container) {
@@ -268,7 +268,7 @@ class crumbs_PluginInfo {
   /**
    * Sorted plugins for 'find' and 'alter' operations.
    *
-   * @param crumbs_Container_LazyData $container
+   * @param crumbs_Container_CachedLazyPluginInfo $container
    * @return array
    */
   function pluginsSorted($container) {
@@ -286,7 +286,7 @@ class crumbs_PluginInfo {
    * Include files in the /plugin/ folder.
    * We use the cache mechanic to make sure this happens exactly once.
    *
-   * @param crumbs_Container_LazyData $container
+   * @param crumbs_Container_CachedLazyPluginInfo $container
    * @return bool
    */
   function includePluginFiles($container) {

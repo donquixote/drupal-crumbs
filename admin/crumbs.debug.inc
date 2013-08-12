@@ -78,9 +78,6 @@ function _crumbs_admin_debug_matrix($path_to_test) {
   $services = new crumbs_Container_LazyServices($service_factory);
   $candidate_logger = new crumbs_Debug_CandidateLogger();
   $services->pluginEngine->setCandidateLogger($candidate_logger);
-  /**
-   * @var crumbs_Container_LazyData $page_info
-   */
   $page_info = $services->page;
   $page_info->set('path', $path_to_test);
   // Trigger breadcrumb calculation.
