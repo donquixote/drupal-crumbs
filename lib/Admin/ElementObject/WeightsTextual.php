@@ -59,7 +59,7 @@ class crumbs_Admin_ElementObject_WeightsTextual extends crumbs_Admin_ElementObje
    */
   protected function getDefaultText($element) {
 
-    $available_keys = $element['#crumbs_plugin_info']->adminPluginInfo->collectedInfo();
+    $available_keys = $element['#crumbs_plugin_info']->availableKeysMeta;
     $weights = $element['#value'];
     $default_weights = $element['#crumbs_plugin_info']->defaultWeights;
 
