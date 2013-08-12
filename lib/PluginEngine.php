@@ -127,6 +127,10 @@ class crumbs_PluginEngine {
     $best_candidate_weight = 999999;
     $best_candidate_key = NULL;
     foreach ($plugin_methods as $plugin_key => $method) {
+      if (empty($this->plugins[$plugin_key])) {
+        // Probably need a cache clear.
+        continue;
+      }
       $plugin = $this->plugins[$plugin_key];
       if ($plugin instanceof crumbs_MultiPlugin) {
         // That's a MultiPlugin
