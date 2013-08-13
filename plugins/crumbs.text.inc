@@ -23,8 +23,11 @@ function text_crumbs_plugins($api) {
         }
       }
     }
-    $plugin = new crumbs_EntityPlugin_Field_Text($field_name, $instances);
-    $api->entityTitlePlugin($field_name, $plugin, array_keys($instances));
+
+    if (!empty($instances)) {
+      $plugin = new crumbs_EntityPlugin_Field_Text($field_name, $instances);
+      $api->entityTitlePlugin($field_name, $plugin, array_keys($instances));
+    }
   }
   $api->disabledByDefault('*');
 }
