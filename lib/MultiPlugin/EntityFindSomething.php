@@ -5,7 +5,7 @@ class crumbs_MultiPlugin_EntityFindSomething extends crumbs_MultiPlugin_EntityFi
   protected $entityType;
   protected $bundleKey;
   protected $bundleName;
-  protected $weights;
+  protected $weights = array();
 
   /**
    * @param crumbs_EntityPlugin $plugin
