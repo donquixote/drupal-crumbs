@@ -45,6 +45,19 @@ class crumbs_Container_CachedLazyPluginInfo {
     foreach ($source->keysToCache() as $key) {
       $this->keysToCache[$key] = TRUE;
     }
+
+    // Plugin cache is special, because these are objects.
+    // If this fails, we want to totally circumvent the cache.
+    $callback_before = ini_get('unserialize_callback_func');
+    ini_set('unserialize_callback_func', '_crumbs_unserialize_failure');
+    try {
+      $this->plugins;
+    }
+    catch (crumbs_UnserializeException $exception) {
+      // Don't cache anything this round.
+      $this->keysToCache = array();
+    }
+    ini_set('unserialize_callback_func', $callback_before);
   }
 
   /**
@@ -79,7 +92,15 @@ class crumbs_Container_CachedLazyPluginInfo {
     // Load from persistent cache
     $cache = cache_get("crumbs:$key");
     if (isset($cache->data)) {
-      return $this->data[$key] = $cache->data;
+      // We do the serialization manually,
+      // to prevent Drupal from intercepting exceptions.
+      // However, from previous versions we might still have non-serialized data.
+      if (is_array($cache->data)) {
+        return $this->data[$key] = $cache->data;
+      }
+      else {
+        return $this->data[$key] = unserialize($cache->data);
+      }
     }
 
     // Load from source, write the result to persistent cache.
@@ -88,7 +109,11 @@ class crumbs_Container_CachedLazyPluginInfo {
     }
     $result = $this->source->$key($this);
     $this->data[$key] = isset($result) ? $result : FALSE;
-    cache_set("crumbs:$key", $this->data[$key]);
+
+    if (!is_array($this->data[$key])) {
+      throw new Exception("Only arrays can be cached in crumbs_CachedLazyPluginInfo.");
+    }
+    cache_set("crumbs:$key", serialize($this->data[$key]));
 
     return $this->data[$key];
   }
