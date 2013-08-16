@@ -588,3 +588,13 @@ function _crumbs_admin_flush_cache() {
   // Clear plugin info in 'cache' cache bin.
   crumbs('pluginInfo')->flushCaches();
 }
+
+/**
+ * Callback to be registered with ini_set('unserialize_callback_func', *)
+ *
+ * @param string $class
+ * @throws crumbs_UnserializeException
+ */
+function _crumbs_unserialize_failure($class) {
+  throw new crumbs_UnserializeException();
+}
