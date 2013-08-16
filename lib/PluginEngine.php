@@ -128,7 +128,7 @@ class crumbs_PluginEngine {
     $best_candidate_key = NULL;
     foreach ($plugin_methods as $plugin_key => $method) {
       if (empty($this->plugins[$plugin_key])) {
-        // Probably need a cache clear.
+        // Probably need a cache clear.)
         continue;
       }
       $plugin = $this->plugins[$plugin_key];

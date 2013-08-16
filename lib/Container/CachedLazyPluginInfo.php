@@ -128,7 +128,7 @@ class crumbs_Container_CachedLazyPluginInfo {
     }
 
     $cache = cache_get("crumbs:$key");
-    if (isset($cache->data) && is_array($cache->data)) {
+    if (FALSE && isset($cache->data) && is_array($cache->data)) {
       return $this->data[$key] = $cache->data;
     }
 

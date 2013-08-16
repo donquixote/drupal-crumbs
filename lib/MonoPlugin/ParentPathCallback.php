@@ -45,7 +45,7 @@ class crumbs_MonoPlugin_ParentPathCallback implements crumbs_MonoPlugin_FindPare
   function findParent($path, $item) {
     if (!isset($this->callback)) {
       // Restore the callback after serialization.
-      $this->callback = crumbs('callbackRestoration')->restoreCallback($this->module, $this->key);
+      $this->callback = crumbs('callbackRestoration')->getRouteParentCallback($this->module, $this->key);
     }
     if (!empty($this->callback)) {
       return call_user_func($this->callback, $path, $item);

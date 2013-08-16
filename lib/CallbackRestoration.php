@@ -32,11 +32,23 @@ class crumbs_CallbackRestoration {
    * @param string $key
    * @return callback
    */
-  function restoreCallback($module, $key) {
+  function getEntityParentCallback($module, $key) {
     if (!isset($this->callbacks[$module])) {
       $this->restoreModuleCallbacks($module);
     }
-    return isset($this->callbacks[$module][$key]) ? $this->callbacks[$module][$key] : FALSE;
+    return isset($this->callbacks[$module]['entityParent'][$key]) ? $this->callbacks[$module]['entityParent'][$key] : FALSE;
+  }
+
+  /**
+   * @param string $module
+   * @param string $key
+   * @return callback
+   */
+  function getRouteParentCallback($module, $key) {
+    if (!isset($this->callbacks[$module])) {
+      $this->restoreModuleCallbacks($module);
+    }
+    return isset($this->callbacks[$module]['routeParent'][$key]) ? $this->callbacks[$module]['routeParent'][$key] : FALSE;
   }
 
   /**
@@ -54,6 +66,6 @@ class crumbs_CallbackRestoration {
     $this->api->setModule($module);
     $f($this->api);
     $this->discoveryOngoing = FALSE;
-    $this->callbacks = $this->api->getCallbacks();
+    $this->callbacks[$module] = $this->api->getModuleCallbacks($module);
   }
 }

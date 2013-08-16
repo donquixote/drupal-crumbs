@@ -42,7 +42,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    */
   function getPluginRoutes() {
     if ($this->discoveryOngoing) {
-      throw new Exception("getPluginRoutes() cannot be called from an implementation of hook_crumbs_plugins().");
+      throw new Exception(__METHOD__ . "() cannot be called from an implementation of hook_crumbs_plugins().");
     }
     return $this->pluginRoutes;
   }
@@ -53,20 +53,21 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    */
   function getDefaultValues() {
     if ($this->discoveryOngoing) {
-      throw new Exception("getDefaultValues() cannot be called from an implementation of hook_crumbs_plugins().");
+      throw new Exception(__METHOD__ . "() cannot be called from an implementation of hook_crumbs_plugins().");
     }
     return $this->defaultValues;
   }
 
   /**
+   * @param string $module
    * @return array
    * @throws Exception
    */
-  function getCallbacks() {
+  function getModuleCallbacks($module) {
     if ($this->discoveryOngoing) {
-      throw new Exception("getModuleCallbacks() cannot be called from an implementation of hook_crumbs_plugins().");
+      throw new Exception(__METHOD__ . "() cannot be called from an implementation of hook_crumbs_plugins().");
     }
-    return $this->callbacks;
+    return isset($this->callbacks[$module]) ? $this->callbacks[$module] : array();
   }
 
   /**
@@ -74,7 +75,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    */
   function finalize() {
     if ($this->discoveryOngoing) {
-      throw new Exception("finalize() cannot be called from an implementation of hook_crumbs_plugins().");
+      throw new Exception(__METHOD__ . "() cannot be called from an implementation of hook_crumbs_plugins().");
     }
 
     $build = array();
@@ -152,6 +153,17 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    */
   function entityParentPlugin($key, $entity_plugin = NULL, $types = NULL) {
     $this->entityPlugin('parent', $key, $entity_plugin, $types);
+  }
+
+  /**
+   * @param $key
+   * @param callable $callback
+   * @param null $types
+   */
+  function entityParentCallback($key, $callback, $types = NULL) {
+    $entity_plugin = new crumbs_EntityPlugin_Callback($callback, $this->module, $key);
+    $this->entityPlugin('parent', $key, $entity_plugin, $types);
+    $this->callbacks[$this->module]['entityParent'][$key] = $callback;
   }
 
   /**
@@ -287,7 +299,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
 
   function routeParentCallback($route, $key, $callback) {
     $this->routeMonoPlugin($route, $key, new crumbs_MonoPlugin_ParentPathCallback($callback, $this->module, $key));
-    $this->callbacks[$this->module][$key] = $callback;
+    $this->callbacks[$this->module]['routeParent'][$key] = $callback;
   }
 
   /**
