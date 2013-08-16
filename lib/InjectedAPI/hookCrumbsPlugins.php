@@ -9,6 +9,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
 
   protected $module;
   protected $plugins = array();
+  protected $callbacks = array();
   protected $pluginRoutes = array();
   protected $defaultValues = array();
   protected $entityRoutes = array();
@@ -55,6 +56,17 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
       throw new Exception("getDefaultValues() cannot be called from an implementation of hook_crumbs_plugins().");
     }
     return $this->defaultValues;
+  }
+
+  /**
+   * @return array
+   * @throws Exception
+   */
+  function getCallbacks() {
+    if ($this->discoveryOngoing) {
+      throw new Exception("getModuleCallbacks() cannot be called from an implementation of hook_crumbs_plugins().");
+    }
+    return $this->callbacks;
   }
 
   /**
@@ -271,6 +283,11 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    */
   function routeParentPath($route, $key, $parent_path) {
     $this->routeMonoPlugin($route, $key, new crumbs_MonoPlugin_FixedParentPath($parent_path));
+  }
+
+  function routeParentCallback($route, $key, $callback) {
+    $this->routeMonoPlugin($route, $key, new crumbs_MonoPlugin_ParentPathCallback($callback, $this->module, $key));
+    $this->callbacks[$this->module][$key] = $callback;
   }
 
   /**

@@ -7,6 +7,7 @@
  * @property crumbs_TrailFinder $trailFinder
  * @property crumbs_ParentFinder $parentFinder
  * @property crumbs_PluginEngine $pluginEngine
+ * @property crumbs_CallbackRestoration $callbackRestoration
  * @property crumbs_Container_CachedLazyPluginInfo $pluginInfo
  * @property crumbs_Container_LazyPageData $page
  * @property crumbs_Container_LazyDataByPath $trails

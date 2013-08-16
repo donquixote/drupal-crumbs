@@ -53,6 +53,14 @@ class crumbs_ServiceFactory {
   }
 
   /**
+   * @param crumbs_Container_LazyServices $cache
+   * @return crumbs_CallbackRestoration
+   */
+  function callbackRestoration($cache) {
+    return new crumbs_CallbackRestoration();
+  }
+
+  /**
    * A service that knows all plugins and their configuration/weights.
    *
    * Available as crumbs('pluginInfo').
