@@ -65,9 +65,7 @@ class crumbs_Container_CachedLazyPluginInfo {
    */
   function flushCaches() {
     $this->data = array();
-    foreach ($this->keysToCache as $key => $true) {
-      cache_clear_all("crumbs:$key", 'cache');
-    }
+    cache_clear_all('crumbs:', 'cache', TRUE);
   }
 
   /**
