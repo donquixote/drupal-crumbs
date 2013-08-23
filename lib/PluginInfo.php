@@ -67,10 +67,19 @@ class crumbs_PluginInfo {
    * @return array
    */
   function userWeights($container) {
-    return variable_get('crumbs_weights', array(
-      // TODO: This default value feels stupid. Why is it?
-      'crumbs.home_title' => 0,
-    ));
+    $user_weights = variable_get('crumbs_weights', array());
+    // '*' always needs to be set.
+    if (!isset($user_weights['*'])) {
+      // Put '*' last.
+      $max = -1;
+      foreach ($user_weights as $k => $v) {
+        if ($v >= $max) {
+          $max = $v;
+        }
+      }
+      $user_weights['*'] = $max + 1;
+    }
+    return $user_weights;
   }
 
   /**
