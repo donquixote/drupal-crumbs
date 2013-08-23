@@ -67,7 +67,11 @@ class crumbs_PluginInfo {
    * @return array
    */
   function userWeights($container) {
-    $user_weights = variable_get('crumbs_weights', array());
+    $user_weights = variable_get('crumbs_weights', array(
+      // The user expects the crumbs.home_title plugin to be dominant.
+      // @todo There must be a better way to do this.
+      'crumbs.home_title' => 0,
+    ));
     // '*' always needs to be set.
     if (!isset($user_weights['*'])) {
       // Put '*' last.
