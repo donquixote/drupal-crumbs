@@ -20,3 +20,24 @@ function crumbs_uninstall() {
   variable_del('crumbs_separator');
   variable_del('crumbs_override_theme_breadcrumb');
 }
+
+/**
+ * Restore the original name of taxonomy.termReference.* plugins,
+ * without losing configuration.
+ */
+function crumbs_update_7201() {
+  $user_weights = variable_get('crumbs_weights', array());
+
+  // Rename taxonomy.termReference plugins.
+  foreach ($user_weights as $old_key => $value) {
+    if ('taxonomy.field_' === substr($old_key, 0, 15)) {
+      $new_key = 'taxonomy.termReference.' . substr($old_key, 9);
+      $user_weights[$new_key] = $value;
+    }
+  }
+
+  // Save and flush caches.
+  variable_set('crumbs_weights', $user_weights);
+  cache_clear_all();
+  cache_clear_all('crumbs:', 'cache', TRUE);
+}

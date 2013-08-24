@@ -13,7 +13,7 @@ function taxonomy_crumbs_plugins($api) {
   foreach (field_info_fields() as $field_name => $field_info) {
     if ($field_info['type'] === 'taxonomy_term_reference') {
       $plugin = new crumbs_EntityPlugin_Field_TermReference($field_name, $field_info['bundles']);
-      $api->entityParentPlugin($field_name, $plugin, array_keys($field_info['bundles']));
+      $api->entityParentPlugin('termReference.' . $field_name, $plugin, array_keys($field_info['bundles']));
     }
   }
   $api->disabledByDefault('termReference.*');
