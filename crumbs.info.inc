@@ -117,6 +117,10 @@ function crumbs_theme($existing, $type, $theme, $path) {
       'file' => 'admin/crumbs.expansible.inc',
       'render element' => 'element',
     ),
+    'crumbs_weights_dropdowns' => array(
+      'file' => 'admin/crumbs.dropdowns.inc',
+      'render element' => 'element',
+    ),
   );
 }
 

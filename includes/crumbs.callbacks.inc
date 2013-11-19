@@ -26,6 +26,10 @@ function crumbs_special_menu_link_title(array $menu_link) {
 // Form element callbacks
 // -----------------------------------------------------------------------------
 
+
+// Admin tabledrag element
+// -----------------------------------------------------------------------------
+
 /**
  * Value callback for tabledrag element ($element['#value_callback']).
  */
@@ -59,7 +63,7 @@ function _crumbs_element_pre_render($element) {
  * Validation callback for tabledrag element ($element['#element_validate']).
  */
 function _crumbs_element_validate(&$element, &$form_state) {
-  _crumbs_element_object($element)->validate($element, $form_state);
+  return _crumbs_element_object($element)->validate($element, $form_state);
 }
 
 /**
@@ -83,6 +87,9 @@ function _crumbs_element_object(&$element) {
         break;
       case 'crumbs_weights_expansible':
         $obj = new crumbs_Admin_ElementObject_WeightsExpansible($element);
+        break;
+      case 'crumbs_weights_dropdowns':
+        $obj = new crumbs_Admin_ElementObject_WeightsDropdowns($element);
         break;
       default:
         throw new Exception('Unknown element type "' . $element['#type'] . '".');

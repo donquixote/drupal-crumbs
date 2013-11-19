@@ -30,5 +30,15 @@ function crumbs_labs_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => 3,
   );
+  $items['admin/structure/crumbs/weights/dropdowns'] = array(
+    'title' => 'Dropdowns (Labs)',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('crumbs_admin_weights_form', 'dropdowns'),
+    'access arguments' => array('administer crumbs'),
+    'file' => 'admin/crumbs.admin.inc',
+    'file path' => drupal_get_path('module', 'crumbs'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 5,
+  );
   return $items;
 }

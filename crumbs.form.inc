@@ -17,13 +17,16 @@ function crumbs_element_info() {
     '#tree' => TRUE,
   );
   $types['crumbs_weights_tabledrag'] = array(
-    '#theme' => 'crumbs_weights_tabledrag',
-  ) + $common;
+      '#theme' => 'crumbs_weights_tabledrag',
+    ) + $common;
   $types['crumbs_weights_textual'] = array(
-    '#theme' => 'crumbs_weights_textual',
-  ) + $common;
+      '#theme' => 'crumbs_weights_textual',
+    ) + $common;
   $types['crumbs_weights_expansible'] = array(
-    '#theme' => 'crumbs_weights_expansible',
-  ) + $common;
+      '#theme' => 'crumbs_weights_expansible',
+    ) + $common;
+  $types['crumbs_weights_dropdowns'] = array(
+      '#theme' => 'crumbs_weights_dropdowns',
+    ) + $common;
   return $types;
 }

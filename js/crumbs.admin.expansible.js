@@ -1,5 +1,7 @@
+/*global jQuery, document, Drupal */
 
-jQuery(document).ready(function($) {
+jQuery(document).ready(function ($) {
+  "use strict";
 
   var default_weights = Drupal.settings.crumbs.default_weights;
 

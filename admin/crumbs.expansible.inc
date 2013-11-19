@@ -8,7 +8,6 @@
  *   Rendered HTML
  */
 function theme_crumbs_weights_expansible(&$vars) {
-
   $element = $vars['element'];
 
   $rows = array();
@@ -16,6 +15,7 @@ function theme_crumbs_weights_expansible(&$vars) {
     $cells = array();
     $cells[] = $key;
     $cells[] = render($element[$key]);
+
     $meta = $element[$key]['#crumbs_rule_info'];
 
     $methods = array();
@@ -45,8 +45,10 @@ function theme_crumbs_weights_expansible(&$vars) {
       $cells[] = '';
     }
 
-    $rows[] = $cells;
+    $rows[$key] = $cells;
   }
+
+  ksort($rows);
 
   return theme('table', array(
     'rows' => $rows,

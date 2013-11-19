@@ -1,6 +1,6 @@
 <?php
 
-class crumbs_Container_MultiWildcardData implements ArrayAccess, IteratorAggregate {
+class crumbs_Container_MultiWildcardData implements ArrayAccess, IteratorAggregate, Countable {
 
   /**
    * @var array
@@ -47,6 +47,8 @@ class crumbs_Container_MultiWildcardData implements ArrayAccess, IteratorAggrega
 
   /**
    * @param string $key
+   *   A plugin result key, e.g. "menu.hierarchy.*".
+   *
    * @return crumbs_Container_MultiWildcardDataOffset
    */
   function offsetGet($key) {
@@ -76,5 +78,12 @@ class crumbs_Container_MultiWildcardData implements ArrayAccess, IteratorAggrega
    */
   function offsetUnset($key) {
     throw new Exception("offsetUnset not supported.");
+  }
+
+  /**
+   * @return int
+   */
+  function count() {
+    return count($this->keys);
   }
 }
