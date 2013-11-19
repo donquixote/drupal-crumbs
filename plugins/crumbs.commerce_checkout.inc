@@ -44,7 +44,8 @@ class commerce_checkout_CrumbsMonoPlugin_checkoutPages implements crumbs_MonoPlu
     if (!empty($page['prev_page'])) {
       return 'checkout/' . $order->order_id . '/' . $page['prev_page'];
     }
-    elseif ('checkout' === $page['page_id']) {
+    else {
+      // If the step has no 'prev_page', then the parent is 'cart'.
       return 'cart';
     }
   }
