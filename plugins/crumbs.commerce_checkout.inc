@@ -7,8 +7,14 @@
  */
 function commerce_checkout_crumbs_plugins($api) {
 
+  // The parent path and title for checkout/%/% will be determined by the
+  // commerce_checkout_CrumbsMonoPlugin_checkoutPages plugin.
   $api->routeMonoPlugin('checkout/%/%', 'checkoutPages');
+
+  // The parent path for 'checkout/%' should always be 'cart'.
   $api->routeParentPath('checkout/%', 'cartToCheckout', 'cart');
+
+  // This plugin needs to be explicitly enabled.
   $api->disabledByDefault('*');
 }
 
@@ -26,9 +32,11 @@ class commerce_checkout_CrumbsMonoPlugin_checkoutPages implements crumbs_MonoPlu
    * @inheritdoc
    */
   function findParent($path, $item) {
+    // $item['map'][2] should contain the checkout step.
     if (empty($item['map'][2])) {
       return;
     }
+    // $item['map'][1] should contain the order.
     if (!is_object($item['map'][1])) {
       return;
     }
