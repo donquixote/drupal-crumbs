@@ -15,14 +15,14 @@ class crumbs_MonoPlugin_TranslateTitle implements crumbs_MonoPlugin_FindTitleInt
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     $api->titleWithLabel("t('" . $this->title . "')", t('Title'));
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function findTitle($path, $item) {
     return t($this->title);

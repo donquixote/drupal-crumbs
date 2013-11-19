@@ -22,7 +22,7 @@ abstract class crumbs_EntityPlugin_Field_Abstract implements crumbs_EntityPlugin
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api, $entity_type, $keys) {
     if (!empty($this->bundlesByType[$entity_type])) {
@@ -45,7 +45,7 @@ abstract class crumbs_EntityPlugin_Field_Abstract implements crumbs_EntityPlugin
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function entityFindCandidate($entity, $entity_type, $distinction_key) {
     $items = field_get_items($entity_type, $entity, $this->fieldKey);

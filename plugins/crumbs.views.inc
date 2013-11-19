@@ -12,7 +12,7 @@ function views_crumbs_plugins($api) {
 class views_CrumbsMultiPlugin_argTitle implements crumbs_MultiPlugin_FindTitleInterface {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     // We try to get all views pages but avoid views_get_all_view() for performance.
@@ -35,7 +35,7 @@ class views_CrumbsMultiPlugin_argTitle implements crumbs_MultiPlugin_FindTitleIn
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function findTitle($path, $item) {
 

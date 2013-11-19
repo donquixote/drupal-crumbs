@@ -33,14 +33,14 @@ class crumbs_MonoPlugin_ParentPathCallback implements crumbs_MonoPlugin_FindPare
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     $api->titleWithLabel(t('Callback result.'), t('Parent'));
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function findParent($path, $item) {
     if (!isset($this->callback)) {

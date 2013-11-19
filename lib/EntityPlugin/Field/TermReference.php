@@ -3,7 +3,7 @@
 class crumbs_EntityPlugin_Field_TermReference extends crumbs_EntityPlugin_Field_Abstract {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function fieldFindCandidate(array $items) {
 

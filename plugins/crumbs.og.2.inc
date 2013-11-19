@@ -24,7 +24,7 @@ function og_crumbs_plugins($api) {
 class og_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     $types = node_type_get_types();
@@ -127,7 +127,7 @@ class og_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin {
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     if (is_array($this->groupsOverviewPaths)) {

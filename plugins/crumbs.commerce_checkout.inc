@@ -22,14 +22,14 @@ function commerce_checkout_crumbs_plugins($api) {
 class commerce_checkout_CrumbsMonoPlugin_checkoutPages implements crumbs_MonoPlugin_FindParentInterface, crumbs_MonoPlugin_FindTitleInterface {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     $api->titleWithLabel(t('Previous page in checkout process'), t('Parent'));
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function findParent($path, $item) {
     // $item['map'][2] should contain the checkout step.
@@ -51,7 +51,7 @@ class commerce_checkout_CrumbsMonoPlugin_checkoutPages implements crumbs_MonoPlu
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function findTitle($path, $item) {
     if (empty($item['map'][2]['name'])) {

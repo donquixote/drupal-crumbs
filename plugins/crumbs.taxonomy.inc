@@ -23,7 +23,7 @@ function taxonomy_crumbs_plugins($api) {
 class taxonomy_CrumbsMultiPlugin_termParent implements crumbs_MultiPlugin {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     foreach (taxonomy_get_vocabularies() as $voc) {

@@ -26,7 +26,7 @@ function og_crumbs_plugins($api) {
 class og_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     $types = node_type_get_types();
@@ -92,7 +92,7 @@ class og_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin {
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     $types = node_type_get_types();
@@ -122,14 +122,14 @@ class og_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin {
 class og_CrumbsMonoPlugin_groups_overview_title implements crumbs_MonoPlugin_FindTitleInterface {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     return t('Set "Group" as the title for item for "group-list".');
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function findTitle($path, $item) {
     if ($item['route'] === 'group-list') {
@@ -158,7 +158,7 @@ class og_CrumbsMultiPlugin_my_groups_overview implements crumbs_MultiPlugin {
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     $types = node_type_get_types();

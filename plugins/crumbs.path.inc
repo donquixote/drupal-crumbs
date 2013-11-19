@@ -20,14 +20,14 @@ function path_crumbs_plugins($api) {
 class path_CrumbsMonoPlugin implements crumbs_MonoPlugin_FindParentInterface {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     return t('Chop off the last fragment of the path alias, consider the result as the parent path.');
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function findParent($path, $item) {
     if ($alias = $item['alias']) {

@@ -18,7 +18,7 @@ function menu_crumbs_plugins($api) {
 class menu_CrumbsMultiPlugin_hierarchy implements crumbs_MultiPlugin_FindParentInterface {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     foreach (menu_get_menus() as $key => $title) {
@@ -28,7 +28,7 @@ class menu_CrumbsMultiPlugin_hierarchy implements crumbs_MultiPlugin_FindParentI
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function findParent($path, $item) {
 
@@ -65,7 +65,7 @@ class menu_CrumbsMultiPlugin_hierarchy implements crumbs_MultiPlugin_FindParentI
 class menu_CrumbsMultiPlugin_link_title implements crumbs_MultiPlugin_FindTitleInterface {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     foreach (menu_get_menus() as $key => $title) {
@@ -78,7 +78,7 @@ class menu_CrumbsMultiPlugin_link_title implements crumbs_MultiPlugin_FindTitleI
    * Find all menu links with $path as the link path.
    * For each menu, find the one with the lowest depth.
    *
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function findTitle($path, $item) {
 
@@ -168,14 +168,14 @@ class menu_CrumbsMultiPlugin_link_title implements crumbs_MultiPlugin_FindTitleI
 class menu_CrumbsMonoPlugin_specialItems implements crumbs_MonoPlugin_FindParentInterface {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     return 'Special menu items';
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function findParent($path, $item) {
 

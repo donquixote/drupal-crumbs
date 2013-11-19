@@ -26,7 +26,7 @@ function crumbs_crumbs_plugins($api) {
 class crumbs_CrumbsMonoPlugin_home_title implements crumbs_MonoPlugin_FindTitleInterface {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     $home_title = variable_get('crumbs_home_link_title', 'Home');
@@ -36,7 +36,7 @@ class crumbs_CrumbsMonoPlugin_home_title implements crumbs_MonoPlugin_FindTitleI
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function findTitle($path, $item) {
     if ('<front>' === $item['href']) {

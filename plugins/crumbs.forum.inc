@@ -22,7 +22,7 @@ function forum_crumbs_plugins($api) {
 class forum_CrumbsMonoPlugin_forumTerm implements crumbs_MonoPlugin {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     $api->titleWithLabel(t('The parent forum'), t('Parent'));
@@ -61,7 +61,7 @@ class forum_CrumbsMonoPlugin_forumTerm implements crumbs_MonoPlugin {
 class forum_CrumbsMonoPlugin_forumTermName implements crumbs_MonoPlugin {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     $api->titleWithLabel(t('The forum\'s term name'), t('Title'));
@@ -93,7 +93,7 @@ class forum_CrumbsMonoPlugin_forumTermName implements crumbs_MonoPlugin {
 class forum_CrumbsMonoPlugin_forumThread implements crumbs_MonoPlugin {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     $api->titleWithLabel(t('The forum the node belongs to'), t('Parent'));
@@ -120,7 +120,7 @@ class forum_CrumbsMonoPlugin_forumThread implements crumbs_MonoPlugin {
 class forum_CrumbsMonoPlugin_forumThreadCreate implements crumbs_MonoPlugin_FindParentInterface {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     $api->titleWithLabel(t('node/add/*/* in a forum'), t('Path'));
@@ -132,7 +132,7 @@ class forum_CrumbsMonoPlugin_forumThreadCreate implements crumbs_MonoPlugin_Find
    * - (type) a forum-enabled node type, e.g. "forum".
    * - (tid) is the forum term tid.
    *
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function findParent($path, $item) {
     if (
@@ -161,7 +161,7 @@ class forum_CrumbsMonoPlugin_forumThreadCreate implements crumbs_MonoPlugin_Find
 class forum_CrumbsMonoPlugin_forumThreadCreateTitle implements crumbs_MonoPlugin_FindTitleInterface {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     $api->titleWithLabel(t('node/add/*/* in a forum'), t('Path'));
@@ -173,7 +173,7 @@ class forum_CrumbsMonoPlugin_forumThreadCreateTitle implements crumbs_MonoPlugin
    * - (type) a forum-enabled node type, e.g. "forum".
    * - (tid) is the forum term tid.
    *
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function findTitle($path, $item) {
     if (

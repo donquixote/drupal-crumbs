@@ -4,7 +4,7 @@
 class crumbs_CrumbsEntityPlugin_TokenDisabled implements crumbs_EntityPlugin {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api, $entity_type, $keys) {
     $patterns = variable_get('crumbs_' . $entity_type . '_parent_patterns', array());
@@ -20,7 +20,7 @@ class crumbs_CrumbsEntityPlugin_TokenDisabled implements crumbs_EntityPlugin {
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function entityFindCandidate($entity, $entity_type, $distinction_key) {
 

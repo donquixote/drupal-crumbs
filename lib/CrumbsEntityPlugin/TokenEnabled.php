@@ -3,7 +3,7 @@
 class crumbs_CrumbsEntityPlugin_TokenEnabled extends crumbs_CrumbsEntityPlugin_TokenDisabled {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function entityFindCandidate($entity, $entity_type, $distinction_key) {
 

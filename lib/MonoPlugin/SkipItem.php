@@ -3,14 +3,14 @@
 class crumbs_MonoPlugin_SkipItem implements crumbs_MonoPlugin_FindTitleInterface {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     $api->setTitle('Skip this breadcrumb link.');
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function findTitle($path, $item) {
     return FALSE;

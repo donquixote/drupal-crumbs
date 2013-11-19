@@ -15,14 +15,14 @@ class crumbs_MonoPlugin_FixedParentPath implements crumbs_MonoPlugin_FindParentI
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     $api->titleWithLabel($this->parentPath, t('Parent'));
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function findParent($path, $item) {
     return $this->parentPath;

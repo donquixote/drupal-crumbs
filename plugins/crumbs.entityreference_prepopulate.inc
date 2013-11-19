@@ -52,7 +52,7 @@ class entityreference_prepopulate_CrumbsMonoPlugin_node implements crumbs_MonoPl
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function describe($api) {
     $api->titleWithLabel(t('!field_name from request', array(
@@ -61,7 +61,7 @@ class entityreference_prepopulate_CrumbsMonoPlugin_node implements crumbs_MonoPl
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   function findParent($path, $item) {
     if (empty($_GET[$this->fieldName])) {
