@@ -140,6 +140,26 @@ function crumbs_admin_display_form() {
     '#markup' => '<p>' . t('Notes:') . '</p>' . $separator_notes,
   );
 
+  // Rich snippet settings.
+  $form['rich_snippet_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Rich snippet settings'),
+  );
+  $form['rich_snippet_settings']['crumbs_rich_snippet_mode'] = array(
+    '#type' => 'radios',
+    '#title' => t('Rich snippet mode'),
+    '#default_value' => variable_get('crumbs_rich_snippet_mode', '0'),
+    '#options' => array(
+      // '0' counts as empty but works better with radios than just FALSE.
+      '0' => t('No rich snippets.'),
+      'microdata' => t('Microdata'),
+      'rdfa' => t('RDFa'),
+    ),
+    '#description' => t('See !link', array(
+      '!link' => l(t('Rich snippets - Breadcrumbs'), 'https://support.google.com/webmasters/answer/185417'),
+     )),
+  );
+
   // Theme override settings
   $theme_override_options = array('theme_breadcrumb' => array());
   $themes_need_flush = FALSE;

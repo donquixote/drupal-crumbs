@@ -187,6 +187,29 @@ class crumbs_CurrentPageInfo {
   }
 
   /**
+   * Determine separator string, e.g. ' &raquo; ' or ' &gt; '.
+   *
+   * @param crumbs_Container_LazyPageData $page
+   * @return string|FALSE
+   */
+  function richSnippetMode($page) {
+    // Only allow rich snippets if theme_breadcrumb() is overridden for the
+    // current theme.
+    $registry = theme_get_registry(FALSE);
+    if (1
+      && isset($registry['breadcrumb']['function'])
+      && 'crumbs_theme_breadcrumb' === $registry['breadcrumb']['function']
+    ) {
+      $mode = variable_get('crumbs_rich_snippet_mode', FALSE);
+      // Do not return $mode if it is something like '0'.
+      if (!empty($mode)) {
+        return $mode;
+      }
+    }
+    return FALSE;
+  }
+
+  /**
    * If there are fewer visible items than this, we hide the breadcrumb.
    * Every "trail item" does become a "visible item", except when it is hidden:
    * - The frontpage item might be hidden based on a setting.
@@ -274,10 +297,22 @@ class crumbs_CurrentPageInfo {
       return '';
     }
 
+    // Theme hook for breadcrumb links.
+    $theme_hook = 'crumbs_breadcrumb_link';
+    if (FALSE !== $page->richSnippetMode) {
+      $theme_hook .= '__' . $page->richSnippetMode;
+    }
+
     // Render each link separately.
     $links = array();
     foreach ($breadcrumb_items as $i => $item) {
-      $links[$i] = theme('crumbs_breadcrumb_link', $item);
+      $links[$i] = theme($theme_hook, $item);
+    }
+
+    // Attributes for the container element.
+    $attributes = array('class' => 'breadcrumb');
+    if ('rdfa' === $page->richSnippetMode) {
+      $attributes['xmlns:v'] = 'http://rdf.data-vocabulary.org/#';
     }
 
     // Render the complete breadcrumb.
@@ -288,6 +323,7 @@ class crumbs_CurrentPageInfo {
       'crumbs_separator' => $page->separator,
       'crumbs_separator_span' => $page->separatorSpan,
       'crumbs_trailing_separator' => $page->trailingSeparator,
+      'attributes' => $attributes,
     ));
   }
 
