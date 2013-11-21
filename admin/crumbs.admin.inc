@@ -141,34 +141,48 @@ function crumbs_admin_display_form() {
   );
 
   // Theme override settings
-  $theme_override_options = array();
-  $other_themes = array();
+  $theme_override_options = array('theme_breadcrumb' => array());
+  $themes_need_flush = FALSE;
+  $originals = variable_get('crumbs_original_theme_breadcrumb', array());
   foreach (list_themes() as $theme_name => $theme_obj) {
     if ('1' !== '' . $theme_obj->status) {
+      // Theme is disabled.
       continue;
     }
-    $f = $theme_name . '_breadcrumb';
-    if (function_exists($f)) {
-      $theme_override_options[$theme_name] = l($theme_obj->info['name'], 'admin/appearance/settings/' . $theme_name);
+    $path = 'admin/appearance_settings/' . $theme_name;
+    $link = l($theme_obj->info['name'], $path);
+    if (!isset($originals[$theme_name])) {
+      $f = 'theme_breadcrumb';
+      $link .= '?';
+      $themes_need_flush = TRUE;
     }
     else {
-      $other_themes[$theme_name] = l($theme_obj->info['name'], 'admin/appearance/settings/' . $theme_name);
+      $f = $originals[$theme_name];
     }
+    $theme_override_options[$f][$theme_name] = $link;
   }
-  if (!empty($other_themes)) {
-    $theme_override_options['(other)'] = t('Themes that don\'t implement theme_breadcrumb(): !other_themes.', array(
-      '!other_themes' => implode(', ', $other_themes),
+
+  foreach ($theme_override_options as $f => $theme_links) {
+    $option_text = t('Override !theme_breadcrumb', array(
+      '!theme_breadcrumb' => $f . '()',
     ));
+    if (!empty($theme_links)) {
+      $option_text .= ': ' . implode(', ', $theme_links);
+    }
+    $theme_override_options[$f] = $option_text;
   }
-  else {
-    $theme_override_options['(other)'] = t('Themes that don\'t implement theme_breadcrumb().');
+
+  if ($themes_need_flush) {
+    $theme_override_options['theme_breadcrumb'] .= '<br/>' .
+      t('The "?" indicates that the theme registry has not been rebuilt for the respective theme yet, so we do not know if it has its own implementation of theme_breadcrumb().');
   }
+
   if (!empty($theme_override_options)) {
     $form['theme_override_settings']['crumbs_override_theme_breadcrumb'] = array(
       '#type' => 'checkboxes',
       '#options' => $theme_override_options,
       '#html' => TRUE,
-      '#default_value' => variable_get('crumbs_override_theme_breadcrumb', array('(other)')),
+      '#default_value' => variable_get('crumbs_override_theme_breadcrumb', array('theme_breadcrumb')),
       '#title' => t('Override theme implementations'),
     );
     $form['theme_override_settings']['notes'] = array(
@@ -177,7 +191,7 @@ function crumbs_admin_display_form() {
         '<p>' . t('Use !crumbs_module_implementation instead of the respective theme implementation.', array(
             '!crumbs_module_implementation' => '<code>crumbs_theme_breadcrumb()</code>',
           )) . '<br/>' .
-        t('You need to flush the theme registry for this setting to take effect!') . '</p>',
+        t('This may conflict with some themes.') . '</p>',
     );
   }
   if (!empty($form['theme_override_settings'])) {
@@ -188,6 +202,43 @@ function crumbs_admin_display_form() {
   }
 
   $form = system_settings_form($form);
-  $form['#submit'][] = '_crumbs_admin_flush_cache';
+  $form['#submit'][] = '_crumbs_admin_display_submit_flush_cache';
   return $form;
+}
+
+function _crumbs_admin_display_submit_flush_cache($form) {
+  _crumbs_admin_flush_cache();
+
+  // Check if the theme registry needs rebuild.
+  if (_crumbs_admin_display_submit_checkboxes_changed($form['theme_override_settings']['crumbs_override_theme_breadcrumb'])) {
+    // Flush theme registry.
+    // See _admin_menu_flush_cache() in admin_menu module.
+    system_rebuild_theme_data();
+    drupal_theme_rebuild();
+  }
+}
+
+/**
+ * Determine if a submitted checkboxes element value has changed.
+ *
+ * @param array $element
+ *   Form element with "#type" = "checkboxes".
+ *
+ * @return bool
+ *   TRUE, if the value has changed. That is, if some checkboxes have been
+ *   checked or unchecked.
+ */
+function _crumbs_admin_display_submit_checkboxes_changed($element) {
+  $before = $element['#default_value'];
+  $after = $element['#value'];
+  foreach ($before as $key => $value) {
+    if ($key === $value) {
+      if (!isset($after[$key])) {
+        // Found a difference.
+        return TRUE;
+      }
+      unset($after[$key]);
+    }
+  }
+  return !empty($after);
 }
