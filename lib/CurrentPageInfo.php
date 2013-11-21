@@ -222,6 +222,43 @@ class crumbs_CurrentPageInfo {
     // Allow modules to alter the breadcrumb, if possible, as that is much
     // faster than rebuilding an entirely new active trail.
     drupal_alter('menu_breadcrumb', $breadcrumb_items, $router_item);
+
+    // Prepare the items for easier theming.
+    foreach ($breadcrumb_items as $i => &$item) {
+      $item += array(
+        'localized_options' => array(),
+      );
+      $item['localized_options'] += array('attributes' => array());
+      $item['localized_options']['attributes'] += array('class' => '');
+    }
+
+    // Mark the last item.
+    if (!empty($item) && $page->showCurrentPage) {
+      $item['localized_options']['attributes']['class'] .= ' active crumbs-current-page';
+      $item['crumbs_current_page'] = $page->showCurrentPage;
+      switch ($page->showCurrentPage) {
+        case CRUMBS_SHOW_CURRENT_PAGE_LINK:
+          // Do nothing.
+          break;
+        case CRUMBS_SHOW_CURRENT_PAGE_SPAN:
+          // Render as span.
+          $item['href'] = '<nolink>';
+          break;
+        default:
+          // Render without html tags around.
+          $item['href'] = '<nolink>';
+          $item['show_span'] = FALSE;;
+      }
+    }
+
+    // Process <nolink> items.
+    foreach ($breadcrumb_items as $i => &$item) {
+      if ('<nolink>' === $item['href']) {
+        $item['localized_options']['attributes']['class'] .= ' crumbs-nolink';
+        $item += array('show_span' => TRUE);
+      }
+    }
+
     return $breadcrumb_items;
   }
 
@@ -236,22 +273,14 @@ class crumbs_CurrentPageInfo {
     if (empty($breadcrumb_items)) {
       return '';
     }
+
+    // Render each link separately.
     $links = array();
-    if ($page->showCurrentPage) {
-      $last = array_pop($breadcrumb_items);
-      foreach ($breadcrumb_items as $i => $item) {
-        $links[$i] = theme('crumbs_breadcrumb_link', $item);
-      }
-      $links[] = theme('crumbs_breadcrumb_current_page', array(
-        'item' => $last,
-        'show_current_page' => $page->showCurrentPage,
-      ));
+    foreach ($breadcrumb_items as $i => $item) {
+      $links[$i] = theme('crumbs_breadcrumb_link', $item);
     }
-    else {
-      foreach ($breadcrumb_items as $i => $item) {
-        $links[$i] = theme('crumbs_breadcrumb_link', $item);
-      }
-    }
+
+    // Render the complete breadcrumb.
     return theme('breadcrumb', array(
       'breadcrumb' => $links,
       'crumbs_breadcrumb_items' => $breadcrumb_items,

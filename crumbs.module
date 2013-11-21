@@ -176,9 +176,6 @@ function crumbs_theme($existing, $type, $theme, $path) {
     'crumbs_breadcrumb_link' => array(
       'item' => NULL,
     ),
-    'crumbs_breadcrumb_current_page' => array(
-      'variables' => array('item' => NULL, 'show_current_page' => TRUE),
-    ),
     'crumbs_weights_tabledrag' => array(
       'file' => 'admin/crumbs.tabledrag.inc',
       'render element' => 'element',
@@ -350,29 +347,35 @@ function crumbs_theme_breadcrumb($variables) {
  * Default theme implementation for theme('crumbs_breadcrumb_link').
  */
 function theme_crumbs_breadcrumb_link(array $item) {
-  if ('<nolink>' === $item['href']) {
-    return check_plain($item['title']);
-  }
-  else {
-    $options = isset($item['localized_options']) ? $item['localized_options'] : array();
+  $options = isset($item['localized_options']) ? $item['localized_options'] : array();
+  if ('<nolink>' !== $item['href']) {
+    // Render as a regular link.
     return l($item['title'], $item['href'], $options);
   }
-}
 
-/**
- * Default theme implementation for theme('crumbs_breadcrumb_current_page').
- */
-function theme_crumbs_breadcrumb_current_page(array $variables) {
-  $item = $variables['item'];
-  switch ($variables['show_current_page']) {
-    case CRUMBS_SHOW_CURRENT_PAGE_SPAN:
-      return '<span class="crumbs-current-page">' . check_plain($item['title']) . '</span>';
-    case CRUMBS_SHOW_CURRENT_PAGE_LINK:
-      $options = isset($item['localized_options']) ? $item['localized_options'] : array();
-      return l($item['title'], $item['href'], $options);
-    default:
-      return check_plain($item['title']);
+  // Filter the title, unless $options['html'] is set.
+  $plain = empty($options['html']) ? check_plain($item['title']) : $item['title'];
+
+  if (empty($item['show_span'])) {
+    // Don't use a span tag.
+    return $plain;
   }
+
+  // Use a span tag instead of a link tag.
+  $attributes = isset($options['attributes']) ? $options['attributes'] : array();
+
+  // Remove all HTML and PHP tags from a tooltip. For best performance, we act
+  // only if a quick strpos() pre-check gave a suspicion (because strip_tags()
+  // is expensive).
+  // Borrowed from l().
+  if (1
+    && isset($attributes['title'])
+    && FALSE !== strpos($attributes['title'], '<')
+  ) {
+    $attributes['title'] = strip_tags($attributes['title']);
+  }
+
+  return '<span ' . drupal_attributes($attributes) . '>' . $plain . '</span>';
 }
 
 /**
