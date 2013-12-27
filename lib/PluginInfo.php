@@ -161,8 +161,12 @@ class crumbs_PluginInfo {
       $method_with_suffix = $method . '__' . $method_suffix;
     }
     $result = array();
+    $plugins = $container->plugins;
     foreach ($container->pluginOrder['find'] as $plugin_key => $weight) {
-      $plugin = $container->plugins[$plugin_key];
+      if (!isset($plugins[$plugin_key])) {
+        continue;
+      }
+      $plugin = $plugins[$plugin_key];
       if (isset($method_with_suffix) && method_exists($plugin, $method_with_suffix)) {
         $result[$plugin_key] = $method_with_suffix;
         $only_basic = FALSE;
@@ -287,12 +291,17 @@ class crumbs_PluginInfo {
   function pluginsSorted($container) {
     $sorted = $container->pluginOrder;
     $plugins = $container->plugins;
+    $pluginsSorted = array();
     foreach (array('find', 'alter') as $type) {
-      foreach ($sorted[$type] as $plugin_key => &$x) {
-        $x = $plugins[$plugin_key];
+      foreach ($sorted[$type] as $plugin_key => $x) {
+        if (!isset($plugins[$plugin_key])) {
+          // Codebase may have changed.
+          continue;
+        }
+        $pluginsSorted[$type][$plugin_key] = $plugins[$plugin_key];
       }
     }
-    return $sorted;
+    return $pluginsSorted;
   }
 
   /**
