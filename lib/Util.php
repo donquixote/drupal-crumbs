@@ -7,7 +7,10 @@ class crumbs_Util {
 
   /**
    * Clean tokens so they are URL friendly.
-   * Taken directly from pathauto_clean_token_values()
+   *
+   * Taken directly from pathauto_clean_token_values(). Using the pathauto
+   * function directly is not an option, because it can be that pathauto is not
+   * installed.
    *
    * @param $replacements
    *   An array of token replacements that need to be "cleaned" for use in the URL.
