@@ -42,7 +42,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    */
   function getPluginRoutes() {
     if ($this->discoveryOngoing) {
-      throw new Exception("getPluginRoutes() cannot be called from an implementation of hook_crumbs_plugins().");
+      throw new Exception(__METHOD__ . "() cannot be called from an implementation of hook_crumbs_plugins().");
     }
     return $this->pluginRoutes;
   }
@@ -53,7 +53,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    */
   function getDefaultValues() {
     if ($this->discoveryOngoing) {
-      throw new Exception("getDefaultValues() cannot be called from an implementation of hook_crumbs_plugins().");
+      throw new Exception(__METHOD__ . "() cannot be called from an implementation of hook_crumbs_plugins().");
     }
     return $this->defaultValues;
   }
@@ -65,7 +65,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    */
   function getModuleCallbacks($module) {
     if ($this->discoveryOngoing) {
-      throw new Exception("getModuleCallbacks() cannot be called from an implementation of hook_crumbs_plugins().");
+      throw new Exception(__METHOD__ . "() cannot be called from an implementation of hook_crumbs_plugins().");
     }
     return isset($this->callbacks[$module]) ? $this->callbacks[$module] : array();
   }
@@ -75,7 +75,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    */
   function finalize() {
     if ($this->discoveryOngoing) {
-      throw new Exception("finalize() cannot be called from an implementation of hook_crumbs_plugins().");
+      throw new Exception(__METHOD__ . "() cannot be called from an implementation of hook_crumbs_plugins().");
     }
 
     $build = array();
