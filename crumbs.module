@@ -276,7 +276,7 @@ function crumbs_block_view($delta = '') {
 
   switch ($delta) {
     case 'breadcrumb':
-      $html = crumbs('page')->breadcrumbHtml;
+      $html = crumbs()->page->breadcrumbHtml;
       if (!empty($html)) {
         $block['content'] = $html;
       }
@@ -291,8 +291,8 @@ function crumbs_block_view($delta = '') {
  */
 function crumbs_preprocess_page(&$vars) {
 
-  $vars['crumbs_trail'] = crumbs('page')->trail;
-  $vars['breadcrumb'] = crumbs('page')->breadcrumbHtml;
+  $vars['crumbs_trail'] = crumbs()->page->trail;
+  $vars['breadcrumb'] = crumbs()->page->breadcrumbHtml;
 }
 
 
@@ -401,7 +401,7 @@ function _crumbs_themekey_path2trailpaths($path) {
  *   or FALSE if the breadcrumb could not be determined.
  */
 function crumbs_get_breadcrumb_data() {
-  return crumbs('page')->breadcrumbData;
+  return crumbs()->page->breadcrumbData;
 }
 
 /**
@@ -411,7 +411,7 @@ function crumbs_get_breadcrumb_data() {
  *   The path for which the trail is built. If NULL, the url of the
  *   current page is assumed.
  *
- * @return
+ * @return mixed
  *   An associative array containing the trail, with the paths as the keys, and
  *   the router items (as received from crumbs_get_router_item()) as the values.
  *
@@ -421,7 +421,7 @@ function crumbs_get_trail($path = NULL) {
   if (!isset($path)) {
     $path = $_GET['q'];
   }
-  return crumbs('trails')->getForPath($path);
+  return crumbs()->trails->getForPath($path);
 }
 
 /**
@@ -434,11 +434,11 @@ function crumbs_get_trail($path = NULL) {
  *   The path for which the corresponding router item is returned.
  *   For example, node/5.
  *
- * @return
+ * @return array
  *   The router item.
  */
 function crumbs_get_router_item($path) {
-  return crumbs('router')->getRouterItem($path);
+  return crumbs()->router->getRouterItem($path);
 }
 
 /**
@@ -450,7 +450,7 @@ function crumbs_get_router_item($path) {
  *   Max number of fragments we try to chop off. -1 means no limit.
  */
 function crumbs_reduce_path($path, $depth = -1) {
-  return crumbs('router')->reducePath($path, $depth);
+  return crumbs()->router->reducePath($path, $depth);
 }
 
 /**
@@ -475,6 +475,10 @@ function crumbs_clean_token_values(&$replacements, $data = array(), $options = a
 /**
  * Get the service with the given key.
  * If it does not exist, it will be lazy-created with all its dependencies.
+ *
+ * @param string $key
+ *
+ * @return crumbs_Container_LazyServices
  */
 function crumbs($key = NULL) {
   static $cache = NULL;
@@ -598,7 +602,7 @@ function _crumbs_admin_flush_cache() {
   cache_clear_all();
 
   // Clear plugin info in 'cache' cache bin.
-  crumbs('pluginInfo')->flushCaches();
+  crumbs()->pluginInfo->flushCaches();
 }
 
 /**
