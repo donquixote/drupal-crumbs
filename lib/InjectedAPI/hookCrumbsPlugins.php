@@ -323,6 +323,24 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
   }
 
   /**
+   * Register a callback that will determine a title for a breadcrumb item.
+   *
+   * @param string $route
+   *   The route where this callback should be used, e.g. "node/%".
+   * @param string $key
+   *   The plugin key under which this callback will be listed on the weights
+   *   configuration form.
+   * @param callback $callback
+   *   The callback, e.g. an anonymous function. The signature must be
+   *   $callback(string $path, array $item), like the findParent() method of
+   *   a typical crumbs_MonoPlugin.
+   */
+  function routeTitleCallback($route, $key, $callback) {
+    $this->routeMonoPlugin($route, $key, new crumbs_MonoPlugin_TitleCallback($callback, $this->module, $key));
+    $this->callbacks[$this->module]['routeTitle'][$key] = $callback;
+  }
+
+  /**
    * @param string $route
    * @param string $key
    */
