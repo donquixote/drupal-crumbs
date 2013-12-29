@@ -310,7 +310,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    */
   function routeParentCallback($route, $key, $callback) {
     $this->routeMonoPlugin($route, $key, new crumbs_MonoPlugin_ParentPathCallback($callback, $this->module, $key));
-    $this->callbacks[$this->module][$key] = $callback;
+    $this->callbacks[$this->module]['routeParent'][$key] = $callback;
   }
 
   /**

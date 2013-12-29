@@ -39,13 +39,18 @@ class crumbs_CallbackRestoration {
   /**
    * @param string $module
    * @param string $key
+   * @param string $callback_type
+   *   E.g. 'routeParent'.
+   *
    * @return callback
    */
-  function restoreCallback($module, $key) {
+  function restoreCallback($module, $key, $callback_type) {
     if (!isset($this->callbacks[$module])) {
       $this->restoreModuleCallbacks($module);
     }
-    return isset($this->callbacks[$module][$key]) ? $this->callbacks[$module][$key] : FALSE;
+    return isset($this->callbacks[$module][$callback_type][$key])
+      ? $this->callbacks[$module][$callback_type][$key]
+      : FALSE;
   }
 
   /**
