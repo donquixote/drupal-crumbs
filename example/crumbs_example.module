@@ -24,4 +24,18 @@ function crumbs_example_crumbs_plugins($api) {
       return $entity_type . '[' . $etid . '] (' . $distinction_key . ')';
     });
   }
+
+  // Custom breadcrumb for search/node/% pages.
+  // Let <front> be the breadcrumb parent of search/node/%.
+  // The second argument will make this behavior available as
+  // "crumbs_example.search.node.parent" on the weights configuration form,
+  // where it can be prioritized against other behaviors.
+  $api->routeParentPath('search/node/%', 'search.node.parent', '<front>');
+
+  // Let "Search for 'xyz'" be the breadcrumb item title for search/node/%.
+  // The second argument will make this behavior available as
+  // "crumbs_example.search.node.title" on the weights configuration form.
+  $api->routeTitleCallback('search/node/%', 'search.node.title', function($path, $item) {
+    return t("Search for '@terms'", array('@terms' => $item['map'][2]));
+  });
 }
