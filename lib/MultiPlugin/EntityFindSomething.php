@@ -56,15 +56,7 @@ class crumbs_MultiPlugin_EntityFindSomething extends crumbs_MultiPlugin_EntityFi
    * @return array
    */
   protected function find($path, $item) {
-    $entity = end($item['map']);
-    // Load the entity if it hasn't been loaded due to a missing wildcard loader.
-    if (is_numeric($entity)) {
-      $entity = entity_load($this->entityType, array($entity));
-      if (is_array($entity)) {
-        $entity = end($entity);
-      }
-    }
-    if (empty($entity) || !is_object($entity)) {
+    if (FALSE === $entity = crumbs_Util::itemExtractEntity($item, $this->entityType)) {
       return;
     }
 

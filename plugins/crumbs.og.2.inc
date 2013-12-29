@@ -47,9 +47,9 @@ class og_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin {
    * @return array
    */
   function findParent__node_x($path, $item) {
-    $node = $item['map'][1];
-    // Load the node if it hasn't been loaded due to a missing wildcard loader.
-    $node = is_numeric($node) ? node_load($node) : $node;
+    if (FALSE === $node = crumbs_Util::itemExtractEntity($item, 'node', 1)) {
+      return;
+    }
 
     // field_get_items() performs a lot faster than og_get_entity_groups().
     // See http://drupal.org/node/1819300#comment-6633494
@@ -149,9 +149,9 @@ class og_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin {
    * Find a parent path for node/%, if that node is a group.
    */
   function findParent__node_x($path, $item) {
-    $node = $item['map'][1];
-    // Load the node if it hasn't been loaded due to a missing wildcard loader.
-    $node = is_numeric($node) ? node_load($node) : $node;
+    if (FALSE === $node = crumbs_Util::itemExtractEntity($item, 'node', 1)) {
+      return;
+    }
 
     if (og_is_group('node', $node)) {
       return $this->getGroupsOverviewPath($node);

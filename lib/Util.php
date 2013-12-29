@@ -1,7 +1,9 @@
 <?php
 
 /**
- * Static methods that are stateless and do not depend on anything.
+ * Static methods that don't fit elsewhere.
+ * Ideally these are all stateless and do not depend on anything. But at least
+ * one of them is not..
  */
 class crumbs_Util {
 
@@ -84,5 +86,30 @@ class crumbs_Util {
     }
     $previous_time = $current_time;
     return isset($str) ? $str : NULL;
+  }
+
+  /**
+   * Extract an entity from a router item, even if the wildcard loader has been
+   * replaced or removed.
+   *
+   * @param array $item
+   *   The loaded router item.
+   * @param string $entity_type
+   *   The entity type, e.g. 'node' or 'taxonomy_term'.
+   * @param int $index
+   *   Index in $item['map'] at which to expect the entity.
+   *
+   * @return stdClass|FALSE
+   *   The entity object.
+   */
+  static function itemExtractEntity($item, $entity_type, $index = NULL) {
+    if (!isset($index)) {
+      $index = count($item['map']) - 1;
+    }
+    if ($item['map'][$index] instanceof stdClass) {
+      return $item['map'][$index];
+    }
+    $entities = entity_load($entity_type, array($item['original_map'][$index]));
+    return reset($entities);
   }
 }

@@ -34,13 +34,12 @@ class forum_CrumbsMonoPlugin_forumTerm implements crumbs_MonoPlugin {
    * Forums are actually taxonomy terms, just the path is different.
    */
   function findParent__forum_x($path, $item) {
-    $term = $item['map'][1];
-    // Load the forum term,
-    // if it hasn't been loaded due to a missing wildcard loader.
-    // We could use forum_forum_load() instead, but this looks too scary
-    // performance-wise, and we don't actually need it.
-    // So we just use taxonomy_term_load() instead.
-    $term = is_numeric($term) ? taxonomy_term_load($term) : $term;
+    // Load the forum term, even if the wildcard loader has been replaced or
+    // removed. This will use entity_load() and not forum_forum_load(), because
+    // we don't need the forum stuff here.
+    if (FALSE === $term = crumbs_Util::itemExtractEntity($item, 'taxonomy_term', 1)) {
+      return;
+    }
 
     $parents = taxonomy_get_parents($term->tid);
     foreach ($parents as $parent_tid => $parent_term) {
@@ -73,14 +72,13 @@ class forum_CrumbsMonoPlugin_forumTermName implements crumbs_MonoPlugin {
    * Forums are actually taxonomy terms, just the path is different.
    */
   function findTitle__forum_x($path, $item) {
-    $term = $item['map'][1];
-    // Load the forum term,
-    // if it hasn't been loaded due to a missing wildcard loader.
-    // We could use forum_forum_load() instead, but this looks too scary
-    // performance-wise, and we don't actually need it.
-    // So we just use taxonomy_term_load() instead.
-    $term = is_numeric($term) ? taxonomy_term_load($term) : $term;
-    if (!empty($term) && !empty($term->name)) {
+    // Load the forum term, even if the wildcard loader has been replaced or
+    // removed. This will use entity_load() and not forum_forum_load(), because
+    // we don't need the forum stuff here.
+    if (FALSE === $term = crumbs_Util::itemExtractEntity($item, 'taxonomy_term', 1)) {
+      return;
+    }
+    if (!empty($term->name)) {
       return $term->name;
     }
   }
@@ -104,9 +102,9 @@ class forum_CrumbsMonoPlugin_forumThread implements crumbs_MonoPlugin {
    * The method name matches the router path "node/%".
    */
   function findParent__node_x($path, $item) {
-    $node = $item['map'][1];
-    // Load the node if it hasn't been loaded due to a missing wildcard loader.
-    $node = is_numeric($node) ? node_load($node) : $node;
+    if (FALSE === $node = crumbs_Util::itemExtractEntity($item, 'node', 1)) {
+      return;
+    }
     if (!empty($node->forum_tid) && _forum_node_check_node_type($node)) {
       return 'forum/' . $node->forum_tid;
     }

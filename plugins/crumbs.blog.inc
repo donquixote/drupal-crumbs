@@ -25,9 +25,9 @@ class blog_CrumbsMonoPlugin_authorPage implements crumbs_MonoPlugin {
    * Still under constructon..
    */
   function findParent__node_x($path, $item) {
-    $node = $item['map'][1];
-    // Load the node if it hasn't been loaded due to a missing wildcard loader.
-    $node = is_numeric($node) ? node_load($node) : $node;
+    if (FALSE === $node = crumbs_Util::itemExtractEntity($item, 'node', 1)) {
+      return;
+    }
 
     if ($node->type === 'blog') {
       return 'blog/' . $node->uid;
@@ -49,9 +49,9 @@ class blog_CrumbsMonoPlugin_authorName implements crumbs_MonoPlugin {
    * Still under constructon..
    */
   function findTitle__blog_x($path, $item) {
-    $user = $item['map'][1];
-    // Load the user if it hasn't been loaded due to a missing wildcard loader.
-    $user = is_numeric($user) ? user_load($user) : $user;
+    if (FALSE === $user = crumbs_Util::itemExtractEntity($item, 'user', 1)) {
+      return;
+    }
 
     return t("!name's blog", array('!name' => format_username($user)));
   }

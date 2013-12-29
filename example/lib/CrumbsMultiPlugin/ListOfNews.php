@@ -29,9 +29,9 @@ class crumbs_example_CrumbsMultiPlugin_ListOfNews implements crumbs_MultiPlugin 
    *   Candidates for the parent path, or NULL.
    */
   function findParent__node_x($path, $item) {
-    $node = $item['map'][1];
-    // Load the node if it hasn't been loaded due to a missing wildcard loader.
-    $node = is_numeric($node) ? node_load($node) : $node;
+    if (FALSE === $node = crumbs_Util::itemExtractEntity($item, 'node', 1)) {
+      return;
+    }
 
     if (!empty($node->created)) {
       list($year, $month, $day) = explode('-', date('Y-m-d', $node->created));

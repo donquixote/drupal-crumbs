@@ -38,9 +38,9 @@ class taxonomy_CrumbsMultiPlugin_termParent implements crumbs_MultiPlugin {
    * The method name matches the router path "taxonomy/term/%".
    */
   function findParent__taxonomy_term_x($path, $item) {
-    $term = $item['map'][2];
-    // Load the term if it hasn't been loaded due to a missing wildcard loader.
-    $term = is_numeric($term) ? taxonomy_term_load($term) : $term;
+    if (FALSE === $term = crumbs_Util::itemExtractEntity($item, 'taxonomy_term', 2)) {
+      return;
+    }
 
     $parents = taxonomy_get_parents($term->tid);
     foreach ($parents as $parent_tid => $parent_term) {
