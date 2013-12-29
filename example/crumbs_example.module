@@ -12,4 +12,16 @@ function crumbs_example_crumbs_plugins($api) {
 
   // The class will be crumbs_example_CrumbsMultiPlugin_ListOfNews.
   $api->multiPlugin('ListOfNews');
+
+  if (module_exists('entity')) {
+    // Let the breadcrumb item title be
+    // - "node[123] (article)" on node/123, and
+    // - "taxonomy_term[55] (categories)" taxonomy/term/55, and
+    // - "node[1] (administrator)" on user/1.
+    $api->entityTitleCallback('experiment', function($entity, $entity_type, $distinction_key) {
+      // The entity_id() function is provided by entity.module.
+      $etid = entity_id($entity_type, $entity);
+      return $entity_type . '[' . $etid . '] (' . $distinction_key . ')';
+    });
+  }
 }

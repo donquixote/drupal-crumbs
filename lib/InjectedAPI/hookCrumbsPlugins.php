@@ -158,6 +158,23 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
   }
 
   /**
+   * Register a callback that will determine a parent path for a breadcrumb item
+   * with an entity route. The behavior will be available for all known entity
+   * routes, e.g. node/% or taxonomy/term/%, with different plugin keys.
+   *
+   * @param string $key
+   * @param callable $callback
+   * @param array $types
+   *   An array of entity types, or a single entity type, or NULL to allow all
+   *   entity types.
+   */
+  function entityParentCallback($key, $callback, $types = NULL) {
+    $entity_plugin = new crumbs_EntityPlugin_Callback($callback, $this->module, $key, 'entityParent');
+    $this->entityPlugin('parent', $key, $entity_plugin, $types);
+    $this->callbacks[$this->module]['entityParent'][$key] = $callback;
+  }
+
+  /**
    * Register an entity title plugin.
    *
    * @param string $key
@@ -168,6 +185,28 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    */
   function entityTitlePlugin($key, $entity_plugin = NULL, $types = NULL) {
     $this->entityPlugin('title', $key, $entity_plugin, $types);
+  }
+
+  /**
+   * Register a callback that will determine a title for a breadcrumb item with
+   * an entity route. The behavior will be available for all known entity
+   * routes, e.g. node/% or taxonomy/term/%, with different plugin keys.
+   *
+   * @param string $key
+   *   The plugin key under which this callback will be listed on the weights
+   *   configuration form.
+   * @param callback $callback
+   *   The callback, e.g. an anonymous function. The signature must be
+   *   $callback(stdClass $entity, string $entity_type, string $distinction_key),
+   *   like the findCandidate() method of a typical crumbs_EntityPlugin.
+   * @param array $types
+   *   An array of entity types, or a single entity type, or NULL to allow all
+   *   entity types.
+   */
+  function entityTitleCallback($key, $callback, $types = NULL) {
+    $entity_plugin = new crumbs_EntityPlugin_Callback($callback, $this->module, $key, 'entityTitle');
+    $this->entityPlugin('title', $key, $entity_plugin, $types);
+    $this->callbacks[$this->module]['entityTitle'][$key] = $callback;
   }
 
   /**
