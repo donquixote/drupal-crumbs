@@ -59,14 +59,15 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
   }
 
   /**
+   * @param string $module
    * @return array
    * @throws Exception
    */
-  function getCallbacks() {
+  function getModuleCallbacks($module) {
     if ($this->discoveryOngoing) {
       throw new Exception("getModuleCallbacks() cannot be called from an implementation of hook_crumbs_plugins().");
     }
-    return $this->callbacks;
+    return isset($this->callbacks[$module]) ? $this->callbacks[$module] : array();
   }
 
   /**

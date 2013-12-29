@@ -66,6 +66,6 @@ class crumbs_CallbackRestoration {
     $this->api->setModule($module);
     $f($this->api);
     $this->discoveryOngoing = FALSE;
-    $this->callbacks = $this->api->getCallbacks();
+    $this->callbacks[$module] = $this->api->getModuleCallbacks($module);
   }
 }
