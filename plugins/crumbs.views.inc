@@ -73,7 +73,9 @@ class views_CrumbsMultiPlugin_argTitle implements crumbs_MultiPlugin_FindTitleIn
         && isset($last_arg->argument)
       ) {
         if ($last_arg_title = $last_arg->get_title()) {
-          return array("$view_name.$view_display_id" => $last_arg_title);
+          // Use decode_entities() to undo duplicate check_plain().
+          // See https://drupal.org/comment/7916895#comment-7916895
+          return array("$view_name.$view_display_id" => decode_entities($last_arg_title));
         }
         break;
       }
