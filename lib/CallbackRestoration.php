@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Can recover anonymous functions registered with hook_crumbs_plugins() via
+ * e.g. $api->routeParentCallback() or $api->entityParentCallback()
+ *
+ * On an average request, Crumbs plugins are not defined via
+ * hook_crumbs_plugins() but loaded from cache. Since anonymouse function are
+ * not serializable, they need to be loaded explicitly by calling the respective
+ * implementation of hook_crumbs_plugins().
+ */
 class crumbs_CallbackRestoration {
 
   /**
@@ -40,6 +49,9 @@ class crumbs_CallbackRestoration {
   }
 
   /**
+   * Restore/load all callbacks declared in the given module's implementation of
+   * hook_crumbs_plugins(), e.g. via $api->routeParentCallback().
+   *
    * @param string $module
    */
   protected function restoreModuleCallbacks($module) {

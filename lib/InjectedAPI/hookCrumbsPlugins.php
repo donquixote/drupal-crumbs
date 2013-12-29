@@ -149,6 +149,8 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    * @param string $key
    * @param string|crumbs_EntityPlugin $entity_plugin
    * @param array $types
+   *   An array of entity types, or a single entity type, or NULL to allow all
+   *   entity types.
    */
   function entityParentPlugin($key, $entity_plugin = NULL, $types = NULL) {
     $this->entityPlugin('parent', $key, $entity_plugin, $types);
@@ -160,6 +162,8 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    * @param string $key
    * @param string|crumbs_EntityPlugin $entity_plugin
    * @param array $types
+   *   An array of entity types, or a single entity type, or NULL to allow all
+   *   entity types.
    */
   function entityTitlePlugin($key, $entity_plugin = NULL, $types = NULL) {
     $this->entityPlugin('title', $key, $entity_plugin, $types);
@@ -167,9 +171,14 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
 
   /**
    * @param string $type
+   *   Either 'title' or 'parent'.
    * @param string $key
+   *   The plugin key under which this callback will be listed on the weights
+   *   configuration form.
    * @param string|crumbs_EntityPlugin $entity_plugin
-   * @param array $types
+   * @param string[]|string|NULL $types
+   *   An array of entity types, or a single entity type, or NULL to allow all
+   *   entity types.
    */
   protected function entityPlugin($type, $key, $entity_plugin, $types) {
     if (!isset($entity_plugin)) {
@@ -285,6 +294,19 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
     $this->routeMonoPlugin($route, $key, new crumbs_MonoPlugin_FixedParentPath($parent_path));
   }
 
+  /**
+   * Register a callback that will determine a parent for a breadcrumb item.
+   *
+   * @param string $route
+   *   The route where this callback should be used, e.g. "node/%".
+   * @param string $key
+   *   The plugin key under which this callback will be listed on the weights
+   *   configuration form.
+   * @param callback $callback
+   *   The callback, e.g. an anonymous function. The signature must be
+   *   $callback(string $path, array $item), like the findParent() method of
+   *   a typical crumbs_MonoPlugin.
+   */
   function routeParentCallback($route, $key, $callback) {
     $this->routeMonoPlugin($route, $key, new crumbs_MonoPlugin_ParentPathCallback($callback, $this->module, $key));
     $this->callbacks[$this->module][$key] = $callback;
