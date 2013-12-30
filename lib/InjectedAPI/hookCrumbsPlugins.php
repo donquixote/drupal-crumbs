@@ -7,13 +7,59 @@
  */
 class crumbs_InjectedAPI_hookCrumbsPlugins {
 
+  /**
+   * @var string $module
+   *   The module for the current hook implementation.
+   */
   protected $module;
+
+  /**
+   * @var crumbs_PluginInterface[]
+   *
+   */
   protected $plugins = array();
+
+  /**
+   * @var array
+   *   Nested array of callbacks, with this format:
+   *   $this->callbacks[$this->module][$callbackType][$key] = $callback;
+   *   Where $callbackType can be 'routeParent', 'routeTitle', 'entityParent',
+   *   or 'entityTitle'.
+   */
   protected $callbacks = array();
+
+  /**
+   * @var string[]
+   *   Array of routes, with this format:
+   *   $this->pluginRoutes[$key] = $route
+   */
   protected $pluginRoutes = array();
+
+  /**
+   * @var array
+   *   Default weights for some plugin keys, with this format:
+   *   $this->defaultValues[$key] = $weight.
+   */
   protected $defaultValues = array();
+
+  /**
+   * @var array
+   *   Known routes for entity types, e.g.:
+   *   $this->entityRoutes['node/%'] = array('node', 'type', 'Node type');
+   */
   protected $entityRoutes = array();
+
+  /**
+   * @var array
+   *   Collection of entity plugins. Format:
+   *   $this->entityPlugins[$type][$module . '.' . $key] = array($entity_plugin, $types);
+   */
   protected $entityPlugins = array();
+
+  /**
+   * @var bool&
+   *   While TRUE, some methods are blocked.
+   */
   protected $discoveryOngoing;
 
   /**
@@ -405,6 +451,9 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
     }
   }
 
+  /**
+   * @param string|NULL $key
+   */
   protected function _disabledByDefault($key) {
     $key = isset($key) ? ($this->module . '.' . $key) : $this->module;
     $this->defaultValues[$key] = FALSE;

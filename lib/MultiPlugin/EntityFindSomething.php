@@ -2,9 +2,31 @@
 
 class crumbs_MultiPlugin_EntityFindSomething extends crumbs_MultiPlugin_EntityFindAbstract {
 
+  /**
+   * @var string
+   *   The entity type, e.g. 'node' or 'taxonomy_term'.
+   */
   protected $entityType;
+
+  /**
+   * @var string
+   *   The key on the $entiy object to determine the bundle.
+   *   E.g. 'type' for nodes, or 'vocabulary_machine_name' for taxonomy terms.
+   */
   protected $bundleKey;
+
+  /**
+   * @var string
+   *   The label for the bundle, e.g. "Node type" or "Vocabulary".
+   *   This is an untranslated string.
+   */
   protected $bundleName;
+
+  /**
+   * @var array
+   *   Plugin key weight per user role id.
+   *   This is empty for entity types other than user.
+   */
   protected $weights = array();
 
   /**

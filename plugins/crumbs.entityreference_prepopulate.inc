@@ -36,8 +36,22 @@ function entityreference_prepopulate_crumbs_plugins($api) {
 
 class entityreference_prepopulate_CrumbsMonoPlugin_node implements crumbs_MonoPlugin_FindParentInterface {
 
+  /**
+   * @var string
+   *   The node type, e.g. 'article'.
+   */
   protected $nodeType;
+
+  /**
+   * @var string
+   *   Field name of the entityreference field.
+   */
   protected $fieldName;
+
+  /**
+   * @var string
+   *   The target entity type for the entityreference field.
+   */
   protected $targetType;
 
   /**

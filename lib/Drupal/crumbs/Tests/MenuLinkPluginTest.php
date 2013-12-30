@@ -4,6 +4,9 @@ namespace Drupal\crumbs\Tests;
 
 class MenuLinkPluginTest extends \DrupalWebTestCase {
 
+  /**
+   * @return array
+   */
   static function getInfo() {
     return array(
       'name' => 'Crumbs menu plugin test',

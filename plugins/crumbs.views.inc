@@ -3,6 +3,8 @@
 
 /**
  * Implements hook_crumbs_plugins().
+ *
+ * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
  */
 function views_crumbs_plugins($api) {
   $api->multiPlugin('argTitle');

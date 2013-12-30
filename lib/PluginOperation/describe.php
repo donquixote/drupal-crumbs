@@ -7,17 +7,49 @@
  */
 class crumbs_PluginOperation_describe {
 
-  // Initial data
+  //                                                                Initial data
+  // ---------------------------------------------------------------------------
+
+  /**
+   * @var array
+   */
   protected $pluginRoutes;
 
-  // Collected data
+  //                                                              Collected data
+  // ---------------------------------------------------------------------------
+
+  /**
+   * @var array
+   */
   protected $keys = array('*' => TRUE);
+
+  /**
+   * @var array
+   */
   protected $keysByPlugin = array();
+
+  /**
+   * @var array
+   */
   protected $collectedInfo = array();
 
-  // State variables
+  //                                                             State variables
+  // ---------------------------------------------------------------------------
+
+  /**
+   * @var string
+   *   Temporary variable.
+   */
   protected $pluginKey;
+
+  /**
+   * @var crumbs_InjectedAPI_describeMonoPlugin
+   */
   protected $injectedAPI_mono;
+
+  /**
+   * @var crumbs_InjectedAPI_describeMultiPlugin
+   */
   protected $injectedAPI_multi;
 
   /**
@@ -31,7 +63,7 @@ class crumbs_PluginOperation_describe {
 
   /**
    * @param crumbs_PluginInterface $plugin
-   * @param $plugin_key
+   * @param string $plugin_key
    */
   function invoke($plugin, $plugin_key) {
     $this->pluginKey = $plugin_key;

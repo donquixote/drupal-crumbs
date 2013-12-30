@@ -299,6 +299,13 @@ function crumbs_preprocess_page(&$vars) {
 // Theme implementations
 // -----------------------------------------------------------------------------
 
+/**
+ * Replacement theme callback for theme('breadcrumb').
+ *
+ * @param $variables
+ * @return string
+ *   Rendered breadcrumb HTML
+ */
 function crumbs_theme_breadcrumb($variables) {
   $breadcrumb = $variables['breadcrumb'];
 

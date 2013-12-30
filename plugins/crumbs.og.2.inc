@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * Implements hook_crumbs_plugins().
  *
@@ -15,7 +14,6 @@ function og_crumbs_plugins($api) {
   // We leave it to custom module developers to instantiate or override those
   // classes.
 }
-
 
 /**
  * Use the group node as a parent for group posts.
@@ -41,10 +39,12 @@ class og_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin {
    * If that node is in a group, it will return the group page as a parent.
    *
    * @param string $path
-   *   The path, e.g. node/123
+   *   The path that we want to find a parent for, e.g. "node/123".
    * @param array $item
-   *   The router item, as returned by crumbs_get_router_item()
+   *   Loaded router item, as returned from crumbs_get_router_item()
+   *
    * @return array
+   *   Parent path candidates
    */
   function findParent__node_x($path, $item) {
     if (FALSE === $node = crumbs_Util::itemExtractEntity($item, 'node', 1)) {
@@ -98,7 +98,6 @@ class og_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin {
   }
 }
 
-
 /**
  * Make $groups_overview_path the parent path for group nodes.
  * The priorities can be configured per group node type.
@@ -108,6 +107,10 @@ class og_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin {
  */
 class og_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin {
 
+  /**
+   * @var string[]|string
+   *   See the constructor argument.
+   */
   protected $groupsOverviewPaths;
 
   /**
@@ -147,6 +150,14 @@ class og_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin {
 
   /**
    * Find a parent path for node/%, if that node is a group.
+   *
+   * @param string $path
+   *   The path that we want to find a parent for, e.g. "node/123".
+   * @param array $item
+   *   Loaded router item, as returned from crumbs_get_router_item()
+   *
+   * @return array
+   *   Parent path candidates
    */
   function findParent__node_x($path, $item) {
     if (FALSE === $node = crumbs_Util::itemExtractEntity($item, 'node', 1)) {
@@ -178,7 +189,6 @@ class og_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin {
     }
   }
 }
-
 
 /**
  * Make $my_groups_path the parent path for group nodes where the current user

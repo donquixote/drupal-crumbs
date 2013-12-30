@@ -10,10 +10,22 @@ class crumbs_Admin_WeightsTable {
    */
   protected $pluginInfo;
 
+  /**
+   * @var array[]
+   */
   protected $sections = array();
   protected $section;
   protected $sectionKey;
+
+
+  /**
+   * @var array
+   */
   protected $sortEnabled = array();
+
+  /**
+   * @var array
+   */
   protected $descriptions = array();
 
   /**
@@ -23,6 +35,9 @@ class crumbs_Admin_WeightsTable {
     $this->pluginInfo = $plugin_info;
   }
 
+  /**
+   * @return array
+   */
   function getRows() {
 
     array_multisort($this->sortEnabled, $this->sections['enabled']);
@@ -55,6 +70,9 @@ class crumbs_Admin_WeightsTable {
     return $rows;
   }
 
+  /**
+   * @return array
+   */
   protected function gridOfDescriptions() {
     $offsets = array();
     $n = 0;
@@ -104,7 +122,10 @@ class crumbs_Admin_WeightsTable {
     return array($grid, $n + 1);
   }
 
-
+  /**
+   * @param string $key
+   * @param array $child
+   */
   function addElement($key, $child) {
 
     $section_key = $child['#section_key'];
@@ -122,6 +143,11 @@ class crumbs_Admin_WeightsTable {
     }
   }
 
+  /**
+   * @param string $section_key
+   * @param string $key
+   * @param array $child
+   */
   function addSectionHeader($section_key, $key, $child) {
     $title = $child['#title'];
     unset($child['#description']);
@@ -130,6 +156,11 @@ class crumbs_Admin_WeightsTable {
     $this->sections[$section_key][$key]['data'][]['data'] = $header;
   }
 
+  /**
+   * @param string $section_key
+   * @param string $key
+   * @param array $child
+   */
   protected function addRow($section_key, $key, $child) {
 
     /**

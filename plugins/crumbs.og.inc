@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * Implements hook_crumbs_plugins().
  *
@@ -17,7 +16,6 @@ function og_crumbs_plugins($api) {
   $api->multiPlugin('my_groups_overview',
     new og_CrumbsMultiPlugin_my_groups_overview('user-groups'));
 }
-
 
 /**
  * Use the group node as a parent for group posts.
@@ -74,7 +72,6 @@ class og_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin {
   }
 }
 
-
 /**
  * Make $groups_overview_path the parent path for group nodes.
  * The priorities can be configured per group node type.
@@ -115,7 +112,6 @@ class og_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin {
   }
 }
 
-
 /**
  * Make t('Groups') the title for '/group-list'.
  */
@@ -138,7 +134,6 @@ class og_CrumbsMonoPlugin_groups_overview_title implements crumbs_MonoPlugin_Fin
   }
 }
 
-
 /**
  * Make $my_groups_path the parent path for group nodes where the current user
  * is a member.
@@ -146,6 +141,9 @@ class og_CrumbsMonoPlugin_groups_overview_title implements crumbs_MonoPlugin_Fin
  */
 class og_CrumbsMultiPlugin_my_groups_overview implements crumbs_MultiPlugin {
 
+  /**
+   * @var string
+   */
   protected $myGroupsPath;
 
   /**
@@ -169,6 +167,15 @@ class og_CrumbsMultiPlugin_my_groups_overview implements crumbs_MultiPlugin {
     }
   }
 
+  /**
+   * @param string $path
+   *   The path that we want to find a parent for.
+   * @param array $item
+   *   Loaded router item, as returned from crumbs_get_router_item()
+   *
+   * @return array
+   *   Parent path candidates
+   */
   function findParent__node_x($path, $item) {
     if (FALSE === $node = crumbs_Util::itemExtractEntity($item, 'node', 1)) {
       return;

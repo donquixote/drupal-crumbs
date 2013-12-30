@@ -28,6 +28,12 @@ class crumbs_MonoPlugin_TitleCallback implements crumbs_MonoPlugin_FindTitleInte
     $this->key = $key;
   }
 
+  /**
+   * @return string[]
+   *   Names of properties that should be remembered on serialize().
+   *   It should be noted that "callback" is not one of them, because this could
+   *   be an anonymous function.
+   */
   function __sleep() {
     return array('module', 'key');
   }

@@ -1,6 +1,11 @@
 <?php
 
-
+/**
+ * Page callback for 'admin/structure/crumbs/debug'.
+ *
+ * @return string
+ *   The rendered HTML for the debug page.
+ */
 function crumbs_debug_page() {
   drupal_set_title('Crumbs debug');
 
@@ -71,6 +76,14 @@ EOT;
   return $html;
 }
 
+/**
+ * Helper function for crumbs_admin_debug_page().
+ *
+ * @param string $path_to_test
+ *   Test path to build a Crumbs breadcrumb.
+ * @return string
+ *   The debug matrix as rendered html.
+ */
 function _crumbs_admin_debug_matrix($path_to_test) {
 
   // Create a local version of the service factory.

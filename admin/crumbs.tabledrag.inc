@@ -1,6 +1,12 @@
 <?php
 
-
+/**
+ * Theme callback for form elements with "#type" = "crumbs_weights_tabledrag".
+ *
+ * @param array &$vars
+ * @return string
+ *   Rendered HTML
+ */
 function theme_crumbs_weights_tabledrag(&$vars) {
 
   $element = $vars['element'];

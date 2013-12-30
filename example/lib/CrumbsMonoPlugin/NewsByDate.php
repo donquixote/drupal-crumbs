@@ -2,12 +2,21 @@
 
 class crumbs_example_CrumbsMonoPlugin_NewsByDate implements crumbs_MonoPlugin {
 
+  /**
+   * {@inheritdoc}
+   */
   function describe($api) {
     $api->setTitle('Breadcrumbs for news/(year)/(month)/(day)');
   }
 
   /**
    * This one only makes sense if you created a view with path "news/%/%/%"
+   *
+   * @param string $path
+   * @param array $item
+   *
+   * @return string
+   *   A candidate for the breadcrumb item title.
    */
   function findTitle__news_x_x_x($path, $item) {
     // Title will be the day.
@@ -16,6 +25,12 @@ class crumbs_example_CrumbsMonoPlugin_NewsByDate implements crumbs_MonoPlugin {
 
   /**
    * This one only makes sense if you created a view with path "news/%/%"
+   *
+   * @param string $path
+   * @param array $item
+   *
+   * @return string
+   *   A candidate for the breadcrumb item title.
    */
   function findTitle__news_x_x($path, $item) {
     // Title will be the month. But we want the human-readable version!
@@ -29,6 +44,12 @@ class crumbs_example_CrumbsMonoPlugin_NewsByDate implements crumbs_MonoPlugin {
 
   /**
    * This one only makes sense if you created a view with path "news/%"
+   *
+   * @param string $path
+   * @param array $item
+   *
+   * @return string
+   *   A candidate for the breadcrumb item title.
    */
   function findTitle__news_x($path, $item) {
     // Title will be the year.
@@ -37,6 +58,12 @@ class crumbs_example_CrumbsMonoPlugin_NewsByDate implements crumbs_MonoPlugin {
 
   /**
    * Breadcrumb item title for path "news".
+   *
+   * @param string $path
+   * @param array $item
+   *
+   * @return string
+   *   A candidate for the breadcrumb item title.
    */
   function findTitle__news($path, $item) {
     return t('News');

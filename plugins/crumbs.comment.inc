@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * Implements hook_crumbs_plugins().
  *
@@ -11,7 +10,6 @@ function comment_crumbs_plugins($api) {
   $api->monoPlugin('comment');
   $api->monoPlugin('skip');
 }
-
 
 class comment_CrumbsMonoPlugin_reply implements crumbs_MonoPlugin {
 
@@ -32,7 +30,6 @@ class comment_CrumbsMonoPlugin_reply implements crumbs_MonoPlugin {
     return 'node/'. $nid;
   }
 }
-
 
 class comment_CrumbsMonoPlugin_comment implements crumbs_MonoPlugin {
 
@@ -55,7 +52,6 @@ class comment_CrumbsMonoPlugin_comment implements crumbs_MonoPlugin {
   }
 }
 
-
 class comment_CrumbsMonoPlugin_skip implements crumbs_MonoPlugin {
 
   /**
@@ -68,11 +64,13 @@ class comment_CrumbsMonoPlugin_skip implements crumbs_MonoPlugin {
   /**
    * The default title for comment/% is "Comment permalink",
    * so not very useful to have in the breadcrumb.
+   *
+   * @param string $path
+   * @param array $item
+   *
+   * @return FALSE
    */
   function findTitle__comment_x($path, $item) {
     return FALSE;
   }
 }
-
-
-

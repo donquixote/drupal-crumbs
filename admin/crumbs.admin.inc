@@ -206,6 +206,12 @@ function crumbs_admin_display_form() {
   return $form;
 }
 
+/**
+ * Additional submit handler for crumbs_admin_display_form, that will flush the
+ * crumbs-related caches.
+ *
+ * @param array $form
+ */
 function _crumbs_admin_display_submit_flush_cache($form) {
   _crumbs_admin_flush_cache();
 
