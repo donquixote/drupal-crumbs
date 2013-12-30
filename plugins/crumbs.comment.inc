@@ -45,8 +45,8 @@ class comment_CrumbsMonoPlugin_comment implements crumbs_MonoPlugin {
    * This also completes the breadcrumb for other comment/%/* paths.
    */
   function findParent__comment_x($path, $item) {
-    $comment = comment_load($item['map'][1]);
-    if ($comment && $comment->nid) {
+    $comment = comment_load($item['original_map'][1]);
+    if (!empty($comment->nid)) {
       return 'node/' . $comment->nid;
     }
   }

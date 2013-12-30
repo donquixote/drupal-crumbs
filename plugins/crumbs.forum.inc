@@ -147,7 +147,7 @@ class forum_CrumbsMonoPlugin_forumThreadCreate implements crumbs_MonoPlugin_Find
       if (is_array($field)) {
         // That's a node/add/(type)/(tid) page for a forum-enabled node type.
         $term = taxonomy_term_load($item['original_map'][3]);
-        if ($term && $term->vocabulary_machine_name === 'forums') {
+        if ($term instanceof stdClass && 'forums' === $term->vocabulary_machine_name) {
           return 'forum/' . $term->tid;
         }
       }
@@ -188,7 +188,7 @@ class forum_CrumbsMonoPlugin_forumThreadCreateTitle implements crumbs_MonoPlugin
       if (is_array($field)) {
         // That's a node/add/(type)/(tid) page for a forum-enabled node type.
         $term = taxonomy_term_load($item['original_map'][3]);
-        if ($term && $term->vocabulary_machine_name === 'forums') {
+        if ($term instanceof stdClass && 'forums' === $term->vocabulary_machine_name) {
           return $this->newTopicTitle($type);
         }
       }

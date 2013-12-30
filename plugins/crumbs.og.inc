@@ -41,7 +41,7 @@ class og_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin {
     }
 
     $items = field_get_items('node', $node, 'group_audience');
-    if ($items) {
+    if (is_array($items)) {
       foreach ($items as $item) {
         $row = db_query("SELECT * FROM {og} WHERE gid = :gid", array(':gid' => $item['gid']))->fetchObject();
         if ($row && $row->entity_type === 'node') {

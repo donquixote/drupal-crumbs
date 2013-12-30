@@ -49,7 +49,7 @@ abstract class crumbs_EntityPlugin_Field_Abstract implements crumbs_EntityPlugin
    */
   function entityFindCandidate($entity, $entity_type, $distinction_key) {
     $items = field_get_items($entity_type, $entity, $this->fieldKey);
-    if ($items) {
+    if (is_array($items) && !empty($items)) {
       return $this->fieldFindCandidate($items);
     }
   }

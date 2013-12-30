@@ -58,7 +58,7 @@ class og_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin {
     //   Instead, we could provide a separate plugin for each such field.
     //   This way, fields in disabled plugins get never triggered.
     $items = field_get_items('node', $node, 'og_group_ref');
-    if (!empty($items)) {
+    if (is_array($items)) {
       foreach ($items as $item) {
         $parent_path = $this->getParentPath($item['target_id'], $node);
         return array($node->type => $parent_path);
