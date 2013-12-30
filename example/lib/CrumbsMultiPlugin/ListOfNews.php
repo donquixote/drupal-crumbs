@@ -6,6 +6,9 @@
  */
 class crumbs_example_CrumbsMultiPlugin_ListOfNews implements crumbs_MultiPlugin {
 
+  /**
+   * {@inheritdoc}
+   */
   function describe($api) {
     // We will have a separate rule per node type on Admin > Structure > Crumbs.
     foreach (node_type_get_types() as $type_name => $type) {
@@ -17,6 +20,13 @@ class crumbs_example_CrumbsMultiPlugin_ListOfNews implements crumbs_MultiPlugin 
    * Set news/(year)/(month)/(day) as the parent for a node.
    * You can use the weights config at Admin > Structure > Crumbs to specify
    * which node types this should apply to.
+   *
+   * @param string $path
+   * @param array $item
+   *   The loaded router item for $path.
+   *
+   * @return string[]|NULL
+   *   Candidates for the parent path, or NULL.
    */
   function findParent__node_x($path, $item) {
     $node = $item['map'][1];
