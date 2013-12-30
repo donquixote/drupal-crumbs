@@ -67,7 +67,7 @@ EOT;
         '#description' => t('Crumbs parent path for users with role "!role"', array(
           '!role' => $role,
         )),
-        '#default_value' => @$settings[$role],
+        '#default_value' => isset($settings[$role]) ? $settings[$role] : NULL,
       ) + $element_defaults;
     }
   }
@@ -80,7 +80,7 @@ EOT;
           '!bundle_label' => t($bundle['label']),
           '!bundle_key' => $bundle_key,
         )),
-        '#default_value' => @$settings[$bundle_key],
+        '#default_value' => isset($settings[$bundle_key]) ? $settings[$bundle_key] : NULL,
       ) + $element_defaults;
     }
   }
