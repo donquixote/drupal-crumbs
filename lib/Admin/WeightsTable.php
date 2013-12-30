@@ -14,9 +14,6 @@ class crumbs_Admin_WeightsTable {
    * @var array[]
    */
   protected $sections = array();
-  protected $section;
-  protected $sectionKey;
-
 
   /**
    * @var array
