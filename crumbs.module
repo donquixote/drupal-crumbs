@@ -323,7 +323,7 @@ function _crumbs_element_pre_render($element) {
  * Validation callback for tabledrag element ($element['#element_validate']).
  */
 function _crumbs_element_validate(&$element, &$form_state) {
-  return _crumbs_element_object($element)->validate($element, $form_state);
+  _crumbs_element_object($element)->validate($element, $form_state);
 }
 
 /**
