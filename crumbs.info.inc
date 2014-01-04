@@ -91,3 +91,29 @@ function crumbs_menu() {
 
   return $items;
 }
+
+/**
+ * Implements hook_theme().
+ */
+function crumbs_theme($existing, $type, $theme, $path) {
+  return array(
+    'crumbs_breadcrumb_link' => array(
+      'item' => NULL,
+    ),
+    'crumbs_breadcrumb_current_page' => array(
+      'variables' => array('item' => NULL, 'show_current_page' => TRUE),
+    ),
+    'crumbs_weights_tabledrag' => array(
+      'file' => 'admin/crumbs.tabledrag.inc',
+      'render element' => 'element',
+    ),
+    'crumbs_weights_textual' => array(
+      'file' => 'admin/crumbs.textual.inc',
+      'render element' => 'element',
+    ),
+    'crumbs_weights_expansible' => array(
+      'file' => 'admin/crumbs.expansible.inc',
+      'render element' => 'element',
+    ),
+  );
+}
