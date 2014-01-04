@@ -72,17 +72,6 @@ function crumbs_module_implements_alter(&$implementations, $hook) {
 // -----------------------------------------------------------------------------
 
 /**
- * Implements hook_permission().
- */
-function crumbs_permission() {
-  return array(
-    'administer crumbs' => array(
-      'title' => t('Administer Crumbs'),
-    ),
-  );
-}
-
-/**
  * Implements hook_help()
  */
 function crumbs_help($path, $arg) {
