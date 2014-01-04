@@ -117,3 +117,45 @@ function crumbs_theme($existing, $type, $theme, $path) {
     ),
   );
 }
+
+/**
+ * Implements hook_theme_registry_alter()
+ */
+function crumbs_theme_registry_alter(array &$registry) {
+  if (!isset($registry['breadcrumb']['function'])) {
+    return;
+  }
+
+  // Figure out which theme this applies to.
+  if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
+    $trace = debug_backtrace(0, 3);
+  }
+  else {
+    // Second parameter not supported in PHP < 5.4.0. It would cause a
+    // "Warning: debug_backtrace() expects at most 1 parameter, 2 given".
+    $trace = debug_backtrace(0);
+  }
+  if (1
+    && isset($trace[2]['function'])
+    && '_theme_build_registry' === $trace[2]['function']
+    && isset($trace[2]['args'][0])
+  ) {
+    // Get the first argument of _theme_build_registry().
+    $theme = $trace[2]['args'][0];
+  }
+  else {
+    // The hook is called from a weird place.
+    return;
+  }
+
+  // Remember the original theme function for the settings page.
+  $f = $registry['breadcrumb']['function'];
+  $originals = variable_get('crumbs_original_theme_breadcrumb', array());
+  $originals[$theme->name] = $f;
+  variable_set('crumbs_original_theme_breadcrumb', $originals);
+
+  $settings = variable_get('crumbs_override_theme_breadcrumb', array('theme_breadcrumb'));
+  if (in_array($f, $settings, TRUE)) {
+    $registry['breadcrumb']['function'] = 'crumbs_theme_breadcrumb';
+  }
+}
