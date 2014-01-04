@@ -163,20 +163,6 @@ function theme_crumbs_breadcrumb_current_page(array $variables) {
   }
 }
 
-/**
- * Callback for themekey integration.
- */
-function _crumbs_themekey_path2trailpaths($path) {
-  $trail = crumbs_get_trail($path);
-  $paths = array();
-  foreach ($trail as $k => $item) {
-    $paths[$item['alias']] = TRUE;
-    $paths[$item['route']] = TRUE;
-    $paths[$k] = TRUE;
-  }
-  return array_keys($paths);
-}
-
 
 // Public API functions
 // -----------------------------------------------------------------------------
