@@ -15,6 +15,8 @@ if (!module_exists('xautoload')) {
   spl_autoload_register('_crumbs_autoload');
 }
 
+require_once __DIR__ . '/includes/crumbs.callbacks.inc';
+
 /**
  * Crumbs autoloader.
  *
@@ -74,20 +76,6 @@ function crumbs_module_implements_alter(&$implementations, $hook) {
 
 // Info hook implementations
 // -----------------------------------------------------------------------------
-
-/**
- * @param array $menu_link
- */
-function crumbs_special_menu_link_page(array $menu_link) {
-  drupal_goto('<front>');
-}
-
-/**
- * @param array $menu_link
- */
-function crumbs_special_menu_link_title(array $menu_link) {
-  return $menu_link['title'];
-}
 
 
 // Page hook implementations
