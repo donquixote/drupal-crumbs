@@ -109,19 +109,6 @@ function crumbs_special_menu_link_title(array $menu_link) {
   return $menu_link['title'];
 }
 
-/**
- * Implements hook_block_info()
- */
-function crumbs_block_info() {
-
-  return array(
-    'breadcrumb' => array(
-      'info' => t('Breadcrumb (Crumbs)'),
-      'cache' => DRUPAL_NO_CACHE,
-    ),
-  );
-}
-
 
 // Page hook implementations
 // -----------------------------------------------------------------------------
