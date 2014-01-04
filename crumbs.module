@@ -355,13 +355,3 @@ function _crumbs_element_object(&$element) {
   }
   return $element['#crumbs_element_object'];
 }
-
-/**
- * Callback to be registered with ini_set('unserialize_callback_func', *)
- *
- * @param string $class
- * @throws crumbs_UnserializeException
- */
-function _crumbs_unserialize_failure($class) {
-  throw new crumbs_UnserializeException();
-}
