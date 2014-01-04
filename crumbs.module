@@ -114,25 +114,6 @@ function crumbs_special_menu_link_title(array $menu_link) {
 // -----------------------------------------------------------------------------
 
 /**
- * Implements hook_block_view()
- */
-function crumbs_block_view($delta = '') {
-
-  $block = array();
-
-  switch ($delta) {
-    case 'breadcrumb':
-      $html = crumbs()->page->breadcrumbHtml;
-      if (!empty($html)) {
-        $block['content'] = $html;
-      }
-      break;
-  }
-
-  return $block;
-}
-
-/**
  * Implements hook_preprocess_page().
  */
 function crumbs_preprocess_page(&$vars) {

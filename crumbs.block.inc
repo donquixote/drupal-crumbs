@@ -12,3 +12,22 @@ function crumbs_block_info() {
     ),
   );
 }
+
+/**
+ * Implements hook_block_view()
+ */
+function crumbs_block_view($delta = '') {
+
+  $block = array();
+
+  switch ($delta) {
+    case 'breadcrumb':
+      $html = crumbs()->page->breadcrumbHtml;
+      if (!empty($html)) {
+        $block['content'] = $html;
+      }
+      break;
+  }
+
+  return $block;
+}
