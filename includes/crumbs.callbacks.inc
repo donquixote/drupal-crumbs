@@ -39,3 +39,16 @@ function _crumbs_themekey_path2trailpaths($path) {
   }
   return array_keys($paths);
 }
+
+/**
+ * Submit callback registered on crumbs admin forms in addition to the usual
+ * system_settings_form stuff.
+ */
+function _crumbs_admin_flush_cache() {
+
+  // This will only hit the 'cache_page' and 'cache_block' cache bins.
+  cache_clear_all();
+
+  // Clear plugin info in 'cache' cache bin.
+  crumbs()->pluginInfo->flushCaches();
+}

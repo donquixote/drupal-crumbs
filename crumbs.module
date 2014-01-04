@@ -357,19 +357,6 @@ function _crumbs_element_object(&$element) {
 }
 
 /**
- * Submit callback registered on crumbs admin forms in addition to the usual
- * system_settings_form stuff.
- */
-function _crumbs_admin_flush_cache() {
-
-  // This will only hit the 'cache_page' and 'cache_block' cache bins.
-  cache_clear_all();
-
-  // Clear plugin info in 'cache' cache bin.
-  crumbs()->pluginInfo->flushCaches();
-}
-
-/**
  * Callback to be registered with ini_set('unserialize_callback_func', *)
  *
  * @param string $class
