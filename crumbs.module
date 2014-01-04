@@ -35,6 +35,39 @@ function _crumbs_autoload($class) {
 }
 
 
+// Hook management
+// -----------------------------------------------------------------------------
+
+/**
+ * Implements hook_module_implements_alter()
+ */
+function crumbs_module_implements_alter(&$implementations, $hook) {
+
+  switch ($hook) {
+
+    case 'theme_registry_alter':
+    case 'permission':
+    case 'menu':
+    case 'themekey_properties':
+    case 'theme':
+      // These hook implementations live in crumbs.info.inc
+      $implementations['crumbs'] = 'info';
+      break;
+
+    case 'block_info':
+    case 'block_view':
+      // These hook implementations live in crumbs.block.inc
+      $implementations['crumbs'] = 'block';
+      break;
+
+    default:
+      return;
+  }
+
+  require_once __DIR__ . '/crumbs.' . $implementations['crumbs'] . '.inc';
+}
+
+
 // Info hook implementations
 // -----------------------------------------------------------------------------
 
