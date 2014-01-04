@@ -110,27 +110,6 @@ function crumbs_special_menu_link_title(array $menu_link) {
 }
 
 /**
- * Implements hook_themekey_properties().
- */
-function crumbs_themekey_properties() {
-  $attributes = array();
-  $attributes['crumbs:trail_paths'] = array(
-    'description' => t('Crumbs trail paths'),
-    'validator' => '',
-    'page cache' => THEMEKEY_PAGECACHE_SUPPORTED,
-  );
-
-  $maps = array();
-  $maps[] = array(
-    'src' => 'drupal:get_q',
-    'dst' => 'crumbs:trail_paths',
-    'callback' => '_crumbs_themekey_path2trailpaths',
-  );
-
-  return array('attributes' => $attributes, 'maps' => $maps);
-}
-
-/**
  * Implements hook_block_info()
  */
 function crumbs_block_info() {
