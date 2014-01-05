@@ -99,9 +99,11 @@ function crumbs_theme($existing, $type, $theme, $path) {
   return array(
     'crumbs_breadcrumb_link' => array(
       'item' => NULL,
+      'file' => 'crumbs.theme.inc',
     ),
     'crumbs_breadcrumb_current_page' => array(
       'variables' => array('item' => NULL, 'show_current_page' => TRUE),
+      'file' => 'crumbs.theme.inc',
     ),
     'crumbs_weights_tabledrag' => array(
       'file' => 'admin/crumbs.tabledrag.inc',
@@ -156,6 +158,7 @@ function crumbs_theme_registry_alter(array &$registry) {
 
   $settings = variable_get('crumbs_override_theme_breadcrumb', array('theme_breadcrumb'));
   if (in_array($f, $settings, TRUE)) {
+    $registry['breadcrumb']['includes'][] = drupal_get_path('module', 'crumbs') . '/crumbs.theme.inc';
     $registry['breadcrumb']['function'] = 'crumbs_theme_breadcrumb';
   }
 }
