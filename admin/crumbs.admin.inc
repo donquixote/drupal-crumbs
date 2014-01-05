@@ -191,7 +191,8 @@ function crumbs_admin_display_form() {
         '<p>' . t('Use !crumbs_module_implementation instead of the respective theme implementation.', array(
             '!crumbs_module_implementation' => '<code>crumbs_theme_breadcrumb()</code>',
           )) . '<br/>' .
-        t('This may conflict with some themes.') . '</p>',
+        t('For some themes (especially Omega) this does not work. ' .
+          'All you can do there is to implement your own THEMENAME_breadcrumb() in your custom Omega sub-theme.') . '</p>',
     );
   }
   if (!empty($form['theme_override_settings'])) {
