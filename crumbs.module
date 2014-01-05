@@ -78,10 +78,6 @@ function crumbs_module_implements_alter(&$implementations, $hook) {
 }
 
 
-// Info hook implementations
-// -----------------------------------------------------------------------------
-
-
 // Page hook implementations
 // -----------------------------------------------------------------------------
 
