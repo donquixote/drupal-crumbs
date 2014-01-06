@@ -1,3 +1,26 @@
+/*
+table#crumbs_weights_dropdowns {
+  border:none;
+}
+
+table#crumbs_weights_dropdowns tr {
+  border:none;
+  border-left:1px solid #ddd;
+  border-right:1px solid #ddd;
+}
+
+table#crumbs_weights_dropdowns tr.crumbs-rule-depth-1 {
+  border-top:3px double #ddd;
+}
+
+table#crumbs_weights_dropdowns td {
+  border:none;
+}
+*/
+
+table#crumbs_weights_dropdowns tr.crumbs-rule-depth-2 {
+  /* border-top:1px solid #eee; */
+}
 
 table#crumbs_weights_dropdowns td {
   padding-top:0;
@@ -11,10 +34,10 @@ table#crumbs_weights_dropdowns td code {
 }
 
 table#crumbs_weights_dropdowns select {
-  padding:1px 6px;
+  padding:0px 5px;
   min-width:100%;
   box-sizing:border-box;
-  margin:1px;
+  margin:0;
   border-style:none;
   color:inherit;
   background:inherit;
@@ -25,9 +48,11 @@ table#crumbs_weights_dropdowns select option {
   /* color:#0a0; */
 }
 
-table#crumbs_weights_dropdowns select option.crumbs-option-disabled {
-  /* color:#d00; */
-}
+/*
+table#crumbs_weights_dropdowns select option.crumbs-option-inherit {color:black;}
+table#crumbs_weights_dropdowns select option.crumbs-option-disabled {color:#d00;}
+table#crumbs_weights_dropdowns select option.crumbs-option-enabled  {color:#0a0;}
+*/
 
 table#crumbs_weights_dropdowns tr.crumbs-rule-explicit select {
   /* border:1px solid;
@@ -36,18 +61,30 @@ table#crumbs_weights_dropdowns tr.crumbs-rule-explicit select {
 
 table#crumbs_weights_dropdowns select:hover {
   border:1px dotted;
-  padding:0 5px;
+  margin:-1px;
 }
 
-table#crumbs_weights_dropdowns tr.crumbs-rule-disabled {
+table#crumbs_weights_dropdowns tr.crumbs-rule-disabled td {
   opacity:0.5;
+}
+
+table#crumbs_weights_dropdowns tr.crumbs-rule-disabled td.crumbs-column-children {
+  opacity: 1;
 }
 
 table#crumbs_weights_dropdowns tr.crumbs-rule-inherit,
 table#crumbs_weights_dropdowns tr.crumbs-rule-inherit select,
 table#crumbs_weights_dropdowns select option.crumbs-option-inherit {
-  font-style: italic;
+  /* font-style: italic; */
 }
+
+/*
+table#crumbs_weights_dropdowns tr.crumbs-rule-explicit.crumbs-rule-enabled  select {color:#0a0;}
+table#crumbs_weights_dropdowns tr.crumbs-rule-explicit.crumbs-rule-disabled select {color:#d00;}
+
+table#crumbs_weights_dropdowns tr.crumbs-rule-explicit.crumbs-rule-enabled  .crumbs-div-weight {color:#0a0;}
+table#crumbs_weights_dropdowns tr.crumbs-rule-explicit.crumbs-rule-disabled .crumbs-div-weight {color:#d00;}
+*/
 
 /* table#crumbs_weights_dropdowns tr.crumbs-rule-inherit.crumbs-rule-enabled  {color:#0a0;}
 table#crumbs_weights_dropdowns tr.crumbs-rule-inherit.crumbs-rule-disabled {color:#d00;} */
@@ -89,4 +126,86 @@ table#crumbs_weights_dropdowns div.crumbs-light {
 
 table#crumbs_weights_dropdowns tr.crumbs-rule-enabled div.crumbs-light {
   background-color:#0d0;
+}
+
+table#crumbs_weights_dropdowns td {
+  position:relative;
+  z-index:20;
+}
+
+/*
+table#crumbs_weights_dropdowns div.crumbs-admin-meta {
+  position:absolute;
+  left:auto;
+  right:20px;
+  visibility:hidden;
+  background:white;
+  border:1px solid #ddd;
+  -webkit-box-shadow: 0 2px 3px #888;
+  -moz-box-shadow: 0 2px 3px #888;
+  box-shadow: 0 2px 3px #888;
+  z-index:30;
+  padding:1px 5px;
+  min-width:200px;
+}
+
+table#crumbs_weights_dropdowns td:hover div.crumbs-admin-meta {
+  visibility:visible;
+}
+*/
+
+table#crumbs_weights_dropdowns td.crumbs-admin-meta {
+  overflow:hidden;
+}
+
+table#crumbs_weights_dropdowns td .crumbs-admin-meta {
+  margin-bottom:-1000px;
+}
+
+table#crumbs_weights_dropdowns tr.crumbs-row-focus td .crumbs-admin-meta {
+  margin-bottom:0;
+}
+
+table#crumbs_weights_dropdowns td .crumbs-div-weight {
+  box-sizing:border-box;
+  width:100%;
+  text-align:right;
+  padding:0 5px;
+  cursor:pointer;
+}
+
+table#crumbs_weights_dropdowns td .crumbs-div-weight:hover {
+  border:1px solid;
+  margin:-1px 0;
+  padding:0 4px;
+  margin-left:auto;
+}
+
+table#crumbs_weights_dropdowns tr.crumbs-rule-disabled td .crumbs-div-weight {
+  display:none;
+}
+
+td.crumbs-column-children > div {
+  padding:0 4px;
+  margin:0;
+}
+
+table#crumbs_weights_dropdowns tr.crumbs-rule-depth-0 td.crumbs-column-children > div,
+table#crumbs_weights_dropdowns tr.expanded td.crumbs-column-children > div {
+  display:none;
+}
+
+tr.crumbs-row-focus {
+  background:#ffd;
+}
+
+tr.crumbs-has-child-with-focus td.crumbs-column-children > div {
+  background:#ffc;
+  border:1px solid #eee;
+  border-style:none solid;
+  margin:0 -1px;
+}
+
+tr.crumbs-has-parent-with-focus {
+  background:#ffeeaa;
 }

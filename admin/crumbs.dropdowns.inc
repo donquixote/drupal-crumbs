@@ -11,6 +11,9 @@
 function theme_crumbs_weights_dropdowns(&$vars) {
   $element = $vars['element'];
 
+  drupal_add_library('system', 'jquery.cookie');
+  drupal_add_js('misc/tabledrag.js', array('weight' => -1));
+
   $rows = array();
   foreach (element_children($element) as $key) {
     $elt = $element[$key];
@@ -39,28 +42,40 @@ function theme_crumbs_weights_dropdowns(&$vars) {
       }
     }
 
-    $cells[] = '<code class="crumbs-admin-meta">' . implode('<br/>', $methods) . '</code>';
-    $cells[] = '<code class="crumbs-admin-meta">' . implode('<br/>', $routes) . '</code>';
+    $cells[] = array(
+      'data' => '<code class="crumbs-admin-meta">' . implode('<br/>', $methods) . '</code>',
+      'class' => 'crumbs-admin-meta',
+    );
+    $cells[] = array(
+      'data' => '<code class="crumbs-admin-meta">' . implode('<br/>', $routes) . '</code>',
+      'class' => 'crumbs-admin-meta',
+    );
 
     if ($descriptions = $meta->descriptions) {
-      $cells[] = '<div class="crumbs-admin-meta">' . implode('<br/>', $descriptions) . '</div>';
+      $cells[] = array(
+        'data' => '<div class="crumbs-admin-meta">' . implode('<br/>', $descriptions) . '</div>',
+        'class' => 'crumbs-admin-meta',
+      );
     }
     else {
-      $cells[] = '';
+      $cells[] = array(
+        'data' => '',
+        'class' => 'crumbs-admin-meta',
+      );
     }
 
     $row = array('data' => $cells);
     $row['id'] = 'crumbs-rule-' . md5($meta->getKey());
     $parent_key = $meta->getParentKey();
     if (NULL === $parent_key) {
-      # $row['class'][] = 'crumbs-rule-depth-0';
+      $row['class'][] = 'crumbs-rule-depth-0';
     }
     elseif ('*' === $parent_key) {
-      # $row['class'][] = 'crumbs-rule-depth-1';
+      $row['class'][] = 'crumbs-rule-depth-1';
     }
     else {
       $row['class'][] = 'child-of-crumbs-rule-' . md5($parent_key);
-      # $row['class'][] = 'crumbs-rule-depth-' . count(explode('.', $parent_key));
+      $row['class'][] = 'crumbs-rule-depth-' . count(explode('.', $parent_key));
     }
     $row['no_striping'] = TRUE;
 
