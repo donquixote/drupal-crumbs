@@ -43,7 +43,7 @@ class og_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin {
    * @param array $item
    *   Loaded router item, as returned from crumbs_get_router_item()
    *
-   * @return array
+   * @return array|null
    *   Parent path candidates
    */
   function findParent__node_x($path, $item) {
@@ -158,7 +158,7 @@ class og_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin {
    * @param array $item
    *   Loaded router item, as returned from crumbs_get_router_item()
    *
-   * @return array
+   * @return array|null
    *   Parent path candidates
    */
   function findParent__node_x($path, $item) {
