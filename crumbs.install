@@ -20,6 +20,7 @@ function crumbs_uninstall() {
   variable_del('crumbs_separator');
   variable_del('crumbs_override_theme_breadcrumb');
   variable_del('crumbs_original_theme_breadcrumb');
+  variable_del('crumbs_rich_snippet_mode');
 }
 
 /**

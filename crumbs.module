@@ -176,8 +176,11 @@ function crumbs_theme($existing, $type, $theme, $path) {
     'crumbs_breadcrumb_link' => array(
       'item' => NULL,
     ),
-    'crumbs_breadcrumb_current_page' => array(
-      'variables' => array('item' => NULL, 'show_current_page' => TRUE),
+    'crumbs_breadcrumb_link__microdata' => array(
+      'item' => NULL,
+    ),
+    'crumbs_breadcrumb_link__rdfa' => array(
+      'item' => NULL,
     ),
     'crumbs_weights_tabledrag' => array(
       'file' => 'admin/crumbs.tabledrag.inc',
@@ -196,6 +199,14 @@ function crumbs_theme($existing, $type, $theme, $path) {
 
 /**
  * Implements hook_theme_registry_alter()
+ *
+ * Replaces those implementations of theme_breadcrumb that have a checkbox on
+ * the admin/structure/crumbs/display "Theme override options" setting.
+ *
+ * It also remembers which theme uses which implementation of theme_breadcrumb.
+ * Unfortunately, theme registry rebuild does only work properly for the
+ * currently active theme. So we cannot just trigger it while building the form,
+ * but need to wait until it happens naturally.
  */
 function crumbs_theme_registry_alter(array &$registry) {
   if (!isset($registry['breadcrumb']['function'])) {
@@ -339,7 +350,7 @@ function crumbs_theme_breadcrumb($variables) {
     $output .= $separator;
   }
 
-  $output = '<div class="breadcrumb">' . $output . '</div>';
+  $output = '<div ' . drupal_attributes($variables['attributes']) . '>' . $output . '</div>';
 
   // Provide a navigational heading to give context for breadcrumb links to
   // screen-reader users. Make the heading invisible with .element-invisible.
@@ -350,29 +361,91 @@ function crumbs_theme_breadcrumb($variables) {
  * Default theme implementation for theme('crumbs_breadcrumb_link').
  */
 function theme_crumbs_breadcrumb_link(array $item) {
-  if ('<nolink>' === $item['href']) {
-    return check_plain($item['title']);
-  }
-  else {
-    $options = isset($item['localized_options']) ? $item['localized_options'] : array();
+  $options = isset($item['localized_options']) ? $item['localized_options'] : array();
+  if ('<nolink>' !== $item['href']) {
+    // Render as a regular link.
     return l($item['title'], $item['href'], $options);
   }
+
+  // Filter the title, unless $options['html'] is set.
+  $plain = empty($options['html']) ? check_plain($item['title']) : $item['title'];
+
+  if (empty($item['show_span'])) {
+    // Don't use a span tag.
+    return $plain;
+  }
+
+  // Use a span tag instead of a link tag.
+  $attributes = isset($options['attributes']) ? $options['attributes'] : array();
+
+  // Remove all HTML and PHP tags from a tooltip. For best performance, we act
+  // only if a quick strpos() pre-check gave a suspicion (because strip_tags()
+  // is expensive).
+  // Borrowed from l().
+  if (1
+    && isset($attributes['title'])
+    && FALSE !== strpos($attributes['title'], '<')
+  ) {
+    $attributes['title'] = strip_tags($attributes['title']);
+  }
+
+  return '<span ' . drupal_attributes($attributes) . '>' . $plain . '</span>';
 }
 
 /**
- * Default theme implementation for theme('crumbs_breadcrumb_current_page').
+ * Default theme implementation for theme('crumbs_breadcrumb_link__microdata').
  */
-function theme_crumbs_breadcrumb_current_page(array $variables) {
-  $item = $variables['item'];
-  switch ($variables['show_current_page']) {
-    case CRUMBS_SHOW_CURRENT_PAGE_SPAN:
-      return '<span class="crumbs-current-page">' . check_plain($item['title']) . '</span>';
-    case CRUMBS_SHOW_CURRENT_PAGE_LINK:
-      $options = isset($item['localized_options']) ? $item['localized_options'] : array();
-      return l($item['title'], $item['href'], $options);
-    default:
-      return check_plain($item['title']);
+function theme_crumbs_breadcrumb_link__microdata(array $item) {
+  $options = isset($item['localized_options']) ? $item['localized_options'] : array();
+
+  // Filter the title, unless $options['html'] is set.
+  $plain = empty($options['html']) ? check_plain($item['title']) : $item['title'];
+
+  if ('<nolink>' !== $item['href']) {
+    // Render as a regular link with microdata.
+    $options['attributes']['itemprop'] = 'url';
+    $options['html'] = TRUE;
+    $title = '<span itemprop="title">' . $plain . '</span>';
+    $link = l($title, $item['href'], $options);
+    return '<span itemscope itemtype="http://data-vocabulary.org/Breadcrumb">' . $link . '</span>';
   }
+
+  if (empty($item['show_span'])) {
+    // Don't use a span tag.
+    return $plain;
+  }
+
+  // Use a span tag instead of a link tag.
+  $attributes = isset($options['attributes']) ? $options['attributes'] : array();
+
+  // Remove all HTML and PHP tags from a tooltip. For best performance, we act
+  // only if a quick strpos() pre-check gave a suspicion (because strip_tags()
+  // is expensive).
+  // Borrowed from l().
+  if (1
+    && isset($attributes['title'])
+    && FALSE !== strpos($attributes['title'], '<')
+  ) {
+    $attributes['title'] = strip_tags($attributes['title']);
+  }
+
+  $attributes['itemprop'] = 'title';
+  $span = '<span ' . drupal_attributes($attributes) . '>' . $plain . '</span>';
+  return '<span itemscope itemtype="http://data-vocabulary.org/Breadcrumb">' . $span . '</span>';
+}
+
+/**
+ * Default theme implementation for theme('crumbs_breadcrumb_link__rdfa').
+ */
+function theme_crumbs_breadcrumb_link__rdfa(array $item) {
+  if ('<nolink>' !== $item['href']) {
+    $item['localized_options']['attributes']['rel'] = 'v:url';
+  }
+  $item['localized_options']['attributes']['property'] = 'v:title';
+  $link = theme_crumbs_breadcrumb_link($item);
+  $link = '<span typeof="v:Breadcrumb">' . $link . '</span>';
+  // The rest happens in crumbs_theme_breadcrumb()
+  return $link;
 }
 
 /**

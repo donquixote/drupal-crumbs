@@ -187,6 +187,29 @@ class crumbs_CurrentPageInfo {
   }
 
   /**
+   * Determine separator string, e.g. ' &raquo; ' or ' &gt; '.
+   *
+   * @param crumbs_Container_LazyPageData $page
+   * @return string|FALSE
+   */
+  function richSnippetMode($page) {
+    // Only allow rich snippets if theme_breadcrumb() is overridden for the
+    // current theme.
+    $registry = theme_get_registry(FALSE);
+    if (1
+      && isset($registry['breadcrumb']['function'])
+      && 'crumbs_theme_breadcrumb' === $registry['breadcrumb']['function']
+    ) {
+      $mode = variable_get('crumbs_rich_snippet_mode', FALSE);
+      // Do not return $mode if it is something like '0'.
+      if (!empty($mode)) {
+        return $mode;
+      }
+    }
+    return FALSE;
+  }
+
+  /**
    * If there are fewer visible items than this, we hide the breadcrumb.
    * Every "trail item" does become a "visible item", except when it is hidden:
    * - The frontpage item might be hidden based on a setting.
@@ -222,6 +245,43 @@ class crumbs_CurrentPageInfo {
     // Allow modules to alter the breadcrumb, if possible, as that is much
     // faster than rebuilding an entirely new active trail.
     drupal_alter('menu_breadcrumb', $breadcrumb_items, $router_item);
+
+    // Prepare the items for easier theming.
+    foreach ($breadcrumb_items as $i => &$item) {
+      $item += array(
+        'localized_options' => array(),
+      );
+      $item['localized_options'] += array('attributes' => array());
+      $item['localized_options']['attributes'] += array('class' => '');
+    }
+
+    // Mark the last item.
+    if (!empty($item) && $page->showCurrentPage) {
+      $item['localized_options']['attributes']['class'] .= ' active crumbs-current-page';
+      $item['crumbs_current_page'] = $page->showCurrentPage;
+      switch ($page->showCurrentPage) {
+        case CRUMBS_SHOW_CURRENT_PAGE_LINK:
+          // Do nothing.
+          break;
+        case CRUMBS_SHOW_CURRENT_PAGE_SPAN:
+          // Render as span.
+          $item['href'] = '<nolink>';
+          break;
+        default:
+          // Render without html tags around.
+          $item['href'] = '<nolink>';
+          $item['show_span'] = FALSE;;
+      }
+    }
+
+    // Process <nolink> items.
+    foreach ($breadcrumb_items as $i => &$item) {
+      if ('<nolink>' === $item['href']) {
+        $item['localized_options']['attributes']['class'] .= ' crumbs-nolink';
+        $item += array('show_span' => TRUE);
+      }
+    }
+
     return $breadcrumb_items;
   }
 
@@ -236,22 +296,26 @@ class crumbs_CurrentPageInfo {
     if (empty($breadcrumb_items)) {
       return '';
     }
+
+    // Theme hook for breadcrumb links.
+    $theme_hook = 'crumbs_breadcrumb_link';
+    if (FALSE !== $page->richSnippetMode) {
+      $theme_hook .= '__' . $page->richSnippetMode;
+    }
+
+    // Render each link separately.
     $links = array();
-    if ($page->showCurrentPage) {
-      $last = array_pop($breadcrumb_items);
-      foreach ($breadcrumb_items as $i => $item) {
-        $links[$i] = theme('crumbs_breadcrumb_link', $item);
-      }
-      $links[] = theme('crumbs_breadcrumb_current_page', array(
-        'item' => $last,
-        'show_current_page' => $page->showCurrentPage,
-      ));
+    foreach ($breadcrumb_items as $i => $item) {
+      $links[$i] = theme($theme_hook, $item);
     }
-    else {
-      foreach ($breadcrumb_items as $i => $item) {
-        $links[$i] = theme('crumbs_breadcrumb_link', $item);
-      }
+
+    // Attributes for the container element.
+    $attributes = array('class' => 'breadcrumb');
+    if ('rdfa' === $page->richSnippetMode) {
+      $attributes['xmlns:v'] = 'http://rdf.data-vocabulary.org/#';
     }
+
+    // Render the complete breadcrumb.
     return theme('breadcrumb', array(
       'breadcrumb' => $links,
       'crumbs_breadcrumb_items' => $breadcrumb_items,
@@ -259,6 +323,7 @@ class crumbs_CurrentPageInfo {
       'crumbs_separator' => $page->separator,
       'crumbs_separator_span' => $page->separatorSpan,
       'crumbs_trailing_separator' => $page->trailingSeparator,
+      'attributes' => $attributes,
     ));
   }
 
