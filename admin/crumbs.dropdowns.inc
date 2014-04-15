@@ -65,17 +65,17 @@ function theme_crumbs_weights_dropdowns(&$vars) {
     }
 
     $row = array('data' => $cells);
-    $row['id'] = 'crumbs-rule-' . md5($meta->getKey());
+    # $row['id'] = 'crumbs-rule-' . md5($meta->getKey());
     $parent_key = $meta->getParentKey();
     if (NULL === $parent_key) {
-      $row['class'][] = 'crumbs-rule-depth-0';
+      # $row['class'][] = 'crumbs-rule-depth-0';
     }
     elseif ('*' === $parent_key) {
-      $row['class'][] = 'crumbs-rule-depth-1';
+      # $row['class'][] = 'crumbs-rule-depth-1';
     }
     else {
-      $row['class'][] = 'child-of-crumbs-rule-' . md5($parent_key);
-      $row['class'][] = 'crumbs-rule-depth-' . count(explode('.', $parent_key));
+      # $row['class'][] = 'child-of-crumbs-rule-' . md5($parent_key);
+      # $row['class'][] = 'crumbs-rule-depth-' . count(explode('.', $parent_key));
     }
     $row['no_striping'] = TRUE;
 

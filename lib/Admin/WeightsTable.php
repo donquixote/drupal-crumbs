@@ -68,6 +68,7 @@ class crumbs_Admin_WeightsTable {
   }
 
   /**
+   * @throws Exception
    * @return array
    */
   protected function gridOfDescriptions() {
@@ -122,6 +123,8 @@ class crumbs_Admin_WeightsTable {
   /**
    * @param string $key
    * @param array $child
+   *
+   * @throws Exception
    */
   function addElement($key, $child) {
 
@@ -157,6 +160,8 @@ class crumbs_Admin_WeightsTable {
    * @param string $section_key
    * @param string $key
    * @param array $child
+   *
+   * @throws Exception
    */
   protected function addRow($section_key, $key, $child) {
 

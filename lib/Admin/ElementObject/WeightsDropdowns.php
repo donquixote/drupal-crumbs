@@ -111,10 +111,29 @@ class crumbs_Admin_ElementObject_WeightsDropdowns extends crumbs_Admin_ElementOb
     // * can't inherit
     unset($element['rules.*']['weight']['#options']['default']);
 
-    $element['#attached']['css'][] = drupal_get_path('module', 'token') . '/jquery.treeTable.css';
-    $element['#attached']['js'][] = drupal_get_path('module', 'token') . '/jquery.treeTable.js';
-    $element['#attached']['css'][] = drupal_get_path('module', 'crumbs') . '/css/crumbs.admin.dropdowns.css';
-    $element['#attached']['js'][] = drupal_get_path('module', 'crumbs') . '/js/crumbs.admin.dropdowns.js';
+    $crumbspath = drupal_get_path('module', 'crumbs');
+
+    if (module_exists('token')) {
+      $element['#attached']['css'][] = drupal_get_path('module', 'token') . '/jquery.treeTable.css';
+      $element['#attached']['js'][]  = drupal_get_path('module', 'token') . '/jquery.treeTable.js';
+    }
+    else {
+      $element['#attached']['css'][] = $crumbspath . '/css/jquery.treeTable.css';
+      $element['#attached']['js'][]  = $crumbspath . '/js/jquery.treeTable.js';
+    }
+
+    // Attach all js files.
+    foreach (array('model', 'widget', 'dropdowns') as $subfolder) {
+      foreach (scandir($crumbspath . '/js/' . $subfolder) as $candidate) {
+        if ('.' === $candidate{0}) {
+          continue;
+        }
+        $element['#attached']['js'][] = $crumbspath . '/js/' . $subfolder . '/' . $candidate;
+      }
+    }
+
+    $element['#attached']['css'][] = $crumbspath . '/css/crumbs.admin.dropdowns.css';
+    $element['#attached']['js'][]  = $crumbspath . '/js/crumbs.admin.dropdowns.js';
 
     return $element;
   }
