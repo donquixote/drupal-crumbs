@@ -1,23 +1,14 @@
 <?php
 
-class crumbs_Container_LazyData {
+/**
+ * Container for lazy-initialized data.
+ */
+abstract class crumbs_Container_AbstractLazyData {
 
   /**
    * @var array
    */
-  protected $data = array();
-
-  /**
-   * @var stdClass
-   */
-  protected $source;
-
-  /**
-   * @param object $source
-   */
-  function __construct($source) {
-    $this->source = $source;
-  }
+  private $data = array();
 
   /**
    * @param string $key
@@ -25,7 +16,7 @@ class crumbs_Container_LazyData {
    */
   function __get($key) {
     if (!array_key_exists($key, $this->data)) {
-      $this->data[$key] = $this->source->$key($this);
+      $this->data[$key] = $this->$key();
     }
     return $this->data[$key];
   }
@@ -44,4 +35,5 @@ class crumbs_Container_LazyData {
   function reset($key) {
     unset($this->data[$key]);
   }
+
 }

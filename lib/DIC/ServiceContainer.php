@@ -9,7 +9,7 @@
  * @property crumbs_PluginEngine $pluginEngine
  * @property crumbs_CallbackRestoration $callbackRestoration
  * @property crumbs_Container_CachedLazyPluginInfo $pluginInfo
- * @property crumbs_Container_LazyPageData $page
+ * @property crumbs_CurrentPageInfo $page
  * @property crumbs_Container_LazyDataByPath $trails
  * @property crumbs_Router $router
  */
@@ -84,11 +84,10 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
    *
    * Available as crumbs('page').
    *
-   * @return crumbs_Container_LazyPageData
+   * @return crumbs_CurrentPageInfo
    */
   protected function page() {
-    $source = new crumbs_CurrentPageInfo($this->trails, $this->breadcrumbBuilder, $this->router);
-    return new crumbs_Container_LazyPageData($source);
+    return new crumbs_CurrentPageInfo($this->trails, $this->breadcrumbBuilder, $this->router);
   }
 
   /**
