@@ -4,14 +4,14 @@
  * Replacement theme callback for theme('breadcrumb').
  *
  * @param $variables
- * @return string
+ * @return string|null
  *   Rendered breadcrumb HTML
  */
 function crumbs_theme_breadcrumb($variables) {
   $breadcrumb = $variables['breadcrumb'];
 
   if (empty($breadcrumb)) {
-    return;
+    return NULL;
   }
 
   // These settings may be missing, if theme('breadcrumb') is called from
@@ -42,6 +42,10 @@ function crumbs_theme_breadcrumb($variables) {
 
 /**
  * Default theme implementation for theme('crumbs_breadcrumb_link').
+ *
+ * @param array $item
+ *
+ * @return string
  */
 function theme_crumbs_breadcrumb_link(array $item) {
   if ('<nolink>' === $item['href']) {
@@ -55,6 +59,10 @@ function theme_crumbs_breadcrumb_link(array $item) {
 
 /**
  * Default theme implementation for theme('crumbs_breadcrumb_current_page').
+ *
+ * @param array $variables
+ *
+ * @return string
  */
 function theme_crumbs_breadcrumb_current_page(array $variables) {
   $item = $variables['item'];

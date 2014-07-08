@@ -79,7 +79,7 @@ class crumbs_MultiPlugin_EntityFindSomething extends crumbs_MultiPlugin_EntityFi
    */
   protected function find($path, $item) {
     if (FALSE === $entity = crumbs_Util::itemExtractEntity($item, $this->entityType)) {
-      return;
+      return NULL;
     }
 
     if ('user' === $this->entityType) {
@@ -106,6 +106,8 @@ class crumbs_MultiPlugin_EntityFindSomething extends crumbs_MultiPlugin_EntityFi
     if (!empty($parent)) {
       return array($distinction_key => $parent);
     }
+
+    return NULL;
   }
 
   /**
@@ -125,4 +127,5 @@ class crumbs_MultiPlugin_EntityFindSomething extends crumbs_MultiPlugin_EntityFi
     }
     return $candidates;
   }
+
 }

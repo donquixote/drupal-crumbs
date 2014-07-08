@@ -23,6 +23,11 @@ class blog_CrumbsMonoPlugin_authorPage implements crumbs_MonoPlugin {
 
   /**
    * Still under constructon..
+   *
+   * @param string $path
+   * @param array $item
+   *
+   * @return null|string
    */
   function findParent__node_x($path, $item) {
     if (FALSE === $node = crumbs_Util::itemExtractEntity($item, 'node', 1)) {
@@ -47,10 +52,15 @@ class blog_CrumbsMonoPlugin_authorName implements crumbs_MonoPlugin {
 
   /**
    * Still under constructon..
+   *
+   * @param string $path
+   * @param array $item
+   *
+   * @return null|string
    */
   function findTitle__blog_x($path, $item) {
     if (FALSE === $user = crumbs_Util::itemExtractEntity($item, 'user', 1)) {
-      return;
+      return NULL;
     }
 
     return t("!name's blog", array('!name' => format_username($user)));

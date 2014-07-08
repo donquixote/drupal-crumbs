@@ -15,6 +15,10 @@ function crumbs_block_info() {
 
 /**
  * Implements hook_block_view()
+ *
+ * @param string $delta
+ *
+ * @return array
  */
 function crumbs_block_view($delta = '') {
 

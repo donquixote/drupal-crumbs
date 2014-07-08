@@ -2,6 +2,11 @@
 
 /**
  * Implements hook_help()
+ *
+ * @param string $path
+ * @param string $arg
+ *
+ * @return null|string
  */
 function crumbs_help($path, $arg) {
   switch ($path) {
@@ -22,4 +27,6 @@ the parent wildcard criterion, unless they are "disabled by default".</p>
 EOT;
       return t($help);
   }
+
+  return NULL;
 }

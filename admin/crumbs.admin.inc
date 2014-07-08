@@ -2,6 +2,13 @@
 
 /**
  * The form displayed on admin/structure/crumbs(/weights)
+ *
+ * @param array $form
+ * @param array $form_state
+ * @param string $type
+ *   E.g. 'tabledrag' or 'textual' or 'expansible'.
+ *
+ * @return array
  */
 function crumbs_admin_weights_form($form, $form_state, $type = 'tabledrag') {
 

@@ -95,7 +95,7 @@ function crumbs_menu() {
 /**
  * Implements hook_theme().
  */
-function crumbs_theme($existing, $type, $theme, $path) {
+function crumbs_theme() {
   return array(
     'crumbs_breadcrumb_link' => array(
       'item' => NULL,
@@ -122,6 +122,8 @@ function crumbs_theme($existing, $type, $theme, $path) {
 
 /**
  * Implements hook_theme_registry_alter()
+ *
+ * @param array $registry
  */
 function crumbs_theme_registry_alter(array &$registry) {
   if (!isset($registry['breadcrumb']['function'])) {

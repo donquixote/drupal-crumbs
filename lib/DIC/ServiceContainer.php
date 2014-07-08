@@ -102,6 +102,8 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
   }
 
   /**
+   * Wrapper for routing-related Drupal core functions.
+   *
    * @return crumbs_Router
    */
   protected function router() {

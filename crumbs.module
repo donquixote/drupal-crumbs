@@ -42,6 +42,9 @@ function _crumbs_autoload($class) {
 
 /**
  * Implements hook_module_implements_alter()
+ *
+ * @param string[] $implementations
+ * @param string $hook
  */
 function crumbs_module_implements_alter(&$implementations, $hook) {
 
@@ -83,6 +86,8 @@ function crumbs_module_implements_alter(&$implementations, $hook) {
 
 /**
  * Implements hook_preprocess_page().
+ *
+ * @param array $vars
  */
 function crumbs_preprocess_page(&$vars) {
 
@@ -163,6 +168,8 @@ function crumbs_get_router_item($path) {
  *   Starting path or alias
  * @param $depth
  *   Max number of fragments we try to chop off. -1 means no limit.
+ *
+ * @return null|string
  */
 function crumbs_reduce_path($path, $depth = -1) {
   return crumbs()->router->reducePath($path, $depth);

@@ -42,15 +42,15 @@ class views_CrumbsMultiPlugin_argTitle implements crumbs_MultiPlugin_FindTitleIn
   function findTitle($path, $item) {
 
     if ('views_page' !== $item['page_callback']) {
-      return;
+      return NULL;
     }
 
     if (count($item['page_arguments']) < 3) {
-      return;
+      return NULL;
     }
 
     if (isset($item['title']) && is_string($item['title']) && '' !== $item['title']) {
-      return;
+      return NULL;
     }
 
     $args = $item['page_arguments'];
@@ -82,5 +82,7 @@ class views_CrumbsMultiPlugin_argTitle implements crumbs_MultiPlugin_FindTitleIn
         break;
       }
     }
+
+    return NULL;
   }
 }

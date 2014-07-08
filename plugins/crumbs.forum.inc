@@ -32,6 +32,11 @@ class forum_CrumbsMonoPlugin_forumTerm implements crumbs_MonoPlugin {
    * Forums get their parent forums as breadcrumb parent.
    * The method name matches the router path "forum/%".
    * Forums are actually taxonomy terms, just the path is different.
+   *
+   * @param string $path
+   * @param array $item
+   *
+   * @return string|null
    */
   function findParent__forum_x($path, $item) {
     // Load the forum term, even if the wildcard loader has been replaced or
@@ -70,6 +75,11 @@ class forum_CrumbsMonoPlugin_forumTermName implements crumbs_MonoPlugin {
    * Forums get their parent forums as breadcrumb parent.
    * The method name matches the router path "forum/%".
    * Forums are actually taxonomy terms, just the path is different.
+   *
+   * @param string $path
+   * @param array $item
+   *
+   * @return string|null
    */
   function findTitle__forum_x($path, $item) {
     // Load the forum term, even if the wildcard loader has been replaced or
@@ -100,6 +110,11 @@ class forum_CrumbsMonoPlugin_forumThread implements crumbs_MonoPlugin {
   /**
    * Forum nodes get their forum terms as breadcrumb parents.
    * The method name matches the router path "node/%".
+   *
+   * @param string $path
+   * @param array $item
+   *
+   * @return string|null
    */
   function findParent__node_x($path, $item) {
     if (FALSE === $node = crumbs_Util::itemExtractEntity($item, 'node', 1)) {
@@ -152,7 +167,10 @@ class forum_CrumbsMonoPlugin_forumThreadCreate implements crumbs_MonoPlugin_Find
         }
       }
     }
+
+    return NULL;
   }
+
 }
 
 
@@ -193,10 +211,16 @@ class forum_CrumbsMonoPlugin_forumThreadCreateTitle implements crumbs_MonoPlugin
         }
       }
     }
+
+    return NULL;
   }
 
   /**
    * Method that can be overwritten by subclasses.
+   *
+   * @param $type
+   *
+   * @return null|string
    */
   protected function newTopicTitle($type) {
     return t('New topic');
