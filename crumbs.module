@@ -490,21 +490,22 @@ function crumbs_clean_token_values(&$replacements, $data = array(), $options = a
  * Get the service with the given key.
  * If it does not exist, it will be lazy-created with all its dependencies.
  *
- * @param string $key
+ * @param string|null $key
+ *   Optional service name.
  *
- * @return crumbs_Container_LazyServices
+ * @return crumbs_DIC_ServiceContainer|object
+ *   The service container, or a service obtained from the container.
  */
 function crumbs($key = NULL) {
-  static $cache = NULL;
-  if (!isset($cache)) {
-    $factory = new crumbs_ServiceFactory();
-    $cache = new crumbs_Container_LazyServices($factory);
+  static $services = NULL;
+  if (!isset($services)) {
+    $services = new crumbs_DIC_ServiceContainer();
   }
   if (isset($key)) {
-    return $cache->__get($key);
+    return $services->__get($key);
   }
   else {
-    return $cache;
+    return $services;
   }
 }
 

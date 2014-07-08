@@ -1,18 +1,29 @@
 <?php
 
-
-class crumbs_ServiceFactory {
+/**
+ * Little brother of a dependency injection container (DIC)
+ *
+ * @property crumbs_BreadcrumbBuilder $breadcrumbBuilder
+ * @property crumbs_TrailFinder $trailFinder
+ * @property crumbs_ParentFinder $parentFinder
+ * @property crumbs_PluginEngine $pluginEngine
+ * @property crumbs_CallbackRestoration $callbackRestoration
+ * @property crumbs_Container_CachedLazyPluginInfo $pluginInfo
+ * @property crumbs_Container_LazyPageData $page
+ * @property crumbs_Container_LazyDataByPath $trails
+ * @property crumbs_Router $router
+ */
+class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
 
   /**
    * A service that can build a breadcrumb from a trail.
    *
    * Available as crumbs('breadcrumbBuilder').
    *
-   * @param crumbs_Container_LazyServices $cache
    * @return crumbs_BreadcrumbBuilder
    */
-  function breadcrumbBuilder($cache) {
-    return new crumbs_BreadcrumbBuilder($cache->pluginEngine);
+  protected function breadcrumbBuilder() {
+    return new crumbs_BreadcrumbBuilder($this->pluginEngine);
   }
 
   /**
@@ -20,11 +31,10 @@ class crumbs_ServiceFactory {
    *
    * Available as crumbs('trailFinder').
    *
-   * @param crumbs_Container_LazyServices $cache
    * @return crumbs_TrailFinder
    */
-  function trailFinder($cache) {
-    return new crumbs_TrailFinder($cache->parentFinder, $cache->router);
+  protected function trailFinder() {
+    return new crumbs_TrailFinder($this->parentFinder, $this->router);
   }
 
   /**
@@ -32,11 +42,10 @@ class crumbs_ServiceFactory {
    *
    * Available as crumbs('parentFinder').
    *
-   * @param crumbs_Container_LazyServices $cache
    * @return crumbs_ParentFinder
    */
-  function parentFinder($cache) {
-    return new crumbs_ParentFinder($cache->pluginEngine, $cache->router);
+  protected function parentFinder() {
+    return new crumbs_ParentFinder($this->pluginEngine, $this->router);
   }
 
   /**
@@ -45,18 +54,16 @@ class crumbs_ServiceFactory {
    *
    * Available as crumbs('pluginEngine').
    *
-   * @param crumbs_Container_LazyServices $cache
    * @return crumbs_PluginEngine
    */
-  function pluginEngine($cache) {
-    return new crumbs_PluginEngine($cache->pluginInfo, $cache->router);
+  protected function pluginEngine() {
+    return new crumbs_PluginEngine($this->pluginInfo, $this->router);
   }
 
   /**
-   * @param crumbs_Container_LazyServices $cache
    * @return crumbs_CallbackRestoration
    */
-  function callbackRestoration($cache) {
+  protected function callbackRestoration() {
     return new crumbs_CallbackRestoration();
   }
 
@@ -65,10 +72,9 @@ class crumbs_ServiceFactory {
    *
    * Available as crumbs('pluginInfo').
    *
-   * @param crumbs_Container_LazyServices $cache
    * @return crumbs_Container_CachedLazyPluginInfo
    */
-  function pluginInfo($cache) {
+  protected function pluginInfo() {
     $source = new crumbs_PluginInfo();
     return new crumbs_Container_CachedLazyPluginInfo($source);
   }
@@ -78,11 +84,10 @@ class crumbs_ServiceFactory {
    *
    * Available as crumbs('page').
    *
-   * @param crumbs_Container_LazyServices $cache
    * @return crumbs_Container_LazyPageData
    */
-  function page($cache) {
-    $source = new crumbs_CurrentPageInfo($cache->trails, $cache->breadcrumbBuilder, $cache->router);
+  protected function page() {
+    $source = new crumbs_CurrentPageInfo($this->trails, $this->breadcrumbBuilder, $this->router);
     return new crumbs_Container_LazyPageData($source);
   }
 
@@ -91,18 +96,17 @@ class crumbs_ServiceFactory {
    *
    * Available as crumbs('trails').
    *
-   * @param crumbs_Container_LazyServices $cache
    * @return crumbs_Container_LazyDataByPath
    */
-  function trails($cache) {
-    return new crumbs_Container_LazyDataByPath($cache->trailFinder);
+  protected function trails() {
+    return new crumbs_Container_LazyDataByPath($this->trailFinder);
   }
 
   /**
-   * @param crumbs_Container_LazyServices $cache
    * @return crumbs_Router
    */
-  function router($cache) {
+  protected function router() {
     return new crumbs_Router();
   }
+
 }

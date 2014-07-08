@@ -86,9 +86,8 @@ EOT;
  */
 function _crumbs_admin_debug_matrix($path_to_test) {
 
-  // Create a local version of the service factory.
-  $service_factory = new crumbs_ServiceFactory();
-  $services = new crumbs_Container_LazyServices($service_factory);
+  // Create a local version of the service container.
+  $services = new crumbs_DIC_ServiceContainer();
   $candidate_logger = new crumbs_Debug_CandidateLogger();
   $services->pluginEngine->setCandidateLogger($candidate_logger);
   $page_info = $services->page;
