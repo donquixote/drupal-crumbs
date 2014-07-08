@@ -21,9 +21,9 @@
           // Set the focus to the group that the clicked row belongs to.
           focusGroupModel.focusGroupWithKey(key);
         }
-        row.$tr.hover(setFocusGroup);
-        // row.$tr.click(setFocusGroup);
-        // row.$select.change(setFocusGroup);
+        // row.$tr.mouseover(setFocusGroup);
+        row.$tr.click(setFocusGroup);
+        row.$select.change(setFocusGroup);
       });
     };
 

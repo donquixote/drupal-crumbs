@@ -64,5 +64,25 @@
     return (piecesStripped.length === 1)
       ? '*'
       : piecesStripped.slice(0, -1).join('.') + '.*';
-  }
+  };
+
+  /**
+   * @param {string} key
+   * @returns {string}
+   */
+  Drupal.crumbs.abbreviateKey = function(key) {
+    if ('*' === key) {
+      return '*';
+    }
+    var pieces = key.split('.');
+    var endpiece = pieces.pop();
+    if ('*' === endpiece) {
+      endpiece = pieces.pop() + '.*';
+    }
+    var dots = '';
+    for (var i = 0; i < pieces.length; ++i) {
+      dots += '.';
+    }
+    return dots + endpiece;
+  };
 })();

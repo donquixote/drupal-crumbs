@@ -21,10 +21,17 @@
       /** @type {Drupal.crumbs.dropdowns.ServiceContainer} */
       var services = new Drupal.crumbs.dropdowns.ServiceContainer($table);
 
-      services.initialDropdownTable().initTreeTableMechanics(
+      var treeTable = services.initialDropdownTable().initTreeTableMechanics(
         services.treeExpandModel(),
         services.treeExpandVisibilityModel(),
         services.hierarchy());
+
+      treeTable.initFuzzyCheckboxes(
+        services.masterStatusModel(),
+        services.effectiveValueModel(),
+        services.explicityModel());
+
+      services.initialDropdownTable().abbreviateRowLabels();
 
       Drupal.crumbs.AdminTableRows.create(
         services.rowClassSwitcher(),
@@ -35,7 +42,7 @@
         services.hierarchy()
       );
 
-      services.initialDropdownTable().rowStatusControls(
+      services.initialDropdownTable().rowsToggleButtons(
         services.masterStatusModel(),
         services.effectiveValueModel());
 

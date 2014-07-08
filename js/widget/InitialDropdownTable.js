@@ -6,6 +6,12 @@
   if (!Drupal.crumbs) Drupal.crumbs = {};
 
   /**
+   * Wraps the original dropdown table before any client-side modifications are
+   * applied. This is used ot read out extract values and structural information
+   * from the original table structure. Also contains some starter methods for
+   * modifications, the implementation of which is usually in a separate widget
+   * class.
+   *
    * @param {jQuery} $table
    * @constructor
    */
@@ -93,13 +99,16 @@
      * @param {Drupal.crumbs.TreeExpandModel} treeExpandModel
      * @param {Drupal.crumbs.TreeExpandVisibilityModel} treeExpandVisibilityModel
      * @param {Drupal.crumbs.Hierarchy} hierarchy
+     *
+     * @returns {Drupal.crumbs.TreeTable}
      */
     this.initTreeTableMechanics = function(treeExpandModel, treeExpandVisibilityModel, hierarchy) {
       /** @type {Drupal.crumbs.TreeTable} */
-      var treeTable = new Drupal.crumbs.TreeTable($table, trRows, treeExpandModel);
-      treeTable.initMechanics(hierarchy);
+      var treeTable = new Drupal.crumbs.TreeTable($table, trRows, hierarchy, treeExpandModel);
+      treeTable.initSubtreeExpandMechanics();
       treeExpandModel.observeExpandedKeys(treeTable);
       treeExpandVisibilityModel.observeExpandedKeys(treeTable);
+      return treeTable;
     };
 
     /**
@@ -123,11 +132,33 @@
       return controls;
     };
 
+    this.rowsToggleButtons = function(masterStatusModel, effectiveValueModel) {
+      var controls = new Drupal.crumbs.RowsToggleButtons(rows, $table, masterStatusModel);
+      masterStatusModel.observeMasterStatuses(controls);
+      effectiveValueModel.observeEffectiveValues(controls);
+      return controls;
+    };
+
     /**
+     * Inserts a column where each cell says '..' if the row has any (grand)
+     * children with explicit (= overridden) values.
+     *
      * @param {Drupal.crumbs.Hierarchy} hierarchy
      */
     this.childrenColumn = function(hierarchy) {
       new Drupal.crumbs.HasChildrenIndicators(rows, $table, hierarchy);
+    };
+
+    /**
+     * Replaces the displayed plugin keys. E.g. "taxonomy.termReference.*"
+     * becomes "termReference", assuming that the "taxonomy" part is already
+     * displayed in the parent plugin.
+     */
+    this.abbreviateRowLabels = function() {
+      for (var key in rows) {
+        var abbrevKey = Drupal.crumbs.abbreviateKey(key);
+        rows[key].$tdTitle.text(abbrevKey);
+      }
     };
   };
 
@@ -148,7 +179,7 @@
    * @returns {Object.<bool>}
    */
   function rowsExtractRootKeys(rows) {
-    var rootKeys = {};
+    var rootKeys = {'*': true};
     for (var key in rows) {
       var row = rows[key];
       if (!row.hasDisabledOption) {

@@ -24,11 +24,12 @@
    *
    * @param {Drupal.crumbs.MasterValueModel} masterValueModel
    * @param {Drupal.crumbs.EffectiveValueModel} effectiveValueModel
+   * @param {Drupal.crumbs.ExplicityModel} explicityModel
    *
    * @constructor
    * @implements {Drupal.crumbs.MasterValueObserverInterface}
    */
-  Drupal.crumbs.MasterStatusModel = function(masterValueModel, effectiveValueModel) {
+  Drupal.crumbs.MasterStatusModel = function(masterValueModel, effectiveValueModel, explicityModel) {
 
     /**
      * E.g. {'x.y.*': 'enabled', 'x.*': 'default', '*': 'enabled'}
@@ -54,6 +55,14 @@
 
     /**
      * @param {string} key
+     * @returns {'enabled'|'disabled'|'default'}
+     */
+    this.getMasterStatus = function(key) {
+      return statuses[key];
+    };
+
+    /**
+     * @param {string} key
      *   E.g. 'x.y.*'
      * @param {'enabled'|'disabled'|'default'} status
      */
@@ -63,6 +72,57 @@
       // masterValueModel talks back.
       var value = statusToValue(status, key);
       masterValueModel.setMasterValue(key, value);
+    };
+
+    /**
+     * @param {string} key
+     */
+    this.toggleExplicity = function(key) {
+      var newValue;
+      if (explicityModel.keyIsExplicit(key)) {
+        newValue = 'default';
+      }
+      else {
+        newValue = effectiveValueModel.keyGetEffectiveValue(key);
+      }
+      masterValueModel.setMasterValue(key, newValue);
+    };
+
+    /**
+     * @param {string} key
+     */
+    this.toggleEnabled = function(key) {
+      if (!explicityModel.keyIsExplicit(key)) {
+        return;
+      }
+      var newValue;
+      if (statuses[key] === 'enabled') {
+        newValue = 'disabled';
+      }
+      else {
+        newValue = statusToValue('enabled', key);
+      }
+      masterValueModel.setMasterValue(key, newValue)
+    };
+
+    /**
+     * @param {string} key
+     */
+    this.fuzzyToggle = function(key) {
+      var newStatus;
+      switch (statuses[key]) {
+        case 'enabled':
+          newStatus = 'disabled';
+          break;
+        case 'disabled':
+          newStatus = 'default';
+          break;
+        case 'default':
+          newStatus = 'enabled';
+          break;
+      }
+      var newValue = statusToValue(newStatus, key);
+      masterValueModel.setMasterValue(key, newValue);
     };
 
     /**

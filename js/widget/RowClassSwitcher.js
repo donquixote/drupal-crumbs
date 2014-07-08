@@ -5,6 +5,8 @@
   if (!Drupal.crumbs) Drupal.crumbs = {};
 
   /**
+   * Helper to set row classes based on conditions.
+   *
    * @param {Object.<jQuery>} rows
    *
    * @constructor

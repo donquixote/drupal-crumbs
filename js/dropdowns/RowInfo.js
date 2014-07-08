@@ -33,6 +33,7 @@
     this.key = key;
     this.parentKey = Drupal.crumbs.keyGetParentKey(key);
     this.name = $select.attr('name');
+    this.$tdTitle = $('> td:first-child', $tr);
     this.$inheritOption = $inheritOption;
     this.$disabledOption = $disabledOption;
     this.$defaultOption = $defaultOption;
@@ -40,8 +41,8 @@
     this.$select = $select;
     // this.parentId = extractParentId($tr, rootId);
     // this.inheritanceParentId = this.hasDisabledOption ? this.parentId : null;
-    this.$tdWeight = $('.crumbs-column-weight', $tr);
-    this.$tdChildren = $('.crumbs-column-children', $tr);
+    this.$tdWeight = $('> .crumbs-column-weight', $tr);
+    this.$tdChildren = $('> .crumbs-column-children', $tr);
   };
 
   /**
@@ -60,30 +61,6 @@
       }
     }
     return null;
-  }
-
-  /**
-   * Determine the parent key for a table row.
-   * A row with a default value ("disabled by default") does not have a parent.
-   * The root wildcard row ("*") does not have a parent.
-   *
-   * @param {jQuery} $tr
-   * @param {string} rootId
-   * @returns {string|null}
-   */
-  function extractParentId($tr, rootId) {
-    var classes = $($tr)[0].className.split(' ');
-    for (var i = 0; i < classes.length; ++i) {
-      if ('child-of-' === classes[i].substr(0, 9)) {
-        return classes[i].substr(9);
-      }
-    }
-    // The top-level rows don't have a child-of- class.
-    var id = $tr.attr('id');
-    if (rootId === id) {
-      return null;
-    }
-    return rootId;
   }
 
 })();

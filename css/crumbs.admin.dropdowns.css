@@ -5,8 +5,12 @@
 table#crumbs_weights_dropdowns tr {
   border: 0 none;
   /* border-top: 1px solid #ddd; */
-  background: white url(../images/pixel-ddd.png) repeat-x left top;
+  background: white url(../images/dotted-ddd.png) repeat-x left top;
   overflow: hidden;
+}
+
+table#crumbs_weights_dropdowns tr.crumbs-rule-explicit {
+  background-image: url(../images/pixel-ddd.png);
 }
 
 table#crumbs_weights_dropdowns td {
@@ -14,7 +18,7 @@ table#crumbs_weights_dropdowns td {
   padding-bottom: 0;
   color: inherit;
   vertical-align: top;
-  overflow: hidden;
+  overflow-y: hidden;
   position:relative;
   z-index:20;
   border-bottom: 0 none;
@@ -34,16 +38,9 @@ table#crumbs_weights_dropdowns td {
 /* TreeTable rows */
 /* -------------------------------------------------------------------------- */
 
-/*
-table#crumbs_weights_dropdowns tr > td {
-  min-height: 24px;
-}
-
 table#crumbs_weights_dropdowns tr.crumbs-TreeTable-hidden > td {
-  min-height: 0;
-  border: none;
+  overflow: hidden;
 }
-*/
 
 table#crumbs_weights_dropdowns td:after {
   /* This element lets every table cell vanish to zero height. */
@@ -83,20 +80,45 @@ table#crumbs_weights_dropdowns tr.crumbs-TreeTable-hidden > td.td-title:before {
 /* -------------------------------------------------------------------------- */
 
 td.crumbs-indent {
-  padding-left: 0;
+  padding-left: 3px;
   padding-right: 0;
   width: 20px;
-  overflow: hidden;
 }
 
 tr.crumbs-rule-explicit > td.crumbs-indent {
   /* border-left: 1px solid #ddd; */
-  background: url(../images/pixel-ddd.png) repeat-y left top;
+  /* background: url(../images/pixel-ddd.png) repeat-y left top; */
+  padding-left: 0;
+  border-left: 3px solid green;
+  /*
+  -webkit-box-shadow: inset 3px 0 0 0 #aaffaa
+  -moz-box-shadow: inset 3px 0 0 0 #aaffaa;
+  box-shadow: inset 3px 0 0 0 #aaffaa;
+  */
+}
+
+tr.crumbs-rule-explicit.crumbs-rule-disabled > td.crumbs-indent {
+  border-left-color: red;
+  /*
+  -webkit-box-shadow: inset 3px 0 0 #ff7777;
+  -moz-box-shadow: inset 3px 0 0 #ff7777;
+  box-shadow: inset 3px 0 0 #ff7777;
+  */
 }
 
 td.crumbs-indent > div {
   width: 20px;
   margin-bottom: -20px;
+}
+
+
+/* TreeTable state control cell */
+/* -------------------------------------------------------------------------- */
+
+td.crumbs-pivot {
+  padding-left: 0;
+  padding-right: 0;
+  width: 20px;
 }
 
 
@@ -117,6 +139,20 @@ table#crumbs_weights_dropdowns tr.crumbs-TreeTable-collapsed .crumbs-TreeTable-e
   transform:rotate(-90deg);
   -ms-transform:rotate(-90deg); /* IE 9 */
   -webkit-transform:rotate(-90deg); /* Opera, Chrome, and Safari */
+}
+
+
+/* TreeTable state controls */
+/* -------------------------------------------------------------------------- */
+
+table#crumbs_weights_dropdowns tr .crumbs-override-ctrl {
+  background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA4klEQVQ4T92SPQuDQAyGExRB0J/nJvg1WQQ3cXJwEnEUb1IU3Px5CoIo117A0haRgps3XfLc+15IgnDx4EU93MWgbdsKEf3PfnDOmW3bD5E748gYI7FpmrBtG3lIkgR934MwEfEZx6IouOd5UNc1iTVNA1VVD4czzzNM00Rs12CSJNyyLOi6DtI0xSzLeBAE72p2J1FVWZYQx/GXBsMw5K7rQtM09HZZFljX9bACWZZBURRiuwYdx6lesR9FEei6TnAcR8jzXFypB2ecFskwDDL5+ZYNw0BTOON32cTDlv+ZfAI89XONg5Yr0QAAAABJRU5ErkJggg==') no-repeat center;
+  width: 20px;
+}
+
+table#crumbs_weights_dropdowns tr.crumbs-rule-explicit .crumbs-override-ctrl {
+  background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACEElEQVQ4T31TTW8SURS9b8ZIjAyDMP0VXTbxB5jUxKTpwggrKF9NhUmERoG4YkFMNECawoJBIl8pugBXBhMXunPjzo2J/wGEDoMmGGau742ZZvgob/fuOfe8k/vOJbDlDCTh5GCk1bdxiAX2AHgiOb/gAk/9l7+/s/r7HQEfDTWT0/PeuksI/xJHs/t+AN3quxJghbYkHHJAXusL/UGEilxIIgZHKul4XbQZBsSAo+B4+snuaEmAAXW3cAgcdz4bq7u3PeL5Yqw+u+Fx/0QwjuMrzYy/JsCKZy6X5+l0OrZeenUHxOcTUDfNwhRot9tVQkjCTkBEJRwOy9sw04GiKGZzIBAAXf8/G57nodvtQjweJ7VaDTdh7IFEIiGTUqmEsVgMGo3GkkNGyGQycrFYXHNn8dPpNCG5XA5DoRB0Oh3I5/MbZ2JXXuWTVCqF0WgUms3mmoNKpSInk8k1Bxa/XC4TEolEqrQzkc1mQRAEU8ThcAC7t1othmOhUID5fG5imqYBu9OjUFw2Lft8PlNk5ZuUfr8vb8OuzQGN9U0a17+WYM/p3PHPZsNrc2AHel7nPcKRNzjUdkESgjDS3tEd+UGT+MQ/+vNhVWRp6hcecR85fAs6PjyaaF+tXWhL4h4HODB0OA5Pph/tIlcCPpqffa/4DQ3j9DFtZqS6140nvy5NTlUU92i+Xnweqwd92zb+Ay+c8hEJvcKAAAAAAElFTkSuQmCC') no-repeat center;
+  width: 20px;
 }
 
 
@@ -144,7 +180,7 @@ table#crumbs_weights_dropdowns tr.crumbs-TreeTable-collapsed td.crumbs-column-ch
 /* -------------------------------------------------------------------------- */
 
 table#crumbs_weights_dropdowns tr.crumbs-rule-disabled td {
-  opacity:0.5;
+  /* opacity: 0.5; */
 }
 
 
@@ -153,8 +189,8 @@ table#crumbs_weights_dropdowns tr.crumbs-rule-disabled td {
 
 table tr.crumbs-focus-group,
 table#crumbs_weights_dropdowns tr.crumbs-focus-group {
+  /* background-color: #ffd; */
   /* background-color: #dfd; */
-  background-color: #ffe;
 }
 
 table tr.crumbs-focus-group.crumbs-rule-disabled,
@@ -222,7 +258,7 @@ table#crumbs_weights_dropdowns tr.crumbs-rule-enabled div.crumbs-light {
 /* -------------------------------------------------------------------------- */
 
 table#crumbs_weights_dropdowns td.crumbs-admin-meta {
-  overflow:hidden;
+  overflow: hidden;
 }
 
 table#crumbs_weights_dropdowns td .crumbs-admin-meta {
@@ -280,4 +316,104 @@ table#crumbs_weights_dropdowns .button.active {
 
 table#crumbs_weights_dropdowns .button.active {
 
+}
+
+
+/* Toggle buttons (from module_filter) */
+/* -------------------------------------------------------------------------- */
+
+table#crumbs_weights_dropdowns .toggle-enable {
+  opacity: 0;
+}
+
+table#crumbs_weights_dropdowns .crumbs-rule-explicit .toggle-enable {
+  opacity: 1;
+}
+
+table#crumbs_weights_dropdowns .toggle-enable {
+  margin: auto;
+  position: relative;
+  width: 50px;
+  overflow: hidden;
+  height: 18px;
+  line-height: 18px;
+  font-size: 11px;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -khtml-border-radius: 3px;
+  border-radius: 3px;
+  -moz-box-shadow: 0 0 10px rgba(0,0,0,0.50) inset;
+  -webkit-box-shadow: 0 0 10px rgba(0,0,0,0.50) inset;
+  box-shadow: 0 0 10px rgba(0,0,0,0.50) inset;
+  background-clip: padding-box;
+  background-image: -webkit-gradient(linear, 0% 0%, 100% 0%, color-stop(50%, red), color-stop(50%, green), color-stop(100%, green));
+  background-image: -moz-linear-gradient(left, red 50%, green 50%, green 100%);
+  background-image: linear-gradient(left, red 50%, green 50%, green 100%);
+}
+
+/*
+table#crumbs_weights_dropdowns .toggle-enable.enabled {
+  background-image: -webkit-gradient(linear, 0% 0%, 100% 0%, color-stop(50%, orange), color-stop(50%, green), color-stop(100%, green));
+  background-image: -moz-linear-gradient(left, orange 50%, green 50%, green 100%);
+  background-image: linear-gradient(left, orange 50%, green 50%, green 100%);
+}
+*/
+
+table#crumbs_weights_dropdowns .toggle-enable.disabled {
+  background: #ccc;
+  border-color: #ddd;
+  cursor: auto;
+}
+
+table#crumbs_weights_dropdowns .toggle-enable div {
+  position: relative;
+  color: #777;
+  width: 26px;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  -khtml-border-radius: 2px;
+  border-radius: 2px;
+  background: white;
+  text-shadow: 1px 1px 0 white;
+  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(0%, #FEFEFE), color-stop(100%, #EAEAEA));
+  background-image: -moz-linear-gradient(top, #FEFEFE 0%, #EAEAEA 100%);
+  background-image: linear-gradient(top, #FEFEFE 0%, #EAEAEA 100%);
+  -webkit-transition: left 0.2s;
+  -mox-transition: left 0.2s;
+  -o-transition: left 0.2s;
+  transition: left 0.2s;
+}
+
+table#crumbs_weights_dropdowns .toggle-enable.disabled div {
+  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(0%, #FEFEFE), color-stop(100%, #EEEEEE));
+  background-image: -moz-linear-gradient(top, #FEFEFE 0%, #EEEEEE 100%);
+  background-image: linear-gradient(top, #FEFEFE 0%, #EEEEEE 100%);
+}
+
+table#crumbs_weights_dropdowns .toggle-enable div:after,
+table#crumbs_weights_dropdowns .toggle-enable div:before {
+  color: white;
+  text-shadow: none;
+  width: 25px;
+  position: absolute;
+  top: 0;
+  font-size: 9px;
+  font-weight: bold;
+}
+
+table#crumbs_weights_dropdowns .toggle-enable div:before {
+  content: "OFF";
+  left: -24px;
+}
+
+table#crumbs_weights_dropdowns .toggle-enable div:after {
+  content: "ON";
+  right: -24px;
+}
+
+table#crumbs_weights_dropdowns .toggle-enable.off div {
+  left: 24px;
 }

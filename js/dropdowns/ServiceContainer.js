@@ -128,7 +128,10 @@
      * @returns {Drupal.crumbs.MasterStatusModel}
      */
     this.masterStatusModel = cache(function(){
-      var masterStatusModel = new Drupal.crumbs.MasterStatusModel(services.masterValueModel(), services.effectiveValueModel());
+      var masterStatusModel = new Drupal.crumbs.MasterStatusModel(
+        services.masterValueModel(),
+        services.effectiveValueModel(),
+        services.explicityModel());
       services.masterValueModel().observeMasterValues(masterStatusModel);
       return masterStatusModel;
     });
