@@ -30,13 +30,13 @@ class blog_CrumbsMonoPlugin_authorPage implements crumbs_MonoPlugin {
    * @return null|string
    */
   function findParent__node_x($path, $item) {
-    if (FALSE === $node = crumbs_Util::itemExtractEntity($item, 'node', 1)) {
-      return;
+    $node = crumbs_Util::itemExtractEntity($item, 'node', 1);
+
+    if ($node === FALSE || $node->type !== 'blog') {
+      return NULL;
     }
 
-    if ($node->type === 'blog') {
-      return 'blog/' . $node->uid;
-    }
+    return 'blog/' . $node->uid;
   }
 }
 

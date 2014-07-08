@@ -42,8 +42,9 @@ class forum_CrumbsMonoPlugin_forumTerm implements crumbs_MonoPlugin {
     // Load the forum term, even if the wildcard loader has been replaced or
     // removed. This will use entity_load() and not forum_forum_load(), because
     // we don't need the forum stuff here.
-    if (FALSE === $term = crumbs_Util::itemExtractEntity($item, 'taxonomy_term', 1)) {
-      return;
+    $term = crumbs_Util::itemExtractEntity($item, 'taxonomy_term', 1);
+    if (FALSE === $term) {
+      return NULL;
     }
 
     $parents = taxonomy_get_parents($term->tid);
@@ -85,12 +86,11 @@ class forum_CrumbsMonoPlugin_forumTermName implements crumbs_MonoPlugin {
     // Load the forum term, even if the wildcard loader has been replaced or
     // removed. This will use entity_load() and not forum_forum_load(), because
     // we don't need the forum stuff here.
-    if (FALSE === $term = crumbs_Util::itemExtractEntity($item, 'taxonomy_term', 1)) {
-      return;
+    $term = crumbs_Util::itemExtractEntity($item, 'taxonomy_term', 1);
+    if (FALSE === $term || empty($term->name)) {
+      return NULL;
     }
-    if (!empty($term->name)) {
-      return $term->name;
-    }
+    return $term->name;
   }
 }
 
@@ -117,12 +117,15 @@ class forum_CrumbsMonoPlugin_forumThread implements crumbs_MonoPlugin {
    * @return string|null
    */
   function findParent__node_x($path, $item) {
-    if (FALSE === $node = crumbs_Util::itemExtractEntity($item, 'node', 1)) {
-      return;
+    $node = crumbs_Util::itemExtractEntity($item, 'node', 1);
+    if ( FALSE === $node
+      || empty($node->forum_tid)
+      || !_forum_node_check_node_type($node)
+    ) {
+      return NULL;
     }
-    if (!empty($node->forum_tid) && _forum_node_check_node_type($node)) {
-      return 'forum/' . $node->forum_tid;
-    }
+
+    return 'forum/' . $node->forum_tid;
   }
 }
 
