@@ -144,6 +144,10 @@ class views_CrumbsMonoPlugin_PageTitle implements crumbs_MonoPlugin_FindTitleInt
   }
 
   /**
+   * Loads the view and determines a breadcrumb item title based on the title
+   * configured for this view. This is used if the views path does NOT end with
+   * '%'.
+   *
    * @return null|string
    */
   private function viewsPageTitle() {
@@ -166,9 +170,17 @@ class views_CrumbsMonoPlugin_PageTitle implements crumbs_MonoPlugin_FindTitleInt
   }
 
   /**
+   * Loads the view and determines a breadcrumb item title based on the last
+   * argument. This is used for views paths that end with '%'.
+   *
    * @param array $args
+   *   Argument values from the url.
    *
    * @return null|string
+   *   A breadcrumb item title for the last argument, or NULL if none found.
+   *   This will use the breadcrumb token string configured for the Views arg.
+   *
+   * @see view::_build_arguments()
    */
   private function viewsArgTitle(array $args) {
 
