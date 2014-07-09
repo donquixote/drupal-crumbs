@@ -35,6 +35,7 @@ class crumbs_ParentFinder {
   /**
    * @param string $path
    * @param array &$item
+   *
    * @return string
    */
   function getParentPath($path, &$item) {
@@ -51,6 +52,7 @@ class crumbs_ParentFinder {
   /**
    * @param string $path
    * @param array &$item
+   *
    * @return string|bool
    */
   protected function _findParentPath($path, &$item) {
@@ -68,4 +70,5 @@ class crumbs_ParentFinder {
     $parent_path = $this->router->reducePath($path);
     return isset($parent_path) ? $parent_path : FALSE;
   }
+
 }

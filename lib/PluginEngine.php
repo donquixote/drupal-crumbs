@@ -74,7 +74,8 @@ class crumbs_PluginEngine {
    *
    * @param string $path
    * @param array $item
-   * @return mixed|null|void
+   *
+   * @return mixed|null
    */
   function findParent($path, $item) {
     $plugin_methods = $this->pluginInfo->routePluginMethods('findParent', $item['route']);
@@ -200,4 +201,5 @@ class crumbs_PluginEngine {
     }
     return $best_candidate;
   }
+
 }
