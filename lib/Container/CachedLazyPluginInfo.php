@@ -70,6 +70,7 @@ class crumbs_Container_CachedLazyPluginInfo {
 
   /**
    * @param string $key
+   *
    * @return mixed
    * @throws Exception
    */
@@ -118,6 +119,7 @@ class crumbs_Container_CachedLazyPluginInfo {
 
   /**
    * @param string $method
+   *
    * @return array
    */
   function basicPluginMethods($method) {
@@ -140,6 +142,7 @@ class crumbs_Container_CachedLazyPluginInfo {
   /**
    * @param string $method
    * @param string $route
+   *
    * @return array
    */
   function routePluginMethods($method, $route) {
@@ -155,6 +158,7 @@ class crumbs_Container_CachedLazyPluginInfo {
   /**
    * @param string $method
    * @param string $route
+   *
    * @return array
    */
   function routePluginMethodsCached($method, $route) {
@@ -173,4 +177,5 @@ class crumbs_Container_CachedLazyPluginInfo {
     cache_set("crumbs:$key", $this->data[$key]);
     return $this->data[$key];
   }
+
 }

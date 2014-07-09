@@ -120,8 +120,10 @@ class crumbs_PluginEngine {
    *
    * @param array $plugin_methods
    * @param array $args
+   *   Parameter values to pass to plugin methods.
    * @param bool $processFindParent
-   * @return mixed|null|void
+   *
+   * @return mixed|null
    */
   protected function find($plugin_methods, $args, $processFindParent = FALSE) {
     $best_candidate = NULL;
