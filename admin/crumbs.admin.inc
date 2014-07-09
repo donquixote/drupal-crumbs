@@ -14,9 +14,6 @@ function crumbs_admin_weights_form($form, $form_state, $type = 'tabledrag') {
 
   $form = array();
 
-  /**
-   * @var crumbs_Container_CachedLazyPluginInfo $info
-   */
   $info = crumbs()->pluginInfo;
 
   // Re-discover plugins, when the admin visits the weights configuration form.

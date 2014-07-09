@@ -6,7 +6,7 @@
 class crumbs_Admin_WeightsTable {
 
   /**
-   * @var crumbs_Container_CachedLazyPluginInfo
+   * @var crumbs_PluginInfo
    */
   protected $pluginInfo;
 
@@ -26,7 +26,7 @@ class crumbs_Admin_WeightsTable {
   protected $descriptions = array();
 
   /**
-   * @param crumbs_Container_CachedLazyPluginInfo $plugin_info
+   * @param crumbs_PluginInfo $plugin_info
    */
   function __construct($plugin_info) {
     $this->pluginInfo = $plugin_info;

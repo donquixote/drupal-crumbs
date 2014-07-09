@@ -1,28 +1,59 @@
 <?php
 
 /**
- * Data provider object to plug into a crumbs_Container_LazyData.
+ * Info about available plugins and their weights.
+ *
+ * @property array $weights
+ * @property crumbs_Container_WildcardDataSorted $weightKeeper
+ * @property array $defaultWeights
+ * @property string[][][] $routePluginMethodsUnsorted
+ * @property string[][] $routelessPluginMethodsUnsorted
+ * @property string[][][] $routePluginMethods
+ * @property string[][] $routelessPluginMethods
+ * @property array $userWeights
+ * @property crumbs_Container_MultiWildcardData $availableKeysMeta
+ *
+ * @property crumbs_PluginInterface[] $plugins
+ * @property array $pluginsCached
+ * @property crumbs_InjectedAPI_hookCrumbsPlugins $discovery
+ * @property array $pluginOrder
+ * @property array $pluginsSorted
+ * @property bool $includePluginFiles
  */
-class crumbs_PluginInfo {
+class crumbs_PluginInfo extends crumbs_Container_CachedLazyPluginInfo {
 
   /**
    * Which keys to load from persistent cache.
    *
-   * @return array
+   * @return string[]
    */
-  function keysToCache() {
+  protected function keysToCache() {
+
+    // Plugin cache is special, because these are objects.
+    // If this fails, we want to totally circumvent the cache.
+    $callback_before = ini_get('unserialize_callback_func');
+    ini_set('unserialize_callback_func', '_crumbs_unserialize_failure');
+    try {
+      // Trigger $this->__get('plugins').
+      $this->plugins;
+    }
+    catch (crumbs_UnserializeException $exception) {
+      // Don't cache anything this round.
+      return array();
+    }
+    ini_set('unserialize_callback_func', $callback_before);
+
     return array('weights', 'pluginsCached', 'defaultWeights', 'pluginRoutes', 'pluginOrder');
   }
 
   /**
    * Combination of user-defined weights and default weights
    *
-   * @param crumbs_Container_CachedLazyPluginInfo $container
    * @return array
    */
-  function weights($container) {
-    $weights = $container->defaultWeights;
-    foreach ($container->userWeights as $key => $weight) {
+  protected function get_weights() {
+    $weights = $this->defaultWeights;
+    foreach ($this->userWeights as $key => $weight) {
       // Make sure to skip NULL values.
       if (isset($weight)) {
         $weights[$key] = $weight;
@@ -35,62 +66,56 @@ class crumbs_PluginInfo {
    * Object that can calculate rule weights based on the weight settings.
    * (which are often wildcards)
    *
-   * @param crumbs_Container_CachedLazyPluginInfo $container
-   *
    * @return crumbs_Container_WildcardDataSorted
+   *
+   * @see crumbs_PluginInfo::$weightKeeper
    */
-  function weightKeeper($container) {
-    return new crumbs_Container_WildcardDataSorted($container->weights);
+  protected function get_weightKeeper() {
+    return new crumbs_Container_WildcardDataSorted($this->weights);
   }
 
   /**
    * Default weights without the user configuration
    *
-   * @param crumbs_Container_CachedLazyPluginInfo $container
-   *
    * @return array
+   *
+   * @see crumbs_PluginInfo::$defaultWeights
    */
-  function defaultWeights($container) {
-    return $container->discovery->getDefaultValues();
+  protected function get_defaultWeights() {
+    return $this->discovery->getDefaultValues();
   }
 
   /**
-   * @param crumbs_Container_CachedLazyPluginInfo $container
-   *
    * @return string[][][]
    *
-   * @see crumbs_Container_CachedLazyPluginInfo::routePluginMethodsUnsorted
+   * @see crumbs_PluginInfo::$routePluginMethodsUnsorted
    */
-  function routePluginMethodsUnsorted($container) {
-    return $container->discovery->getRoutePluginMethods();
+  protected function get_routePluginMethodsUnsorted() {
+    return $this->discovery->getRoutePluginMethods();
   }
 
   /**
-   * @param crumbs_Container_CachedLazyPluginInfo $container
-   *
    * @return string[][]
    *
-   * @see crumbs_Container_CachedLazyPluginInfo::routelessPluginMethodsUnsorted
+   * @see crumbs_PluginInfo::$routelessPluginMethodsUnsorted
    */
-  function routelessPluginMethodsUnsorted($container) {
-    return $container->discovery->getRoutelessPluginMethods();
+  protected function get_routelessPluginMethodsUnsorted() {
+    return $this->discovery->getRoutelessPluginMethods();
   }
 
   /**
-   * @param crumbs_Container_CachedLazyPluginInfo $container
-   *
    * @return string[][][]
    *
-   * @see crumbs_Container_CachedLazyPluginInfo::routePluginMethods
+   * @see crumbs_PluginInfo::$routePluginMethods
    */
-  function routePluginMethods($container) {
-    $unsorted_all = $container->routePluginMethodsUnsorted;
+  protected function get_routePluginMethods() {
+    $unsorted_all = $this->routePluginMethodsUnsorted;
     $types = array(
       'decorateBreadcrumb' => 'alter',
       'findParent' => 'find',
       'findTitle' => 'find',
     );
-    $order = $container->pluginOrder;
+    $order = $this->pluginOrder;
     $sorted_all = array();
     foreach ($types as $base_method_name => $type) {
       if (!isset($unsorted_all[$base_method_name])) {
@@ -107,20 +132,18 @@ class crumbs_PluginInfo {
   }
 
   /**
-   * @param crumbs_Container_CachedLazyPluginInfo $container
-   *
    * @return string[][]
    *
-   * @see crumbs_Container_CachedLazyPluginInfo::routelessPluginMethods
+   * @see crumbs_PluginInfo::$routelessPluginMethods
    */
-  function routelessPluginMethods($container) {
-    $unsorted = $container->routelessPluginMethodsUnsorted;
+  protected function get_routelessPluginMethods() {
+    $unsorted = $this->routelessPluginMethodsUnsorted;
     $types = array(
       'decorateBreadcrumb' => 'alter',
       'findParent' => 'find',
       'findTitle' => 'find',
     );
-    $order = $container->pluginOrder;
+    $order = $this->pluginOrder;
     $sorted_all = array();
     foreach ($types as $base_method_name => $type) {
       if (!isset($unsorted[$base_method_name])) {
@@ -153,11 +176,9 @@ class crumbs_PluginInfo {
   /**
    * User-defined weights
    *
-   * @param crumbs_Container_CachedLazyPluginInfo $container
-   *
    * @return array
    */
-  function userWeights($container) {
+  protected function get_userWeights() {
     $user_weights = variable_get('crumbs_weights', array(
       // The user expects the crumbs.home_title plugin to be dominant.
       // @todo There must be a better way to do this.
@@ -178,19 +199,17 @@ class crumbs_PluginInfo {
   }
 
   /**
-   * @param crumbs_Container_CachedLazyPluginInfo $container
-   *
    * @return crumbs_Container_MultiWildcardData
    */
-  function availableKeysMeta($container) {
+  protected function get_availableKeysMeta() {
     $op = new crumbs_PluginOperation_describe();
     /**
      * @var crumbs_PluginInterface $plugin
      */
-    foreach ($container->plugins as $plugin_key => $plugin) {
+    foreach ($this->plugins as $plugin_key => $plugin) {
       $op->invoke($plugin, $plugin_key);
     }
-    foreach ($container->defaultWeights as $key => $default_weight) {
+    foreach ($this->defaultWeights as $key => $default_weight) {
       $op->setDefaultWeight($key, $default_weight);
     }
     return $op->collectedInfo();
@@ -199,30 +218,26 @@ class crumbs_PluginInfo {
   /**
    * Plugins, not sorted, but already with the weights information.
    *
-   * @param crumbs_Container_CachedLazyPluginInfo $container
-   *
    * @return array
    */
-  function plugins($container) {
+  protected function get_plugins() {
     // We use a trick to always include the plugin files, even if the plugins
     // are coming from the cache.
-    $container->includePluginFiles;
-    return $container->pluginsCached;
+    $this->includePluginFiles;
+    return $this->pluginsCached;
   }
 
   /**
    * Plugins, not sorted, but already with the weights information.
    *
-   * @param crumbs_Container_CachedLazyPluginInfo $container
-   *
    * @return array
    */
-  function pluginsCached($container) {
-    $plugins = $container->discovery->getPlugins();
+  protected function get_pluginsCached() {
+    $plugins = $this->discovery->getPlugins();
     foreach ($plugins as $plugin_key => $plugin) {
       // Let plugins know about the weights, if they want to.
       if (method_exists($plugin, 'initWeights')) {
-        $plugin->initWeights($container->weightKeeper->prefixedContainer($plugin_key));
+        $plugin->initWeights($this->weightKeeper->prefixedContainer($plugin_key));
       }
     }
     return $plugins;
@@ -231,12 +246,12 @@ class crumbs_PluginInfo {
   /**
    * Information returned from hook_crumbs_plugins()
    *
-   * @param crumbs_Container_CachedLazyPluginInfo $container
-   *
    * @return crumbs_InjectedAPI_hookCrumbsPlugins
    */
-  function discovery($container) {
-    $container->includePluginFiles;
+  protected function get_discovery() {
+    $this->includePluginFiles;
+    // Pass a by-reference parameter to the $api object, that can only be
+    // changed from here.
     $discovery_ongoing = TRUE;
     $api = new crumbs_InjectedAPI_hookCrumbsPlugins($discovery_ongoing);
     foreach (module_implements('crumbs_plugins') as $module) {
@@ -244,6 +259,8 @@ class crumbs_PluginInfo {
       $api->setModule($module);
       $function($api);
     }
+    // $api still has a reference to the $discovery_ongoing variable.
+    // Set it to FALSE before calling $api->finalize().
     /** @noinspection PhpUnusedLocalVariableInspection */
     $discovery_ongoing = FALSE;
     $api->finalize();
@@ -253,11 +270,9 @@ class crumbs_PluginInfo {
   /**
    * Order of plugins, for 'find' and 'alter' operations.
    *
-   * @param crumbs_Container_CachedLazyPluginInfo $container
-   *
    * @return array
    */
-  function pluginOrder($container) {
+  protected function get_pluginOrder() {
 
     $order = array(
       'find' => array(),
@@ -268,8 +283,8 @@ class crumbs_PluginInfo {
     /**
      * @var crumbs_Container_WildcardData $weight_keeper
      */
-    $weight_keeper = $container->weightKeeper;
-    foreach ($container->plugins as $plugin_key => $plugin) {
+    $weight_keeper = $this->weightKeeper;
+    foreach ($this->plugins as $plugin_key => $plugin) {
       if ($plugin instanceof crumbs_MultiPlugin) {
         /**
          * @var crumbs_Container_WildcardDataSorted $keeper
@@ -302,13 +317,11 @@ class crumbs_PluginInfo {
   /**
    * Sorted plugins for 'find' and 'alter' operations.
    *
-   * @param crumbs_Container_CachedLazyPluginInfo $container
-   *
    * @return array
    */
-  function pluginsSorted($container) {
-    $sorted = $container->pluginOrder;
-    $plugins = $container->plugins;
+  protected function get_pluginsSorted() {
+    $sorted = $this->pluginOrder;
+    $plugins = $this->plugins;
     foreach (array('find', 'alter') as $type) {
       foreach ($sorted[$type] as $plugin_key => &$x) {
         $x = $plugins[$plugin_key];
@@ -321,11 +334,9 @@ class crumbs_PluginInfo {
    * Include files in the /plugin/ folder.
    * We use the cache mechanic to make sure this happens exactly once.
    *
-   * @param crumbs_Container_CachedLazyPluginInfo $container
-   *
    * @return bool
    */
-  function includePluginFiles($container) {
+  protected function get_includePluginFiles() {
 
     $dir = drupal_get_path('module', 'crumbs') . '/plugins';
 

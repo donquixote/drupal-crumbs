@@ -9,7 +9,7 @@
  * @property crumbs_PluginSystem_PluginBag $pluginBag
  * @property crumbs_PluginEngine $pluginEngine
  * @property crumbs_CallbackRestoration $callbackRestoration
- * @property crumbs_Container_CachedLazyPluginInfo $pluginInfo
+ * @property crumbs_PluginInfo $pluginInfo
  * @property crumbs_CurrentPageInfo $page
  * @property crumbs_TrailCache $trails
  * @property crumbs_Router $router
@@ -89,13 +89,12 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
   /**
    * A service that knows all plugins and their configuration/weights.
    *
-   * @return crumbs_Container_CachedLazyPluginInfo
+   * @return crumbs_PluginInfo
    *
    * @see crumbs_DIC_ServiceContainer::$pluginInfo
    */
   protected function pluginInfo() {
-    $source = new crumbs_PluginInfo();
-    return new crumbs_Container_CachedLazyPluginInfo($source);
+    return new crumbs_PluginInfo();
   }
 
   /**
