@@ -6,10 +6,10 @@
  * @property crumbs_BreadcrumbBuilder $breadcrumbBuilder
  * @property crumbs_TrailFinder $trailFinder
  * @property crumbs_ParentFinder $parentFinder
+ * @property crumbs_PluginSystem_PluginBag $pluginBag
  * @property crumbs_PluginEngine $pluginEngine
  * @property crumbs_CallbackRestoration $callbackRestoration
  * @property crumbs_Container_CachedLazyPluginInfo $pluginInfo
- * @property crumbs_PluginSystem_PluginBag $pluginBag
  * @property crumbs_CurrentPageInfo $page
  * @property crumbs_Container_LazyDataByPath $trails
  * @property crumbs_Router $router
@@ -21,7 +21,7 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
    *
    * @return crumbs_BreadcrumbBuilder
    *
-   * @see crumbs_DIC_ServiceContainer::breadcrumbBuilder
+   * @see crumbs_DIC_ServiceContainer::$breadcrumbBuilder
    */
   protected function breadcrumbBuilder() {
     return new crumbs_BreadcrumbBuilder($this->pluginEngine);
@@ -32,7 +32,7 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
    *
    * @return crumbs_TrailFinder
    *
-   * @see crumbs_DIC_ServiceContainer::trailFinder
+   * @see crumbs_DIC_ServiceContainer::$trailFinder
    */
   protected function trailFinder() {
     return new crumbs_TrailFinder($this->parentFinder, $this->router);
@@ -43,7 +43,7 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
    *
    * @return crumbs_ParentFinder
    *
-   * @see crumbs_DIC_ServiceContainer::parentFinder
+   * @see crumbs_DIC_ServiceContainer::$parentFinder
    */
   protected function parentFinder() {
     return new crumbs_ParentFinder($this->pluginEngine, $this->router);
@@ -52,7 +52,7 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
   /**
    * @return crumbs_PluginSystem_PluginBag
    *
-   * @see crumbs_DIC_ServiceContainer::pluginBag
+   * @see crumbs_DIC_ServiceContainer::$pluginBag
    */
   protected function pluginBag() {
     $pluginInfo = $this->pluginInfo;
@@ -68,7 +68,7 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
    *
    * @return crumbs_PluginEngine
    *
-   * @see crumbs_DIC_ServiceContainer::pluginEngine
+   * @see crumbs_DIC_ServiceContainer::$pluginEngine
    */
   protected function pluginEngine() {
     return new crumbs_PluginEngine(
@@ -80,7 +80,7 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
   /**
    * @return crumbs_CallbackRestoration
    *
-   * @see crumbs_DIC_ServiceContainer::callbackRestoration
+   * @see crumbs_DIC_ServiceContainer::$callbackRestoration
    */
   protected function callbackRestoration() {
     return new crumbs_CallbackRestoration();
@@ -91,7 +91,7 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
    *
    * @return crumbs_Container_CachedLazyPluginInfo
    *
-   * @see crumbs_DIC_ServiceContainer::pluginInfo
+   * @see crumbs_DIC_ServiceContainer::$pluginInfo
    */
   protected function pluginInfo() {
     $source = new crumbs_PluginInfo();
@@ -103,7 +103,7 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
    *
    * @return crumbs_CurrentPageInfo
    *
-   * @see crumbs_DIC_ServiceContainer::page
+   * @see crumbs_DIC_ServiceContainer::$page
    */
   protected function page() {
     return new crumbs_CurrentPageInfo(
@@ -117,7 +117,7 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
    *
    * @return crumbs_Container_LazyDataByPath
    *
-   * @see crumbs_DIC_ServiceContainer::trails
+   * @see crumbs_DIC_ServiceContainer::$trails
    */
   protected function trails() {
     return new crumbs_Container_LazyDataByPath($this->trailFinder);
@@ -128,7 +128,7 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
    *
    * @return crumbs_Router
    *
-   * @see crumbs_DIC_ServiceContainer::router
+   * @see crumbs_DIC_ServiceContainer::$router
    */
   protected function router() {
     return new crumbs_Router();
