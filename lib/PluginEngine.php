@@ -77,6 +77,19 @@ class crumbs_PluginEngine {
   }
 
   /**
+   * Invoke all relevant plugins to find all possible parents for a given path.
+   *
+   * @param string $path
+   * @param array $item
+   *
+   * @return string[]
+   */
+  function findAllParents($path, $item) {
+    $plugin_methods = $this->pluginBag->getRoutePluginMethodIterator('findParent', $item['route']);
+    return $this->findAll($plugin_methods, array($path, $item), TRUE);
+  }
+
+  /**
    * @param string $parent_raw
    *
    * @return string
@@ -105,6 +118,20 @@ class crumbs_PluginEngine {
       $this->candidateLogger->endFindTitle($path, $item, $breadcrumb);
     }
     return $result;
+  }
+
+  /**
+   * Invoke all relevant plugins to find all possible titles for a given path.
+   *
+   * @param string $path
+   * @param array $item
+   * @param array $breadcrumb
+   *
+   * @return string[]
+   */
+  function findAllTitles($path, $item, $breadcrumb) {
+    $plugin_methods = $this->pluginBag->getRoutePluginMethodIterator('findTitle', $item['route']);
+    return $this->findAll($plugin_methods, array($path, $item, $breadcrumb), FALSE);
   }
 
   /**
@@ -184,6 +211,62 @@ class crumbs_PluginEngine {
       }
     }
     return $best_candidate;
+  }
+
+  /**
+   * Invoke all relevant plugins to find title or parent for a given path.
+   *
+   * @param crumbs_PluginSystem_PluginMethodIterator $iterator
+   * @param array $args
+   *   Parameter values to pass to plugin methods.
+   * @param bool $processFindParent
+   *
+   * @return mixed|null
+   */
+  protected function findAll($iterator, $args, $processFindParent = FALSE) {
+
+    $all_candidates = array();
+    /**
+     * @var string $plugin_key
+     * @var crumbs_PluginSystem_PluginMethodIterator $position
+     */
+    foreach ($iterator as $plugin_key => $position) {
+      if ($position->isMultiPlugin()) {
+        // That's a crumbs_MultiPlugin
+        $candidates = $position->invokeFinderMethod($args);
+        if (empty($candidates)) {
+          continue;
+        }
+        foreach ($candidates as $candidate_key => $candidate) {
+          if (!isset($candidate)) {
+            continue;
+          }
+          if ($processFindParent) {
+            $candidate = $this->processFindParent($candidate);
+            if (!isset($candidate)) {
+              continue;
+            }
+          }
+          $all_candidates["$plugin_key.$candidate_key"] = $candidate;
+        }
+      }
+      else {
+        // That's a crumbs_MonoPlugin
+        $candidate = $position->invokeFinderMethod($args);
+        if (!isset($candidate)) {
+          continue;
+        }
+        if ($processFindParent) {
+          $candidate = $this->processFindParent($candidate);
+          if (!isset($candidate)) {
+            continue;
+          }
+        }
+        $all_candidates[$plugin_key] = $candidate;
+      }
+    }
+
+    return $all_candidates;
   }
 
 }
