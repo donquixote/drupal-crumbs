@@ -9,6 +9,7 @@
  * @property crumbs_PluginEngine $pluginEngine
  * @property crumbs_CallbackRestoration $callbackRestoration
  * @property crumbs_Container_CachedLazyPluginInfo $pluginInfo
+ * @property crumbs_PluginSystem_PluginBag $pluginBag
  * @property crumbs_CurrentPageInfo $page
  * @property crumbs_Container_LazyDataByPath $trails
  * @property crumbs_Router $router
@@ -49,6 +50,19 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
   }
 
   /**
+   * @return crumbs_PluginSystem_PluginBag
+   *
+   * @see crumbs_DIC_ServiceContainer::pluginBag
+   */
+  protected function pluginBag() {
+    $pluginInfo = $this->pluginInfo;
+    return new crumbs_PluginSystem_PluginBag(
+      $pluginInfo->plugins,
+      $pluginInfo->routelessPluginMethods,
+      $pluginInfo->routePluginMethods);
+  }
+
+  /**
    * A service that knows all plugins and their configuration/weights,
    * and can run plugin operations on those plugins.
    *
@@ -57,7 +71,10 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
    * @see crumbs_DIC_ServiceContainer::pluginEngine
    */
   protected function pluginEngine() {
-    return new crumbs_PluginEngine($this->pluginInfo, $this->router);
+    return new crumbs_PluginEngine(
+      $this->pluginBag,
+      $this->router,
+      $this->pluginInfo->weightKeeper);
   }
 
   /**
@@ -89,7 +106,10 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
    * @see crumbs_DIC_ServiceContainer::page
    */
   protected function page() {
-    return new crumbs_CurrentPageInfo($this->trails, $this->breadcrumbBuilder, $this->router);
+    return new crumbs_CurrentPageInfo(
+      $this->trails,
+      $this->breadcrumbBuilder,
+      $this->router);
   }
 
   /**
