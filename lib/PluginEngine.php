@@ -9,9 +9,16 @@ class crumbs_PluginEngine {
   protected $candidateLogger;
 
   /**
-   * @var crumbs_Container_CachedLazyPluginInfo
+   * @var string[][]
+   *   Format: $['findParent'][$plugin_key] = $method
    */
-  protected $pluginInfo;
+  protected $routelessPluginMethods = array();
+
+  /**
+   * @var string[][][]
+   *   Format: $['findParent'][$route][$plugin_key] = $method
+   */
+  protected $routePluginMethods = array();
 
   /**
    * @var crumbs_Router
@@ -19,7 +26,7 @@ class crumbs_PluginEngine {
   protected $router;
 
   /**
-   * @var array
+   * @var crumbs_PluginInterface[]
    */
   protected $plugins;
 
@@ -33,7 +40,8 @@ class crumbs_PluginEngine {
    * @param crumbs_Router $router
    */
   function __construct($plugin_info, $router) {
-    $this->pluginInfo = $plugin_info;
+    $this->routelessPluginMethods = $plugin_info->routelessPluginMethods;
+    $this->routePluginMethods = $plugin_info->routePluginMethods;
     $this->router = $router;
     // These are for quicker access.
     $this->plugins = $plugin_info->plugins;
@@ -53,7 +61,10 @@ class crumbs_PluginEngine {
    * @param array $breadcrumb
    */
   function decorateBreadcrumb($breadcrumb) {
-    $plugin_methods = $this->pluginInfo->basicPluginMethods('decorateBreadcrumb');
+    if (!isset($this->routelessPluginMethods['decorateBreadcrumb'])) {
+      return;
+    }
+    $plugin_methods = $this->routelessPluginMethods['decorateBreadcrumb'];
     foreach ($plugin_methods as $plugin_key => $method) {
       /**
        * @var crumbs_PluginInterface $plugin
@@ -78,7 +89,7 @@ class crumbs_PluginEngine {
    * @return mixed|null
    */
   function findParent($path, $item) {
-    $plugin_methods = $this->pluginInfo->routePluginMethods('findParent', $item['route']);
+    $plugin_methods = $this->getRoutePluginMethods('findParent', $item['route']);
     $result = $this->find($plugin_methods, array($path, $item), TRUE);
     if ($this->candidateLogger) {
       $this->candidateLogger->endFindParent($path, $item);
@@ -104,15 +115,35 @@ class crumbs_PluginEngine {
    * @param string $path
    * @param array $item
    * @param array $breadcrumb
-   * @return mixed|null|void
+   *
+   * @return mixed|null
    */
   function findTitle($path, $item, $breadcrumb) {
-    $plugin_methods = $this->pluginInfo->routePluginMethods('findTitle', $item['route']);
+    $plugin_methods = $this->getRoutePluginMethods('findTitle', $item['route']);
     $result = $this->find($plugin_methods, array($path, $item, $breadcrumb), FALSE);
     if ($this->candidateLogger) {
       $this->candidateLogger->endFindTitle($path, $item, $breadcrumb);
     }
     return $result;
+  }
+
+  /**
+   * @param string $base_method_name
+   *   Either 'findParent' or 'findTitle' or 'decorateBreadcrumb'.
+   * @param string $route
+   *   A route, e.g. 'node/%'.
+   *
+   * @return string[]
+   *   Format: $[$plugin_key] = $method.
+   */
+  private function getRoutePluginMethods($base_method_name, $route) {
+    if (isset($this->routePluginMethods[$base_method_name][$route])) {
+      return $this->routePluginMethods[$base_method_name][$route];
+    }
+    if (isset($this->routelessPluginMethods[$base_method_name])) {
+      return $this->routelessPluginMethods[$base_method_name];
+    }
+    return array();
   }
 
   /**

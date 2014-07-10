@@ -36,6 +36,7 @@ class crumbs_PluginInfo {
    * (which are often wildcards)
    *
    * @param crumbs_Container_CachedLazyPluginInfo $container
+   *
    * @return crumbs_Container_WildcardDataSorted
    */
   function weightKeeper($container) {
@@ -46,6 +47,7 @@ class crumbs_PluginInfo {
    * Default weights without the user configuration
    *
    * @param crumbs_Container_CachedLazyPluginInfo $container
+   *
    * @return array
    */
   function defaultWeights($container) {
@@ -54,16 +56,105 @@ class crumbs_PluginInfo {
 
   /**
    * @param crumbs_Container_CachedLazyPluginInfo $container
+   *
+   * @return string[][][]
+   *
+   * @see crumbs_Container_CachedLazyPluginInfo::routePluginMethodsUnsorted
+   */
+  function routePluginMethodsUnsorted($container) {
+    return $container->discovery->getRoutePluginMethods();
+  }
+
+  /**
+   * @param crumbs_Container_CachedLazyPluginInfo $container
+   *
+   * @return string[][]
+   *
+   * @see crumbs_Container_CachedLazyPluginInfo::routelessPluginMethodsUnsorted
+   */
+  function routelessPluginMethodsUnsorted($container) {
+    return $container->discovery->getRoutelessPluginMethods();
+  }
+
+  /**
+   * @param crumbs_Container_CachedLazyPluginInfo $container
+   *
+   * @return string[][][]
+   *
+   * @see crumbs_Container_CachedLazyPluginInfo::routePluginMethods
+   */
+  function routePluginMethods($container) {
+    $unsorted_all = $container->routePluginMethodsUnsorted;
+    $types = array(
+      'decorateBreadcrumb' => 'alter',
+      'findParent' => 'find',
+      'findTitle' => 'find',
+    );
+    $order = $container->pluginOrder;
+    $sorted_all = array();
+    foreach ($types as $base_method_name => $type) {
+      if (!isset($unsorted_all[$base_method_name])) {
+        continue;
+      }
+      foreach ($unsorted_all[$base_method_name] as $route => $unsorted) {
+        $sorted = $this->sortPluginMethods($unsorted_all[$base_method_name][$route], $order[$type]);
+        if (!empty($sorted)) {
+          $sorted_all[$base_method_name][$route] = $sorted;
+        }
+      }
+    }
+    return $sorted_all;
+  }
+
+  /**
+   * @param crumbs_Container_CachedLazyPluginInfo $container
+   *
+   * @return string[][]
+   *
+   * @see crumbs_Container_CachedLazyPluginInfo::routelessPluginMethods
+   */
+  function routelessPluginMethods($container) {
+    $unsorted = $container->routelessPluginMethodsUnsorted;
+    $types = array(
+      'decorateBreadcrumb' => 'alter',
+      'findParent' => 'find',
+      'findTitle' => 'find',
+    );
+    $order = $container->pluginOrder;
+    $sorted_all = array();
+    foreach ($types as $base_method_name => $type) {
+      if (!isset($unsorted[$base_method_name])) {
+        continue;
+      }
+      $sorted = $this->sortPluginMethods($unsorted[$base_method_name], $order[$type]);
+      if (!empty($sorted)) {
+        $sorted_all[$base_method_name] = $sorted;
+      }
+    }
+    return $sorted_all;
+  }
+
+  /**
+   * @param string[] $plugin_methods
+   * @param mixed[] $order
+   *
    * @return array
    */
-  function pluginRoutes($container) {
-    return $container->discovery->getPluginRoutes();
+  private function sortPluginMethods(array $plugin_methods, array $order) {
+    $sorted = array();
+    foreach ($order as $plugin_key => $x) {
+      if (isset($plugin_methods[$plugin_key])) {
+        $sorted[$plugin_key] = $plugin_methods[$plugin_key];
+      }
+    }
+    return $sorted;
   }
 
   /**
    * User-defined weights
    *
    * @param crumbs_Container_CachedLazyPluginInfo $container
+   *
    * @return array
    */
   function userWeights($container) {
@@ -88,10 +179,11 @@ class crumbs_PluginInfo {
 
   /**
    * @param crumbs_Container_CachedLazyPluginInfo $container
+   *
    * @return crumbs_Container_MultiWildcardData
    */
   function availableKeysMeta($container) {
-    $op = new crumbs_PluginOperation_describe($container->pluginRoutes);
+    $op = new crumbs_PluginOperation_describe();
     /**
      * @var crumbs_PluginInterface $plugin
      */
@@ -105,85 +197,10 @@ class crumbs_PluginInfo {
   }
 
   /**
-   * Prepared list of plugins and methods for a given operation.
-   *
-   * @param crumbs_Container_CachedLazyPluginInfo $container
-   * @param string $method
-   * @return array
-   */
-  function basicPluginMethods($container, $method) {
-    $type = ('decorateBreadcrumb' === $method) ? 'alter' : 'find';
-    $plugin_routes = $container->pluginRoutes;
-    $result = array();
-    /**
-     * @var crumbs_PluginInterface $plugin
-     */
-    foreach ($container->pluginsSorted[$type] as $plugin_key => $plugin) {
-      if (method_exists($plugin, $method)) {
-        if (!isset($plugin_routes[$plugin_key])) {
-          $result[$plugin_key] = $method;
-        }
-      }
-    }
-    return $result;
-  }
-
-  /**
-   * Prepared list of plugins and methods for a given find operation and route.
-   *
-   * @param crumbs_Container_CachedLazyPluginInfo $container
-   * @param string $method
-   * @param string $route
-   * @return array
-   */
-  function routePluginMethods($container, $method, $route) {
-    $plugin_methods = $container->routePluginMethodsCached($method, $route);
-    return (FALSE !== $plugin_methods) ? $plugin_methods : $container->basicPluginMethods($method);
-  }
-
-  /**
-   * Prepared list of plugins and methods for a given find operation and route.
-   * This is the version to be cached.
-   *
-   * @param crumbs_Container_CachedLazyPluginInfo $container
-   * @param string $method
-   * @param string $route
-   * @return array|bool
-   */
-  function routePluginMethodsCached($container, $method, $route) {
-    if (empty($route)) {
-      return FALSE;
-    }
-    $only_basic = TRUE;
-    $plugin_routes = $container->pluginRoutes;
-    $method_suffix = crumbs_Util::buildMethodSuffix($route);
-    if (!empty($method_suffix)) {
-      $method_with_suffix = $method . '__' . $method_suffix;
-    }
-    $result = array();
-    foreach ($container->pluginOrder['find'] as $plugin_key => $weight) {
-      $plugin = $container->plugins[$plugin_key];
-      if (isset($method_with_suffix) && method_exists($plugin, $method_with_suffix)) {
-        $result[$plugin_key] = $method_with_suffix;
-        $only_basic = FALSE;
-      }
-      elseif (method_exists($plugin, $method)) {
-        if (!isset($plugin_routes[$plugin_key])) {
-          $result[$plugin_key] = $method;
-        }
-        elseif ($route === $plugin_routes[$plugin_key]) {
-          $only_basic = FALSE;
-          $result[$plugin_key] = $method;
-        }
-      }
-    }
-    return $only_basic ? FALSE : $result;
-  }
-
-  /**
    * Plugins, not sorted, but already with the weights information.
    *
    * @param crumbs_Container_CachedLazyPluginInfo $container
+   *
    * @return array
    */
   function plugins($container) {
@@ -197,6 +214,7 @@ class crumbs_PluginInfo {
    * Plugins, not sorted, but already with the weights information.
    *
    * @param crumbs_Container_CachedLazyPluginInfo $container
+   *
    * @return array
    */
   function pluginsCached($container) {
@@ -214,6 +232,7 @@ class crumbs_PluginInfo {
    * Information returned from hook_crumbs_plugins()
    *
    * @param crumbs_Container_CachedLazyPluginInfo $container
+   *
    * @return crumbs_InjectedAPI_hookCrumbsPlugins
    */
   function discovery($container) {
@@ -225,6 +244,7 @@ class crumbs_PluginInfo {
       $api->setModule($module);
       $function($api);
     }
+    /** @noinspection PhpUnusedLocalVariableInspection */
     $discovery_ongoing = FALSE;
     $api->finalize();
     return $api;
@@ -234,6 +254,7 @@ class crumbs_PluginInfo {
    * Order of plugins, for 'find' and 'alter' operations.
    *
    * @param crumbs_Container_CachedLazyPluginInfo $container
+   *
    * @return array
    */
   function pluginOrder($container) {
@@ -282,6 +303,7 @@ class crumbs_PluginInfo {
    * Sorted plugins for 'find' and 'alter' operations.
    *
    * @param crumbs_Container_CachedLazyPluginInfo $container
+   *
    * @return array
    */
   function pluginsSorted($container) {
@@ -300,6 +322,7 @@ class crumbs_PluginInfo {
    * We use the cache mechanic to make sure this happens exactly once.
    *
    * @param crumbs_Container_CachedLazyPluginInfo $container
+   *
    * @return bool
    */
   function includePluginFiles($container) {
@@ -333,4 +356,5 @@ class crumbs_PluginInfo {
 
     return TRUE;
   }
+
 }

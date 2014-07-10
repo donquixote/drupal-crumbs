@@ -29,11 +29,16 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
   protected $callbacks = array();
 
   /**
-   * @var string[]
-   *   Array of routes, with this format:
-   *   $this->pluginRoutes[$key] = $route
+   * @var string[][]
+   *   Format: $['findParent'][$plugin_key] = $method
    */
-  protected $pluginRoutes = array();
+  protected $routelessPluginMethods = array();
+
+  /**
+   * @var string[][][]
+   *   Format: $['findParent'][$route][$plugin_key] = $method
+   */
+  protected $routePluginMethods = array();
 
   /**
    * @var array
@@ -83,14 +88,27 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
   }
 
   /**
-   * @return array
+   * @return string[][]
+   *   Format: $['findParent'][$plugin_key] = $method
    * @throws Exception
    */
-  function getPluginRoutes() {
+  function getRoutelessPluginMethods() {
     if ($this->discoveryOngoing) {
       throw new Exception(__METHOD__ . "() cannot be called from an implementation of hook_crumbs_plugins().");
     }
-    return $this->pluginRoutes;
+    return $this->routelessPluginMethods;
+  }
+
+  /**
+   * @return string[][][]
+   *   Format: $['findParent'][$route][$plugin_key] = $method.
+   * @throws Exception
+   */
+  function getRoutePluginMethods() {
+    if ($this->discoveryOngoing) {
+      throw new Exception(__METHOD__ . "() cannot be called from an implementation of hook_crumbs_plugins().");
+    }
+    return $this->routePluginMethods;
   }
 
   /**
@@ -153,12 +171,21 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
           foreach ($plugins as $key => $entity_plugin) {
             if ('parent' === $type) {
               $this->plugins[$key] = new crumbs_MultiPlugin_EntityParent($entity_plugin, $entity_type, $bundle_key, $bundle_name);
+              $this->routePluginMethods['findParent'][$route][$key] = 'findParent';
             }
             else {
               $this->plugins[$key] = new crumbs_MultiPlugin_EntityTitle($entity_plugin, $entity_type, $bundle_key, $bundle_name);
+              $this->routePluginMethods['findTitle'][$route][$key] = 'findTitle';
             }
-            $this->pluginRoutes[$key] = $route;
           }
+        }
+      }
+    }
+
+    foreach ($this->routePluginMethods as $base_method => &$route_plugin_methods) {
+      if (isset($this->routelessPluginMethods[$base_method])) {
+        foreach ($route_plugin_methods as $route => &$methods_by_plugin_key) {
+          $methods_by_plugin_key += $this->routelessPluginMethods[$base_method];
         }
       }
     }
@@ -293,82 +320,103 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    * @throws Exception
    */
   function monoPlugin($key = NULL, crumbs_MonoPlugin $plugin = NULL) {
-    if (!isset($key)) {
-      $class = $this->module . '_CrumbsMonoPlugin';
-      $plugin = new $class();
-      $key = $this->module;
-    }
-    elseif (!isset($plugin)) {
-      $class = $this->module . '_CrumbsMonoPlugin_' . $key;
-      $plugin = new $class();
-      $key = $this->module . '.' . $key;
-    }
-    else {
-      $class = get_class($plugin);
-      $key = $this->module . '.' . $key;
-    }
-    if (!($plugin instanceof crumbs_MonoPlugin)) {
-      throw new Exception("$class must implement class_MonoPlugin.");
-    }
-    if (isset($this->plugins[$key])) {
-      throw new Exception("There already is a plugin with key '$key'.");
-    }
-    $this->plugins[$key] = $plugin;
+    $this->addPluginByType($plugin, $key, NULL, FALSE);
   }
 
   /**
+   * Register a "Mono" plugin that is restricted to a specific route.
+   *
    * @param string $route
    * @param string $key
    * @param crumbs_MonoPlugin $plugin
    */
   function routeMonoPlugin($route, $key = NULL, crumbs_MonoPlugin $plugin = NULL) {
-    $this->monoPlugin($key, $plugin);
-    $plugin_key = empty($key) ? $this->module : $this->module . '.' . $key;
-    $this->pluginRoutes[$plugin_key] = $route;
+    $this->addPluginByType($plugin, $key, $route, FALSE);
   }
 
   /**
    * Register a "Multi" plugin.
    * That is, a plugin that defines more than one rule.
    *
-   * @param $key
+   * @param string|null $key
    *   Rule key, relative to module name.
-   * @param crumbs_MultiPlugin $plugin
+   * @param crumbs_MultiPlugin|null $plugin
    *   Plugin object. Needs to implement crumbs_MultiPlugin.
    *   Or NULL, to have the plugin object automatically created based on a
    *   class name guessed from the $key parameter and the module name.
+   *
    * @throws Exception
    */
-  function multiPlugin($key, crumbs_MultiPlugin $plugin = NULL) {
-    if (!isset($key)) {
-      $class = $this->module . '_CrumbsMultiPlugin';
-      $plugin = new $class();
-      $plugin_key = $this->module;
-    }
-    elseif (!isset($plugin)) {
-      $class = $this->module . '_CrumbsMultiPlugin_' . $key;
-      $plugin = new $class();
-      $plugin_key = $this->module . '.' . $key;
-    }
-    else {
-      $class = get_class($plugin);
-      $plugin_key = $this->module . '.' . $key;
-    }
-    if (!($plugin instanceof crumbs_MultiPlugin)) {
-      throw new Exception("$class must implement class_MultiPlugin.");
-    }
-    $this->plugins[$plugin_key] = $plugin;
+  function multiPlugin($key = NULL, crumbs_MultiPlugin $plugin = NULL) {
+    $this->addPluginByType($plugin, $key, NULL, TRUE);
   }
 
   /**
    * @param string $route
-   * @param string $key
-   * @param crumbs_MultiPlugin $plugin
+   * @param string|null $key
+   * @param crumbs_MultiPlugin|null $plugin
    */
   function routeMultiPlugin($route, $key = NULL, crumbs_MultiPlugin $plugin = NULL) {
-    $this->multiPlugin($key, $plugin);
-    $plugin_key = empty($key) ? $this->module : $this->module . '.' . $key;
-    $this->pluginRoutes[$plugin_key] = $route;
+    $this->addPluginByType($plugin, $key, $route, TRUE);
+  }
+
+  /**
+   * @param crumbs_MonoPlugin|crumbs_PluginInterface|null $plugin
+   * @param string|null $key
+   * @param string|null $route
+   * @param bool $is_multi
+   *   TRUE for a multi plugin.
+   *
+   * @throws Exception
+   */
+  private function addPluginByType(crumbs_PluginInterface $plugin = NULL, $key = NULL, $route = NULL, $is_multi) {
+    $plugin_key = isset($key)
+      ? $this->module . '.' . $key
+      : $this->module;
+    if (!isset($plugin)) {
+      $class = $is_multi
+        ? $this->module . '_CrumbsMultiPlugin'
+        : $this->module . '_CrumbsMonoPlugin';
+      $class .= isset($key) ? '_' . $key : '';
+      if (!class_exists($class)) {
+        throw new \Exception("Plugin class $class does not exist.");
+      }
+      $plugin = new $class();
+    }
+    else {
+      $class = get_class($plugin);
+    }
+    if ($is_multi) {
+      if (!$plugin instanceof crumbs_MultiPlugin) {
+        throw new Exception("$class must implement class_MultiPlugin.");
+      }
+    }
+    else {
+      if (!$plugin instanceof crumbs_MonoPlugin) {
+        throw new Exception("$class must implement class_MonoPlugin.");
+      }
+    }
+    $this->addPlugin($plugin, $plugin_key, $route);
+  }
+
+  /**
+   * @param crumbs_PluginInterface $plugin
+   * @param string $plugin_key
+   * @param string|null $route
+   *
+   * @throws Exception
+   */
+  private function addPlugin(crumbs_PluginInterface $plugin, $plugin_key, $route = NULL) {
+    if (isset($this->plugins[$plugin_key])) {
+      throw new Exception("There already is a plugin with key '$plugin_key'.");
+    }
+    $this->plugins[$plugin_key] = $plugin;
+    if (isset($route)) {
+      $this->analyzeRoutePluginMethods($route, $plugin_key, $plugin);
+    }
+    else {
+      $this->analyzePluginMethods($plugin_key, $plugin);
+    }
   }
 
   /**
@@ -458,4 +506,63 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
     $key = isset($key) ? ($this->module . '.' . $key) : $this->module;
     $this->defaultValues[$key] = FALSE;
   }
+
+  /**
+   * @param string $plugin_key
+   * @param crumbs_PluginInterface $plugin
+   */
+  private function analyzePluginMethods($plugin_key, crumbs_PluginInterface $plugin) {
+    $reflectionObject = new ReflectionObject($plugin);
+    foreach ($reflectionObject->getMethods() as $method) {
+      if ('decorateBreadcrumb' === $method->name) {
+        $this->routelessPluginMethods['decorateBreadcrumb'][$plugin_key] = $method->name;
+        continue;
+      }
+      $this->analyzePluginMethod($plugin_key, $method);
+    }
+  }
+
+  /**
+   * @param string $plugin_key
+   * @param ReflectionMethod $method
+   */
+  private function analyzePluginMethod($plugin_key, ReflectionMethod $method) {
+    foreach (array('findTitle', 'findParent') as $base_method_name) {
+      if ($base_method_name === $method->name) {
+        $this->routelessPluginMethods[$base_method_name][$plugin_key] = $base_method_name;
+        return;
+      }
+      elseif (0 === strpos($method->name, $base_method_name . '__')) {
+        // This method is only for a specific route.
+        $method_suffix = substr($method->name, strlen($base_method_name . '__'));
+        $route = crumbs_Util::routeFromMethodSuffix($method_suffix);
+        $this->routePluginMethods[$base_method_name][$route][$plugin_key] = $method->name;
+        return;
+      }
+    }
+  }
+
+  /**
+   * @param string $route
+   * @param string $plugin_key
+   * @param crumbs_PluginInterface $plugin
+   */
+  private function analyzeRoutePluginMethods($route, $plugin_key, crumbs_PluginInterface $plugin) {
+
+    $method_suffix = crumbs_Util::buildMethodSuffix($route);
+
+    foreach (array('findTitle', 'findParent') as $base_method_name) {
+      if (!empty($method_suffix)) {
+        $method_with_suffix = $base_method_name . '__' . $method_suffix;
+        if (method_exists($plugin, $method_with_suffix)) {
+          $this->routePluginMethods[$base_method_name][$route][$plugin_key] = $method_with_suffix;
+          continue;
+        }
+      }
+      if (method_exists($plugin, $base_method_name)) {
+        $this->routePluginMethods[$base_method_name][$route][$plugin_key] = $base_method_name;
+      }
+    }
+  }
+
 }

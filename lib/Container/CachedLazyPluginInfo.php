@@ -6,11 +6,14 @@
  * @property array $weights
  * @property crumbs_Container_WildcardDataSorted $weightKeeper
  * @property array $defaultWeights
- * @property array $pluginRoutes
+ * @property string[][][] $routePluginMethodsUnsorted
+ * @property string[][] $routelessPluginMethodsUnsorted
+ * @property string[][][] $routePluginMethods
+ * @property string[][] $routelessPluginMethods
  * @property array $userWeights
  * @property crumbs_Container_MultiWildcardData $availableKeysMeta
  *
- * @property array $plugins
+ * @property crumbs_PluginInterface[] $plugins
  * @property array $pluginsCached
  * @property crumbs_InjectedAPI_hookCrumbsPlugins $discovery
  * @property array $pluginOrder
@@ -114,67 +117,6 @@ class crumbs_Container_CachedLazyPluginInfo {
     }
     cache_set("crumbs:$key", serialize($this->data[$key]));
 
-    return $this->data[$key];
-  }
-
-  /**
-   * @param string $method
-   *
-   * @return array
-   */
-  function basicPluginMethods($method) {
-
-    $key = __FUNCTION__ . ':' . $method;
-    if (array_key_exists($key, $this->data)) {
-      return $this->data[$key];
-    }
-
-    $cache = cache_get("crumbs:$key");
-    if (isset($cache->data) && is_array($cache->data)) {
-      return $this->data[$key] = $cache->data;
-    }
-
-    $this->data[$key] = $this->source->basicPluginMethods($this, $method);
-    cache_set("crumbs:$key", $this->data[$key]);
-    return $this->data[$key];
-  }
-
-  /**
-   * @param string $method
-   * @param string $route
-   *
-   * @return array
-   */
-  function routePluginMethods($method, $route) {
-
-    $key = __FUNCTION__ . ':' . $method . ':' . $route;
-    if (array_key_exists($key, $this->data)) {
-      return $this->data[$key];
-    }
-
-    return $this->data[$key] = $this->source->routePluginMethods($this, $method, $route);
-  }
-
-  /**
-   * @param string $method
-   * @param string $route
-   *
-   * @return array
-   */
-  function routePluginMethodsCached($method, $route) {
-
-    $key = __FUNCTION__ . ':' . $method . ':' . $route;
-    if (array_key_exists($key, $this->data)) {
-      return $this->data[$key];
-    }
-
-    $cache = cache_get("crumbs:$key");
-    if (isset($cache->data) && is_array($cache->data)) {
-      return $this->data[$key] = $cache->data;
-    }
-
-    $this->data[$key] = $this->source->routePluginMethodsCached($this, $method, $route);
-    cache_set("crumbs:$key", $this->data[$key]);
     return $this->data[$key];
   }
 
