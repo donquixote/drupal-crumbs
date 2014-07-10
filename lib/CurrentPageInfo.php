@@ -28,7 +28,7 @@
 class crumbs_CurrentPageInfo extends crumbs_Container_AbstractLazyData {
 
   /**
-   * @var crumbs_Container_LazyDataByPath
+   * @var crumbs_TrailCache
    */
   protected $trails;
 
@@ -43,7 +43,7 @@ class crumbs_CurrentPageInfo extends crumbs_Container_AbstractLazyData {
   protected $router;
 
   /**
-   * @param crumbs_Container_LazyDataByPath $trails
+   * @param crumbs_TrailCache $trails
    * @param crumbs_BreadcrumbBuilder $breadcrumbBuilder
    * @param crumbs_Router $router
    */

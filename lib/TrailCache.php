@@ -3,7 +3,7 @@
 /**
  * Class crumbs_Container_LazyTrails
  */
-class crumbs_Container_LazyDataByPath {
+class crumbs_TrailCache {
 
   /**
    * @var array

@@ -11,7 +11,7 @@
  * @property crumbs_CallbackRestoration $callbackRestoration
  * @property crumbs_Container_CachedLazyPluginInfo $pluginInfo
  * @property crumbs_CurrentPageInfo $page
- * @property crumbs_Container_LazyDataByPath $trails
+ * @property crumbs_TrailCache $trails
  * @property crumbs_Router $router
  */
 class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
@@ -115,12 +115,12 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
   /**
    * Service that can provide/calculate trails for different paths.
    *
-   * @return crumbs_Container_LazyDataByPath
+   * @return crumbs_TrailCache
    *
    * @see crumbs_DIC_ServiceContainer::$trails
    */
   protected function trails() {
-    return new crumbs_Container_LazyDataByPath($this->trailFinder);
+    return new crumbs_TrailCache($this->trailFinder);
   }
 
   /**
