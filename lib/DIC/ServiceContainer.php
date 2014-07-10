@@ -18,9 +18,9 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
   /**
    * A service that can build a breadcrumb from a trail.
    *
-   * Available as crumbs('breadcrumbBuilder').
-   *
    * @return crumbs_BreadcrumbBuilder
+   *
+   * @see crumbs_DIC_ServiceContainer::breadcrumbBuilder
    */
   protected function breadcrumbBuilder() {
     return new crumbs_BreadcrumbBuilder($this->pluginEngine);
@@ -29,9 +29,9 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
   /**
    * A service that can build a trail for a given path.
    *
-   * Available as crumbs('trailFinder').
-   *
    * @return crumbs_TrailFinder
+   *
+   * @see crumbs_DIC_ServiceContainer::trailFinder
    */
   protected function trailFinder() {
     return new crumbs_TrailFinder($this->parentFinder, $this->router);
@@ -40,9 +40,9 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
   /**
    * A service that attempts to find a parent path for a given path.
    *
-   * Available as crumbs('parentFinder').
-   *
    * @return crumbs_ParentFinder
+   *
+   * @see crumbs_DIC_ServiceContainer::parentFinder
    */
   protected function parentFinder() {
     return new crumbs_ParentFinder($this->pluginEngine, $this->router);
@@ -52,9 +52,9 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
    * A service that knows all plugins and their configuration/weights,
    * and can run plugin operations on those plugins.
    *
-   * Available as crumbs('pluginEngine').
-   *
    * @return crumbs_PluginEngine
+   *
+   * @see crumbs_DIC_ServiceContainer::pluginEngine
    */
   protected function pluginEngine() {
     return new crumbs_PluginEngine($this->pluginInfo, $this->router);
@@ -62,6 +62,8 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
 
   /**
    * @return crumbs_CallbackRestoration
+   *
+   * @see crumbs_DIC_ServiceContainer::callbackRestoration
    */
   protected function callbackRestoration() {
     return new crumbs_CallbackRestoration();
@@ -70,9 +72,9 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
   /**
    * A service that knows all plugins and their configuration/weights.
    *
-   * Available as crumbs('pluginInfo').
-   *
    * @return crumbs_Container_CachedLazyPluginInfo
+   *
+   * @see crumbs_DIC_ServiceContainer::pluginInfo
    */
   protected function pluginInfo() {
     $source = new crumbs_PluginInfo();
@@ -82,9 +84,9 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
   /**
    * Service that can provide information related to the current page.
    *
-   * Available as crumbs('page').
-   *
    * @return crumbs_CurrentPageInfo
+   *
+   * @see crumbs_DIC_ServiceContainer::page
    */
   protected function page() {
     return new crumbs_CurrentPageInfo($this->trails, $this->breadcrumbBuilder, $this->router);
@@ -93,9 +95,9 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
   /**
    * Service that can provide/calculate trails for different paths.
    *
-   * Available as crumbs('trails').
-   *
    * @return crumbs_Container_LazyDataByPath
+   *
+   * @see crumbs_DIC_ServiceContainer::trails
    */
   protected function trails() {
     return new crumbs_Container_LazyDataByPath($this->trailFinder);
@@ -105,6 +107,8 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
    * Wrapper for routing-related Drupal core functions.
    *
    * @return crumbs_Router
+   *
+   * @see crumbs_DIC_ServiceContainer::router
    */
   protected function router() {
     return new crumbs_Router();
