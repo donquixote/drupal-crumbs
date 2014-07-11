@@ -3,14 +3,19 @@
 abstract class crumbs_Container_CachedLazyPluginInfo {
 
   /**
-   * @var array
+   * Lazy-initialized data.
+   *
+   * @var mixed[]
    */
-  protected $data = array();
+  private $data = array();
 
   /**
-   * @var array
+   * Keys whose data should be remembered in persistent cached.
+   *
+   * @var true[]
+   *   Format: $[$key] = TRUE.
    */
-  protected $keysToCache = array();
+  private $keysToCache = array();
 
   /**
    * The constructor.
@@ -49,6 +54,8 @@ abstract class crumbs_Container_CachedLazyPluginInfo {
   }
 
   /**
+   * Load data from persistent cache, or calls $this->get() if not in cache.
+   *
    * @param string $key
    *
    * @return mixed|false
@@ -77,6 +84,8 @@ abstract class crumbs_Container_CachedLazyPluginInfo {
   }
 
   /**
+   * Calculate a piece of data by using methods defined in a child class.
+   *
    * @param string $key
    *
    * @return mixed|false
