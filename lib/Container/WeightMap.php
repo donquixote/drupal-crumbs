@@ -9,10 +9,10 @@
  *   crumbs.nodeParent.* = 5
  * and then we are looking for a weight for
  *   crumbs.nodeParent.page
- * then the weight keeper will return 5, because crumbs.nodeParent.* is the best
+ * then the weight map will return 5, because crumbs.nodeParent.* is the best
  * matching wildcard.
  */
-class crumbs_Container_WildcardDataSorted extends crumbs_Container_WildcardData {
+class crumbs_Container_WeightMap extends crumbs_Container_WildcardData {
 
   /**
    * @param array $data
@@ -37,4 +37,5 @@ class crumbs_Container_WildcardDataSorted extends crumbs_Container_WildcardData 
     }
     return FALSE;
   }
+
 }

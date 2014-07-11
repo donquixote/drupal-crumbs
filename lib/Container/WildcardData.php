@@ -104,7 +104,7 @@ class crumbs_Container_WildcardData {
   /**
    * Get a "child" container with a prefix.
    * E.g. if the config contains a weight setting "crumbs.nodeParent.* = 5"
-   * then in the child keeper this will be just "nodeParent.* = 5".
+   * then in the child weight map this will be just "nodeParent.* = 5".
    *
    * @param string $prefix
    *   The prefix.
@@ -122,7 +122,7 @@ class crumbs_Container_WildcardData {
   }
 
   /**
-   * Helper: Actually build the prefixed keeper.
+   * Helper: Actually build the prefixed container.
    *
    * @param string $prefix
    *   Prefix, as above.

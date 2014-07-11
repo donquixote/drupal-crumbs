@@ -48,16 +48,16 @@ class crumbs_MultiPlugin_EntityFindSomething extends crumbs_MultiPlugin_EntityFi
   }
 
   /**
-   * @param crumbs_Container_WildcardDataSorted $weight_keeper
+   * @param crumbs_Container_WeightMap $localWeightMap
    */
-  function initWeights($weight_keeper) {
+  function initWeights($localWeightMap) {
 
     if ('user' !== $this->entityType) {
       return;
     }
 
     foreach (user_roles(TRUE) as $rid => $role) {
-      $weight = $weight_keeper->valueAtKey($role);
+      $weight = $localWeightMap->valueAtKey($role);
       if (FALSE !== $weight) {
         $this->weights[$rid] = $weight;
       }

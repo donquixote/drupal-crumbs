@@ -74,7 +74,7 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
     return new crumbs_PluginSystem_PluginEngine(
       $this->pluginBag,
       $this->router,
-      $this->pluginInfo->weightKeeper);
+      $this->pluginInfo->weightMap);
   }
 
   /**

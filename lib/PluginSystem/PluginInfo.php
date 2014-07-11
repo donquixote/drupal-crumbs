@@ -4,7 +4,7 @@
  * Info about available plugins and their weights.
  *
  * @property array $weights
- * @property crumbs_Container_WildcardDataSorted $weightKeeper
+ * @property crumbs_Container_WeightMap $weightMap
  * @property array $defaultWeights
  * @property string[][][] $routePluginMethodsUnsorted
  * @property string[][] $routelessPluginMethodsUnsorted
@@ -68,12 +68,12 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
    * Object that can calculate rule weights based on the weight settings.
    * (which are often wildcards)
    *
-   * @return crumbs_Container_WildcardDataSorted
+   * @return crumbs_Container_WeightMap
    *
-   * @see crumbs_PluginSystem_PluginInfo::$weightKeeper
+   * @see crumbs_PluginSystem_PluginInfo::$weightMap
    */
-  protected function get_weightKeeper() {
-    return new crumbs_Container_WildcardDataSorted($this->weights);
+  protected function get_weightMap() {
+    return new crumbs_Container_WeightMap($this->weights);
   }
 
   /**
@@ -240,14 +240,14 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
    *
    * @return array
    *
-   * @see crumbs_PluginInfo::$pluginsCached
+   * @see crumbs_PluginSystem_PluginInfo::$pluginsCached
    */
   protected function get_pluginsCached() {
     $plugins = $this->discovery->getPlugins();
     foreach ($plugins as $plugin_key => $plugin) {
       // Let plugins know about the weights, if they want to.
       if (method_exists($plugin, 'initWeights')) {
-        $plugin->initWeights($this->weightKeeper->prefixedContainer($plugin_key));
+        $plugin->initWeights($this->weightMap->prefixedContainer($plugin_key));
       }
     }
     return $plugins;
@@ -294,25 +294,25 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
       'alter' => array(),
     );
 
-    // Sort the plugins, using the weights from weight keeper.
+    // Sort the plugins, using the weights from weight map.
     /**
-     * @var crumbs_Container_WildcardData $weight_keeper
+     * @var crumbs_Container_WildcardData $weightMap
      */
-    $weight_keeper = $this->weightKeeper;
+    $weightMap = $this->weightMap;
     foreach ($this->plugins as $plugin_key => $plugin) {
       if ($plugin instanceof crumbs_MultiPlugin) {
         /**
-         * @var crumbs_Container_WildcardDataSorted $keeper
+         * @var crumbs_Container_WeightMap $localWeightMap
          */
-        $keeper = $weight_keeper->prefixedContainer($plugin_key);
-        $w_find = $keeper->smallestValue();
+        $localWeightMap = $weightMap->prefixedContainer($plugin_key);
+        $w_find = $localWeightMap->smallestValue();
         if ($w_find !== FALSE) {
           $order['find'][$plugin_key] = $w_find;
         }
         // Multi plugins cannot participate in alter operations.
       }
       else {
-        $weight = $weight_keeper->valueAtKey($plugin_key);
+        $weight = $weightMap->valueAtKey($plugin_key);
         if ($weight !== FALSE) {
           $order['find'][$plugin_key] = $weight;
           $order['alter'][$plugin_key] = $weight;

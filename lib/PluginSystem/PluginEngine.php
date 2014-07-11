@@ -19,19 +19,19 @@ class crumbs_PluginSystem_PluginEngine {
   protected $router;
 
   /**
-   * @var crumbs_Container_WildcardDataSorted
+   * @var crumbs_Container_WeightMap
    */
-  protected $weightKeeper;
+  protected $weightMap;
 
   /**
    * @param crumbs_PluginSystem_PluginBag $pluginBag
    * @param crumbs_Router $router
-   * @param crumbs_Container_WildcardDataSorted $weightKeeper
+   * @param crumbs_Container_WeightMap $weightMap
    */
-  function __construct($pluginBag, $router, $weightKeeper) {
+  function __construct($pluginBag, $router, $weightMap) {
     $this->pluginBag = $pluginBag;
     $this->router = $router;
-    $this->weightKeeper = $weightKeeper;
+    $this->weightMap = $weightMap;
   }
 
   /**
@@ -155,10 +155,10 @@ class crumbs_PluginSystem_PluginEngine {
     foreach ($iterator as $plugin_key => $position) {
       if ($position->isMultiPlugin()) {
         /**
-         * @var crumbs_Container_WildcardDataSorted $keeper
+         * @var crumbs_Container_WeightMap $localWeightMap
          */
-        $keeper = $this->weightKeeper->prefixedContainer($plugin_key);
-        if ($best_candidate_weight <= $keeper->smallestValue()) {
+        $localWeightMap = $this->weightMap->prefixedContainer($plugin_key);
+        if ($best_candidate_weight <= $localWeightMap->smallestValue()) {
           return $best_candidate;
         }
         $candidates = $position->invokeFinderMethod($args);
@@ -169,7 +169,7 @@ class crumbs_PluginSystem_PluginEngine {
           if (!isset($candidate_raw)) {
             continue;
           }
-          $candidate_weight = $keeper->valueAtKey($candidate_key);
+          $candidate_weight = $localWeightMap->valueAtKey($candidate_key);
           if (FALSE === $candidate_weight) {
             continue;
           }
@@ -189,7 +189,7 @@ class crumbs_PluginSystem_PluginEngine {
         }
       }
       elseif ($position->isMonoPlugin()) {
-        $candidate_weight = $this->weightKeeper->valueAtKey($plugin_key);
+        $candidate_weight = $this->weightMap->valueAtKey($plugin_key);
         if ($best_candidate_weight <= $candidate_weight) {
           return $best_candidate;
         }
