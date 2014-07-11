@@ -105,56 +105,74 @@ function _crumbs_admin_debug_matrix($path_to_test) {
 
   list($matrix, $best_cells, $weights) = $candidate_logger->getAsMatrix(array_reverse($trail));
 
-  $matrix_thead_tr_first = '<td></td><td></td>';
-  $matrix_thead_tr_second = '<td></td><td></td>';
-  $matrix_thead_tr_third = '<th>' . t('Candidate key') . '</th><th>' . t('Weight') . '</th>';
+  $table = new crumbs_UI_Table();
+  $table
+    ->addColName('candidateKey')
+    ->addColName('candidateWeight')
+    ->addRowName('link')
+    ->addRowName('path')
+    ->addRowName('legend')
+    ->th('legend', 'candidateKey', t('Candidate key'))
+    ->th('legend', 'candidateWeight', t('Weight'))
+  ;
+
+  # $matrix_thead_tr_first = '<td></td><td></td>';
+  # $matrix_thead_tr_second = '<td></td><td></td>';
+  # $matrix_thead_tr_third = '<th>' . t('Candidate key') . '</th><th>' . t('Weight') . '</th>';
 
   foreach (array_reverse(array_keys($trail)) as $i => $path) {
-    $title = isset($titles[$path]) ? l($titles[$path], $path) : FALSE;
-    $separator = ($i > 0) ? '&laquo;' : ':';
-    $matrix_thead_tr_first .= '<td rowspan="' . (count($matrix) + 3) . '">' . $separator . '</td>';
-    $matrix_thead_tr_third .= '<th>' . t('Title') . '</th>';
 
+    $separator = ($i > 0) ? '&laquo;' : ':';
+    $table->addColName("separator.$i");
+    $table->td('', "separator.$i", $separator);
+
+    $table->th('legend', "item.$i.title", t('Title'));
     if ($i + 1 < count($trail)) {
-      $td_opening = '<td colspan="2"';
+      $table->addColGroup("item.$i", array('title', 'parent'));
+      $table->th('legend', "item.$i.parent", t('Parent'));
       $path_eff = $path;
-      $matrix_thead_tr_third .= '<th>' . t('Parent') . '</th>';
     }
     else {
-      $td_opening = '<td';
+      $table->addColGroup("item.$i", array('title'));
       $path_eff = '<front>';
     }
 
-    if (FALSE !== $title) {
-      $matrix_thead_tr_first .= $td_opening . '>' . $title . '</td>';
-      $matrix_thead_tr_second .= $td_opening . '><code>' . check_plain($path_eff) . '</code></td>';
+    $table->td('path', "item.$i", '<code>' . check_plain($path_eff) . '</code>');
+
+    if (isset($titles[$path])) {
+      $table->td('link', "item.$i", l($titles[$path], $path_eff));
     }
     else {
-      $matrix_thead_tr_first .= $td_opening . ' rowspan="2"><strike><code>' . l($path_eff, $path_eff) . '</code></strike></td>';
+      // No title - the breadcrumb item will be skipped.
+      $table->td('link', "item.$i", '<del><code>' . l($path_eff, $path_eff) . '</code></del>');
     }
   }
-  $matrix_thead = '<tr>' . $matrix_thead_tr_first . '</tr>';
-  $matrix_thead .= '<tr>' . $matrix_thead_tr_second . '</tr>';
-  $matrix_thead .= '<tr>' . $matrix_thead_tr_third . '</tr>';
 
-  $matrix_tbody = '';
   $odd = TRUE;
   foreach ($matrix as $key => $row_cells) {
-    $row_html = '<td>' . $key . '</td><td>' . $weights[$key] . '</td>';
+    $table->addRowName("row.$key");
+    $table->td("row.$key", 'candidateKey', $key);
+    $table->td("row.$key", 'candidateWeight', $weights[$key]);
+    $i = 0;
     foreach ($row_cells as $col_key => $cell) {
+      $cell = check_plain($cell);
       if (':parent' === substr($col_key, -7)) {
         $cell = '<code>' . $cell . '</code>';
+        $colName = "item.$i.parent";
+        ++$i;
+      }
+      else {
+        $colName = "item.$i.title";
       }
       if (!empty($best_cells[$key][$col_key])) {
         $cell = '<strong>' . $cell . '</strong>';
       }
-      $row_html .= '<td>' . $cell . '</td>';
+      $table->td("row.$key", $colName, $cell);
     }
-    $class = $odd ? 'odd' : 'even';
+    $table->addRowClass("row.$key", $odd ? 'odd' : 'even');
     $odd = !$odd;
-    $matrix_tbody .= '<tr class="' . $class . '">' . $row_html . '</tr>';
   }
 
-  $table = '<table>' . $matrix_thead . $matrix_tbody . '</table>';
-  return '<div style="overflow-x: auto;">' . $table . '</div>';
+  $html = $table->render();
+  return '<div style="overflow-x: auto;">' . $html . '</div>';
 }
