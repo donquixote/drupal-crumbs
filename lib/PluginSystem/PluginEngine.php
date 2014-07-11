@@ -1,7 +1,7 @@
 <?php
 
 
-class crumbs_PluginEngine {
+class crumbs_PluginSystem_PluginEngine {
 
   /**
    * @var crumbs_Debug_CandidateLogger

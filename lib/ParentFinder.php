@@ -8,7 +8,7 @@
 class crumbs_ParentFinder {
 
   /**
-   * @var crumbs_PluginEngine
+   * @var crumbs_PluginSystem_PluginEngine
    */
   protected $pluginEngine;
 
@@ -24,7 +24,7 @@ class crumbs_ParentFinder {
   protected $parents = array();
 
   /**
-   * @param crumbs_PluginEngine $pluginEngine
+   * @param crumbs_PluginSystem_PluginEngine $pluginEngine
    * @param crumbs_Router $router
    */
   function __construct($pluginEngine, $router) {

@@ -20,7 +20,7 @@
  * @property array $pluginsSorted
  * @property bool $includePluginFiles
  */
-class crumbs_PluginInfo extends crumbs_Container_AbstractLazyDataCached {
+class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCached {
 
   /**
    * Which keys to load from persistent cache.
@@ -51,7 +51,7 @@ class crumbs_PluginInfo extends crumbs_Container_AbstractLazyDataCached {
    *
    * @return array
    *
-   * @see crumbs_PluginInfo::$weights
+   * @see crumbs_PluginSystem_PluginInfo::$weights
    */
   protected function get_weights() {
     $weights = $this->defaultWeights;
@@ -70,7 +70,7 @@ class crumbs_PluginInfo extends crumbs_Container_AbstractLazyDataCached {
    *
    * @return crumbs_Container_WildcardDataSorted
    *
-   * @see crumbs_PluginInfo::$weightKeeper
+   * @see crumbs_PluginSystem_PluginInfo::$weightKeeper
    */
   protected function get_weightKeeper() {
     return new crumbs_Container_WildcardDataSorted($this->weights);
@@ -81,7 +81,7 @@ class crumbs_PluginInfo extends crumbs_Container_AbstractLazyDataCached {
    *
    * @return array
    *
-   * @see crumbs_PluginInfo::$defaultWeights
+   * @see crumbs_PluginSystem_PluginInfo::$defaultWeights
    */
   protected function get_defaultWeights() {
     return $this->discovery->getDefaultValues();
@@ -90,7 +90,7 @@ class crumbs_PluginInfo extends crumbs_Container_AbstractLazyDataCached {
   /**
    * @return string[][][]
    *
-   * @see crumbs_PluginInfo::$routePluginMethodsUnsorted
+   * @see crumbs_PluginSystem_PluginInfo::$routePluginMethodsUnsorted
    */
   protected function get_routePluginMethodsUnsorted() {
     return $this->discovery->getRoutePluginMethods();
@@ -99,7 +99,7 @@ class crumbs_PluginInfo extends crumbs_Container_AbstractLazyDataCached {
   /**
    * @return string[][]
    *
-   * @see crumbs_PluginInfo::$routelessPluginMethodsUnsorted
+   * @see crumbs_PluginSystem_PluginInfo::$routelessPluginMethodsUnsorted
    */
   protected function get_routelessPluginMethodsUnsorted() {
     return $this->discovery->getRoutelessPluginMethods();
@@ -108,7 +108,7 @@ class crumbs_PluginInfo extends crumbs_Container_AbstractLazyDataCached {
   /**
    * @return string[][][]
    *
-   * @see crumbs_PluginInfo::$routePluginMethods
+   * @see crumbs_PluginSystem_PluginInfo::$routePluginMethods
    */
   protected function get_routePluginMethods() {
     $unsorted_all = $this->routePluginMethodsUnsorted;
@@ -136,7 +136,7 @@ class crumbs_PluginInfo extends crumbs_Container_AbstractLazyDataCached {
   /**
    * @return string[][]
    *
-   * @see crumbs_PluginInfo::$routelessPluginMethods
+   * @see crumbs_PluginSystem_PluginInfo::$routelessPluginMethods
    */
   protected function get_routelessPluginMethods() {
     $unsorted = $this->routelessPluginMethodsUnsorted;
@@ -180,7 +180,7 @@ class crumbs_PluginInfo extends crumbs_Container_AbstractLazyDataCached {
    *
    * @return array
    *
-   * @see crumbs_PluginInfo::$userWeights
+   * @see crumbs_PluginSystem_PluginInfo::$userWeights
    */
   protected function get_userWeights() {
     $user_weights = variable_get('crumbs_weights', array(
@@ -205,7 +205,7 @@ class crumbs_PluginInfo extends crumbs_Container_AbstractLazyDataCached {
   /**
    * @return crumbs_Container_MultiWildcardData
    *
-   * @see crumbs_PluginInfo::$availableKeysMeta
+   * @see crumbs_PluginSystem_PluginInfo::$availableKeysMeta
    */
   protected function get_availableKeysMeta() {
     $op = new crumbs_PluginOperation_describe();
@@ -226,7 +226,7 @@ class crumbs_PluginInfo extends crumbs_Container_AbstractLazyDataCached {
    *
    * @return array
    *
-   * @see crumbs_PluginInfo::$plugins
+   * @see crumbs_PluginSystem_PluginInfo::$plugins
    */
   protected function get_plugins() {
     // We use a trick to always include the plugin files, even if the plugins
@@ -258,7 +258,7 @@ class crumbs_PluginInfo extends crumbs_Container_AbstractLazyDataCached {
    *
    * @return crumbs_InjectedAPI_hookCrumbsPlugins
    *
-   * @see crumbs_PluginInfo::$discovery
+   * @see crumbs_PluginSystem_PluginInfo::$discovery
    */
   protected function get_discovery() {
     $this->includePluginFiles;
@@ -285,7 +285,7 @@ class crumbs_PluginInfo extends crumbs_Container_AbstractLazyDataCached {
    * @return array
    *   Format: $['find'][$pluginKey] = $weight.
    *
-   * @see crumbs_PluginInfo::$pluginOrder
+   * @see crumbs_PluginSystem_PluginInfo::$pluginOrder
    */
   protected function get_pluginOrder() {
 
@@ -334,7 +334,7 @@ class crumbs_PluginInfo extends crumbs_Container_AbstractLazyDataCached {
    *
    * @return array
    *
-   * @see crumbs_PluginInfo::$pluginsSorted
+   * @see crumbs_PluginSystem_PluginInfo::$pluginsSorted
    */
   protected function get_pluginsSorted() {
     $sorted = $this->pluginOrder;
@@ -353,7 +353,7 @@ class crumbs_PluginInfo extends crumbs_Container_AbstractLazyDataCached {
    *
    * @return bool
    *
-   * @see crumbs_PluginInfo::$includePluginFiles
+   * @see crumbs_PluginSystem_PluginInfo::$includePluginFiles
    */
   protected function get_includePluginFiles() {
 

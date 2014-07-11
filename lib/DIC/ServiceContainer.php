@@ -7,9 +7,9 @@
  * @property crumbs_TrailFinder $trailFinder
  * @property crumbs_ParentFinder $parentFinder
  * @property crumbs_PluginSystem_PluginBag $pluginBag
- * @property crumbs_PluginEngine $pluginEngine
+ * @property crumbs_PluginSystem_PluginEngine $pluginEngine
  * @property crumbs_CallbackRestoration $callbackRestoration
- * @property crumbs_PluginInfo $pluginInfo
+ * @property crumbs_PluginSystem_PluginInfo $pluginInfo
  * @property crumbs_CurrentPageInfo $page
  * @property crumbs_TrailCache $trails
  * @property crumbs_Router $router
@@ -66,12 +66,12 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
    * A service that knows all plugins and their configuration/weights,
    * and can run plugin operations on those plugins.
    *
-   * @return crumbs_PluginEngine
+   * @return crumbs_PluginSystem_PluginEngine
    *
    * @see crumbs_DIC_ServiceContainer::$pluginEngine
    */
   protected function pluginEngine() {
-    return new crumbs_PluginEngine(
+    return new crumbs_PluginSystem_PluginEngine(
       $this->pluginBag,
       $this->router,
       $this->pluginInfo->weightKeeper);
@@ -89,12 +89,12 @@ class crumbs_DIC_ServiceContainer extends crumbs_DIC_AbstractServiceContainer {
   /**
    * A service that knows all plugins and their configuration/weights.
    *
-   * @return crumbs_PluginInfo
+   * @return crumbs_PluginSystem_PluginInfo
    *
    * @see crumbs_DIC_ServiceContainer::$pluginInfo
    */
   protected function pluginInfo() {
-    return new crumbs_PluginInfo();
+    return new crumbs_PluginSystem_PluginInfo();
   }
 
   /**
