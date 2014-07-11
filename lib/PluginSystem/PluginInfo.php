@@ -247,7 +247,7 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
     foreach ($plugins as $plugin_key => $plugin) {
       // Let plugins know about the weights, if they want to.
       if (method_exists($plugin, 'initWeights')) {
-        $plugin->initWeights($this->weightMap->prefixedContainer($plugin_key));
+        $plugin->initWeights($this->weightMap->localWeightMap($plugin_key));
       }
     }
     return $plugins;
@@ -295,16 +295,10 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
     );
 
     // Sort the plugins, using the weights from weight map.
-    /**
-     * @var crumbs_Container_WildcardData $weightMap
-     */
     $weightMap = $this->weightMap;
     foreach ($this->plugins as $plugin_key => $plugin) {
       if ($plugin instanceof crumbs_MultiPlugin) {
-        /**
-         * @var crumbs_Container_WeightMap $localWeightMap
-         */
-        $localWeightMap = $weightMap->prefixedContainer($plugin_key);
+        $localWeightMap = $weightMap->localWeightMap($plugin_key);
         $w_find = $localWeightMap->smallestValue();
         if ($w_find !== FALSE) {
           $order['find'][$plugin_key] = $w_find;

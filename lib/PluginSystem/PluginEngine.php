@@ -154,10 +154,7 @@ class crumbs_PluginSystem_PluginEngine {
      */
     foreach ($iterator as $plugin_key => $position) {
       if ($position->isMultiPlugin()) {
-        /**
-         * @var crumbs_Container_WeightMap $localWeightMap
-         */
-        $localWeightMap = $this->weightMap->prefixedContainer($plugin_key);
+        $localWeightMap = $this->weightMap->localWeightMap($plugin_key);
         if ($best_candidate_weight <= $localWeightMap->smallestValue()) {
           return $best_candidate;
         }

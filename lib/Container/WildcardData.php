@@ -13,11 +13,6 @@ class crumbs_Container_WildcardData {
   protected $fallback;
 
   /**
-   * @var array
-   */
-  protected $prefixedContainers = array();
-
-  /**
    * @param array $data
    *   Array keyed with wildcard keys.
    */
@@ -99,26 +94,6 @@ class crumbs_Container_WildcardData {
     }
     // Try wildcards.
     return $this->wildcardValue($key);
-  }
-
-  /**
-   * Get a "child" container with a prefix.
-   * E.g. if the config contains a weight setting "crumbs.nodeParent.* = 5"
-   * then in the child weight map this will be just "nodeParent.* = 5".
-   *
-   * @param string $prefix
-   *   The prefix.
-   *
-   * @return crumbs_Container_WildcardData
-   *   The prefixed container.
-   */
-  function prefixedContainer($prefix) {
-    if (!isset($this->prefixedContainers[$prefix])) {
-      $data = $this->buildPrefixedData($prefix);
-      $class = get_class($this);
-      $this->prefixedContainers[$prefix] = new $class($data);
-    }
-    return $this->prefixedContainers[$prefix];
   }
 
   /**

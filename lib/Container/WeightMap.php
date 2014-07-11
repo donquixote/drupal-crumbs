@@ -15,6 +15,11 @@
 class crumbs_Container_WeightMap extends crumbs_Container_WildcardData {
 
   /**
+   * @var array
+   */
+  private $localWeightMaps = array();
+
+  /**
    * @param array $data
    *   Weights with wildcards, as saved in the configuration form.
    */
@@ -36,6 +41,28 @@ class crumbs_Container_WeightMap extends crumbs_Container_WildcardData {
       }
     }
     return FALSE;
+  }
+
+  /**
+   * Gets a local weight map with a prefix.
+   * E.g. if the config contains a weight setting "crumbs.nodeParent.* = 5",
+   * then in a local weight map with prefix "crumbs", this will be available as
+   * "nodeParent.* = 5".
+   *
+   * @param string $prefix
+   *   The prefix.
+   *
+   * @return self
+   *   The local weight map.
+   *
+   * @see crumbs_Container_WildcardData::prefixedContainer()
+   */
+  function localWeightMap($prefix) {
+    if (!isset($this->localWeightMaps[$prefix])) {
+      $data = $this->buildPrefixedData($prefix);
+      $this->localWeightMaps[$prefix] = new self($data);
+    }
+    return $this->localWeightMaps[$prefix];
   }
 
 }
