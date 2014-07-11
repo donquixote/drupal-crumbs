@@ -173,6 +173,87 @@ function _crumbs_admin_debug_matrix($path_to_test) {
     $odd = !$odd;
   }
 
+  $unfilteredPluginBag = new crumbs_PluginSystem_PluginBag(
+    $services->pluginInfo->plugins,
+    $services->pluginInfo->routelessPluginMethodsUnsorted,
+    $services->pluginInfo->routePluginMethodsUnsorted);
+
+  $unfilteredPluginEngine = new crumbs_PluginSystem_PluginEngine(
+    $unfilteredPluginBag,
+    $services->router,
+    $services->pluginInfo->weightMap);
+
+  $tbody = $table->tbody('all')
+    ->addRowName('space')
+    ->addRowName('legend')
+    ->th('legend', 'candidateKey', t('All candidates'))
+    ->th('legend', 'candidateWeight', t('Weight'))
+  ;
+
+  $candidates_all = array();
+  $candidateKeys = array();
+  $breadcrumb = array();
+  foreach (array_reverse(array_keys($trail)) as $i => $path) {
+
+    $separator = ($i > 0) ? '&laquo;' : ':';
+    $tbody->td('', "separator.$i", $separator);
+
+    $tbody->th('legend', "item.$i.title", t('Title'));
+    $candidates = $unfilteredPluginEngine->findAllTitles($path, $trail[$path], $breadcrumb);
+    $candidates_all['title'][$i] = $candidates;
+    foreach ($candidates as $candidateKey => $candidate) {
+      $candidateKeys[$candidateKey] = TRUE;
+    }
+    if ($i + 1 < count($trail)) {
+      $tbody->th('legend', "item.$i.parent", t('Parent'));
+      $candidates = $unfilteredPluginEngine->findAllParents($path, $trail[$path]);
+      $candidates_all['parent'][$i] = $candidates;
+      foreach ($candidates as $candidateKey => $candidate) {
+        $candidateKeys[$candidateKey] = TRUE;
+      }
+    }
+  }
+
+  $weightMap = $services->pluginInfo->weightMap;
+  list($enabledKeys, $disabledKeys) = $weightMap->sortCandidateKeys($candidateKeys);
+
+  $odd = TRUE;
+  foreach (array($enabledKeys, $disabledKeys) as $keys) {
+    foreach ($keys as $candidateKey => $weight) {
+      $tbody
+        ->addRowName("row.$candidateKey")
+        ->addRowClass("row.$candidateKey", $odd ? 'odd' : 'even')
+        ->td("row.$candidateKey", 'candidateKey', $candidateKey)
+        ->td(
+          "row.$candidateKey",
+          'candidateWeight',
+          var_export($weight, TRUE))
+      ;
+      $odd = !$odd;
+    }
+  }
+  if (isset($candidates_all['parent'])) {
+    foreach ($candidates_all['parent'] as $i => $candidates) {
+      foreach ($candidates as $candidateKey => $candidate) {
+        $tbody->td(
+          "row.$candidateKey",
+          "item.$i.parent",
+          '<code>' . check_plain($candidate) . '</code>'
+        );
+      }
+    }
+  }
+  if (isset($candidates_all['title'])) {
+    foreach ($candidates_all['title'] as $i => $candidates) {
+      foreach ($candidates as $candidateKey => $candidate) {
+        $tbody->td(
+          "row.$candidateKey",
+          "item.$i.title",
+          check_plain($candidate));
+      }
+    }
+  }
+
   $html = $table->render();
   return '<div style="overflow-x: auto;">' . $html . '</div>';
 }
