@@ -20,7 +20,7 @@
  * @property array $pluginsSorted
  * @property bool $includePluginFiles
  */
-class crumbs_PluginInfo extends crumbs_Container_CachedLazyPluginInfo {
+class crumbs_PluginInfo extends crumbs_Container_AbstractLazyDataCached {
 
   /**
    * Which keys to load from persistent cache.

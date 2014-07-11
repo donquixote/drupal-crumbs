@@ -1,6 +1,6 @@
 <?php
 
-abstract class crumbs_Container_CachedLazyPluginInfo {
+abstract class crumbs_Container_AbstractLazyDataCached {
 
   /**
    * Lazy-initialized data.
