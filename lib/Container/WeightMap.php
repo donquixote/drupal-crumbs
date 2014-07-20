@@ -65,4 +65,29 @@ class crumbs_Container_WeightMap extends crumbs_Container_WildcardData {
     return $this->localWeightMaps[$prefix];
   }
 
+  /**
+   * @param mixed[] $candidates
+   *
+   * @return mixed[][]
+   */
+  function sortCandidateKeys($candidates) {
+    $buckets = array();
+    $disabledCandidates = array();
+    foreach ($candidates as $key => $cTrue) {
+      $weight = $this->valueAtKey($key);
+      if (FALSE !== $weight) {
+        $buckets[$weight][$key] = $weight;
+      }
+      else {
+        $disabledCandidates[$key] = FALSE;
+      }
+    }
+    ksort($buckets);
+    $sorted = array();
+    foreach ($buckets as $bucket) {
+      $sorted += $bucket;
+    }
+    return array($sorted, $disabledCandidates);
+  }
+
 }
