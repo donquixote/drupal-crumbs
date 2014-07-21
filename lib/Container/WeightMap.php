@@ -92,4 +92,27 @@ class crumbs_Container_WeightMap extends crumbs_Container_WildcardData {
     return array($sorted, $disabledCandidates);
   }
 
+  /**
+   * @param mixed[] $candidates
+   *   Format: $[$candidateKey] = $candidateValue
+   *
+   * @return string|null
+   *   The candidate key with the smallest weight, or NULL if none found.
+   */
+  function findBestCandidateKey(array $candidates) {
+    $bestWeight = NULL;
+    $bestKey = NULL;
+    foreach ($candidates as $key => $value) {
+      $weight = $this->valueAtKey($key);
+      if ($weight === FALSE) {
+        continue;
+      }
+      if (!isset($bestWeight) || $weight < $bestWeight) {
+        $bestWeight = $weight;
+        $bestKey = $key;
+      }
+    }
+    return $bestKey;
+  }
+
 }
