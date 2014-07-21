@@ -160,9 +160,7 @@ class crumbs_Admin_WeightsTable {
    */
   protected function addRow($section_key, $key, $child) {
 
-    /**
-     * @var crumbs_Container_MultiWildcardDataOffset $meta
-     */
+    /** @var crumbs_Container_MultiWildcardDataOffset $meta */
     $meta = $child['#crumbs_rule_info'];
     $child['weight']['#attributes']['class'][] = 'crumbs-weight-element';
     $title = $child['#title'];

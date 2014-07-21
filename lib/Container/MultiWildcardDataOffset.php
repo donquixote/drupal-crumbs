@@ -6,6 +6,7 @@
  * @property array $basicMethods
  * @property array $routeMethods
  * @property array $routes
+ * @property array $descriptions
  */
 class crumbs_Container_MultiWildcardDataOffset {
 

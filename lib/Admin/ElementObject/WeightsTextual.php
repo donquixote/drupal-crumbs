@@ -17,7 +17,9 @@ class crumbs_Admin_ElementObject_WeightsTextual extends crumbs_Admin_ElementObje
       return isset($element['#default_value']) ? $element['#default_value'] : array();
     }
 
-    $available_keys_meta = $element['#crumbs_plugin_info']->availableKeysMeta;
+    /** @var crumbs_PluginSystem_PluginInfo $info */
+    $info = $element['#crumbs_plugin_info'];
+    $available_keys_meta = $info->availableKeysMeta;
 
     $weights = array();
     $weight = 0;

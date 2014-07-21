@@ -96,7 +96,8 @@ abstract class crumbs_Container_AbstractLazyDataCached {
   private function get($key) {
     $method = 'get_' . $key;
     if (!method_exists($this, $method)) {
-      throw new Exception("Key $key not supported.");
+      $class = get_class($this);
+      throw new Exception("Key '$key' not supported in $class.");
     }
     $result = $this->$method($this);
     return isset($result)

@@ -16,6 +16,8 @@ function theme_crumbs_weights_expansible(&$vars) {
     $cells = array();
     $cells[] = $key;
     $cells[] = render($element[$key]);
+
+    /** @var crumbs_Container_MultiWildcardDataOffset $meta */
     $meta = $element[$key]['#crumbs_rule_info'];
 
     $methods = array();
