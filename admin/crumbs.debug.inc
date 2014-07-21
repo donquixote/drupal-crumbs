@@ -88,90 +88,8 @@ function _crumbs_admin_debug_matrix($path_to_test) {
 
   // Create a local version of the service container.
   $services = new crumbs_DIC_ServiceContainer();
-  $candidate_logger = new crumbs_Debug_CandidateLogger();
-  $services->pluginEngine->setCandidateLogger($candidate_logger);
   $page_info = $services->page;
   $page_info->set('path', $path_to_test);
-  // Trigger breadcrumb calculation.
-  $trail = $page_info->trail;
-  $breadcrumb_items = $page_info->rawBreadcrumbItems;
-  $titles = array();
-  foreach ($breadcrumb_items as $item) {
-    $path = $item['link_path'];
-    if (isset($trail[$path]) && isset($item['title'])) {
-      $titles[$path] = $item['title'];
-    }
-  }
-
-  list($matrix, $best_cells, $weights) = $candidate_logger->getAsMatrix(array_reverse($trail));
-
-  $table = new crumbs_UI_Table();
-  $table
-    ->addColName('candidateKey')
-    ->addColName('candidateWeight')
-    ->addRowName('link')
-    ->addRowName('path')
-    ->addRowName('legend')
-    ->th('legend', 'candidateKey', t('Candidate key'))
-    ->th('legend', 'candidateWeight', t('Weight'))
-  ;
-
-  # $matrix_thead_tr_first = '<td></td><td></td>';
-  # $matrix_thead_tr_second = '<td></td><td></td>';
-  # $matrix_thead_tr_third = '<th>' . t('Candidate key') . '</th><th>' . t('Weight') . '</th>';
-
-  foreach (array_reverse(array_keys($trail)) as $i => $path) {
-
-    $separator = ($i > 0) ? '&laquo;' : ':';
-    $table->addColName("separator.$i");
-    $table->td('', "separator.$i", $separator);
-
-    $table->th('legend', "item.$i.title", t('Title'));
-    if ($i + 1 < count($trail)) {
-      $table->addColGroup("item.$i", array('title', 'parent'));
-      $table->th('legend', "item.$i.parent", t('Parent'));
-      $path_eff = $path;
-    }
-    else {
-      $table->addColGroup("item.$i", array('title'));
-      $path_eff = '<front>';
-    }
-
-    $table->td('path', "item.$i", '<code>' . check_plain($path_eff) . '</code>');
-
-    if (isset($titles[$path])) {
-      $table->td('link', "item.$i", l($titles[$path], $path_eff));
-    }
-    else {
-      // No title - the breadcrumb item will be skipped.
-      $table->td('link', "item.$i", '<del><code>' . l($path_eff, $path_eff) . '</code></del>');
-    }
-  }
-
-  $odd = TRUE;
-  foreach ($matrix as $key => $row_cells) {
-    $table->addRowName("row.$key");
-    $table->td("row.$key", 'candidateKey', $key);
-    $table->td("row.$key", 'candidateWeight', $weights[$key]);
-    $i = 0;
-    foreach ($row_cells as $col_key => $cell) {
-      $cell = check_plain($cell);
-      if (':parent' === substr($col_key, -7)) {
-        $cell = '<code>' . $cell . '</code>';
-        $colName = "item.$i.parent";
-        ++$i;
-      }
-      else {
-        $colName = "item.$i.title";
-      }
-      if (!empty($best_cells[$key][$col_key])) {
-        $cell = '<strong>' . $cell . '</strong>';
-      }
-      $table->td("row.$key", $colName, $cell);
-    }
-    $table->addRowClass("row.$key", $odd ? 'odd' : 'even');
-    $odd = !$odd;
-  }
 
   $unfilteredPluginBag = new crumbs_PluginSystem_PluginBag(
     $services->pluginInfo->plugins,
@@ -183,76 +101,15 @@ function _crumbs_admin_debug_matrix($path_to_test) {
     $services->router,
     $services->pluginInfo->weightMap);
 
-  $tbody = $table->tbody('all')
-    ->addRowName('space')
-    ->addRowName('legend')
-    ->th('legend', 'candidateKey', t('All candidates'))
-    ->th('legend', 'candidateWeight', t('Weight'))
-  ;
+  $table = new crumbs_Admin_DebugTable();
 
-  $candidates_all = array();
-  $candidateKeys = array();
-  $breadcrumb = array();
-  foreach (array_reverse(array_keys($trail)) as $i => $path) {
+  $table->setTrail(
+    $page_info->trail,
+    $page_info->rawBreadcrumbItems);
 
-    $separator = ($i > 0) ? '&laquo;' : ':';
-    $tbody->td('', "separator.$i", $separator);
-
-    $tbody->th('legend', "item.$i.title", t('Title'));
-    $candidates = $unfilteredPluginEngine->findAllTitles($path, $trail[$path], $breadcrumb);
-    $candidates_all['title'][$i] = $candidates;
-    foreach ($candidates as $candidateKey => $candidate) {
-      $candidateKeys[$candidateKey] = TRUE;
-    }
-    if ($i + 1 < count($trail)) {
-      $tbody->th('legend', "item.$i.parent", t('Parent'));
-      $candidates = $unfilteredPluginEngine->findAllParents($path, $trail[$path]);
-      $candidates_all['parent'][$i] = $candidates;
-      foreach ($candidates as $candidateKey => $candidate) {
-        $candidateKeys[$candidateKey] = TRUE;
-      }
-    }
-  }
-
-  $weightMap = $services->pluginInfo->weightMap;
-  list($enabledKeys, $disabledKeys) = $weightMap->sortCandidateKeys($candidateKeys);
-
-  $odd = TRUE;
-  foreach (array($enabledKeys, $disabledKeys) as $keys) {
-    foreach ($keys as $candidateKey => $weight) {
-      $tbody
-        ->addRowName("row.$candidateKey")
-        ->addRowClass("row.$candidateKey", $odd ? 'odd' : 'even')
-        ->td("row.$candidateKey", 'candidateKey', $candidateKey)
-        ->td(
-          "row.$candidateKey",
-          'candidateWeight',
-          var_export($weight, TRUE))
-      ;
-      $odd = !$odd;
-    }
-  }
-  if (isset($candidates_all['parent'])) {
-    foreach ($candidates_all['parent'] as $i => $candidates) {
-      foreach ($candidates as $candidateKey => $candidate) {
-        $tbody->td(
-          "row.$candidateKey",
-          "item.$i.parent",
-          '<code>' . check_plain($candidate) . '</code>'
-        );
-      }
-    }
-  }
-  if (isset($candidates_all['title'])) {
-    foreach ($candidates_all['title'] as $i => $candidates) {
-      foreach ($candidates as $candidateKey => $candidate) {
-        $tbody->td(
-          "row.$candidateKey",
-          "item.$i.title",
-          check_plain($candidate));
-      }
-    }
-  }
+  $table->addPluginResults(
+    $unfilteredPluginEngine,
+    $services->pluginInfo->weightMap);
 
   $html = $table->render();
   return '<div style="overflow-x: auto;">' . $html . '</div>';

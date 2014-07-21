@@ -4,11 +4,6 @@
 class crumbs_PluginSystem_PluginEngine {
 
   /**
-   * @var crumbs_Debug_CandidateLogger
-   */
-  protected $candidateLogger;
-
-  /**
    * @var crumbs_PluginSystem_PluginBag
    */
   protected $pluginBag;
@@ -32,13 +27,6 @@ class crumbs_PluginSystem_PluginEngine {
     $this->pluginBag = $pluginBag;
     $this->router = $router;
     $this->weightMap = $weightMap;
-  }
-
-  /**
-   * @param crumbs_Debug_CandidateLogger $candidate_logger
-   */
-  function setCandidateLogger($candidate_logger) {
-    $this->candidateLogger = $candidate_logger;
   }
 
   /**
@@ -70,9 +58,6 @@ class crumbs_PluginSystem_PluginEngine {
   function findParent($path, $item) {
     $iterator = $this->pluginBag->getRoutePluginMethodIterator('findParent', $item['route']);
     $result = $this->find($iterator, array($path, $item), TRUE);
-    if ($this->candidateLogger) {
-      $this->candidateLogger->endFindParent($path, $item);
-    }
     return $result;
   }
 
@@ -114,9 +99,6 @@ class crumbs_PluginSystem_PluginEngine {
   function findTitle($path, $item, $breadcrumb) {
     $plugin_methods = $this->pluginBag->getRoutePluginMethodIterator('findTitle', $item['route']);
     $result = $this->find($plugin_methods, array($path, $item, $breadcrumb), FALSE);
-    if ($this->candidateLogger) {
-      $this->candidateLogger->endFindTitle($path, $item, $breadcrumb);
-    }
     return $result;
   }
 
@@ -173,15 +155,9 @@ class crumbs_PluginSystem_PluginEngine {
           $candidate = $processFindParent
             ? $this->processFindParent($candidate_raw)
             : $candidate_raw;
-          if ($this->candidateLogger) {
-            $this->candidateLogger->addCandidate("$plugin_key.$candidate_key", $candidate_weight, $candidate_raw, $candidate);
-          }
           if ($best_candidate_weight > $candidate_weight && isset($candidate)) {
             $best_candidate = $candidate;
             $best_candidate_weight = $candidate_weight;
-            if ($this->candidateLogger) {
-              $this->candidateLogger->setBestCandidateKey("$plugin_key.$candidate_key");
-            }
           }
         }
       }
@@ -194,16 +170,12 @@ class crumbs_PluginSystem_PluginEngine {
         if (!isset($candidate_raw)) {
           continue;
         }
-        $candidate = $processFindParent ? $this->processFindParent($candidate_raw) : $candidate_raw;
-        if ($this->candidateLogger) {
-          $this->candidateLogger->addCandidate($plugin_key, $candidate_weight, $candidate_raw, $candidate);
-        }
+        $candidate = $processFindParent
+          ? $this->processFindParent($candidate_raw)
+          : $candidate_raw;
         if (isset($candidate)) {
           $best_candidate = $candidate;
           $best_candidate_weight = $candidate_weight;
-          if ($this->candidateLogger) {
-            $this->candidateLogger->setBestCandidateKey($plugin_key);
-          }
         }
       }
     }
