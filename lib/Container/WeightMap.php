@@ -66,9 +66,11 @@ class crumbs_Container_WeightMap extends crumbs_Container_WildcardData {
   }
 
   /**
-   * @param mixed[] $candidates
+   * @param true[] $candidates
+   *   Format: $[$candidateKey] = true
    *
    * @return mixed[][]
+   *   Format: $[0|1][$candidateKey] = $weight|false
    */
   function sortCandidateKeys($candidates) {
     $buckets = array();

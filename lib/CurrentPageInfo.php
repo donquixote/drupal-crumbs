@@ -103,6 +103,8 @@ class crumbs_CurrentPageInfo extends crumbs_Container_AbstractLazyData {
    * The altering will happen in a separate step, so
    *
    * @return array
+   *
+   * @see crumbs_CurrentPageInfo::$rawBreadcrumbItems
    */
   protected function rawBreadcrumbItems() {
     if ($this->breadcrumbSuppressed) {
