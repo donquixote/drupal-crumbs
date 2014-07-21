@@ -152,13 +152,20 @@ class crumbs_PluginSystem_PluginEngine {
           if (FALSE === $candidate_weight) {
             continue;
           }
-          $candidate = $processFindParent
-            ? $this->processFindParent($candidate_raw)
-            : $candidate_raw;
-          if ($best_candidate_weight > $candidate_weight && isset($candidate)) {
-            $best_candidate = $candidate;
-            $best_candidate_weight = $candidate_weight;
+          if ($best_candidate_weight <= $candidate_weight) {
+            continue;
           }
+          if ($processFindParent) {
+            $candidate = $this->processFindParent($candidate_raw);
+            if (!isset($candidate)) {
+              continue;
+            }
+          }
+          else {
+            $candidate = $candidate_raw;
+          }
+          $best_candidate = $candidate;
+          $best_candidate_weight = $candidate_weight;
         }
       }
       elseif ($position->isMonoPlugin()) {
