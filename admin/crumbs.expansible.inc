@@ -41,7 +41,7 @@ function theme_crumbs_weights_expansible(&$vars) {
     $cells[] = '<code class="crumbs-admin-meta">' . implode('<br/>', $routes) . '</code>';
 
     if ($descriptions = $meta->descriptions) {
-      $cells[] = '<div class="crumbs-admin-meta">' . implode('<br/>', $meta->descriptions) . '</div>';
+      $cells[] = '<div class="crumbs-admin-meta">' . implode('<br/>', $descriptions) . '</div>';
     }
     else {
       $cells[] = '';
