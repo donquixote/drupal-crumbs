@@ -24,6 +24,8 @@
  *
  * @property array $userWeights
  * @property crumbs_Container_MultiWildcardData $availableKeysMeta
+ * @property crumbs_Container_MultiWildcardDataOffset[][] $availableKeysMetaGrouped
+ *   Format: $['inherit'][$key] = $meta
  *
  * @property crumbs_PluginInterface[] $plugins
  * @property array $pluginsCached
@@ -263,6 +265,55 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
     $info->routeMethods = $this->pluginRouteMethods;
 
     return $info;
+  }
+
+  /**
+   * @return crumbs_Container_MultiWildcardDataOffset[][]
+   *   Format: $['inherit'][$key] = $meta
+   *
+   * @see crumbs_PluginSystem_PluginInfo::$availableKeysMetaGrouped
+   */
+  protected function get_availableKeysMetaGrouped() {
+    $sectionKeys = array();
+    foreach ($this->availableKeysMeta as $key => $meta) {
+      $sectionKeys[$key] = 'inherit';
+    }
+    foreach ($this->defaultWeights as $key => $weight) {
+      if (!isset($sectionKeys[$key])) {
+        continue;
+      }
+      elseif (FALSE === $weight) {
+        $sectionKeys[$key] = 'default:disabled';
+      }
+      else {
+        $sectionKeys[$key] = "default:$weight";
+      }
+    }
+    $weights = $this->weights;
+    asort($weights);
+    $enabled = array();
+    foreach ($weights as $key => $weight) {
+      if (!isset($sectionKeys[$key])) {
+        continue;
+      }
+      elseif (FALSE === $weight) {
+        $sectionKeys[$key] = 'disabled';
+      }
+      elseif (isset($sectionKeys[$key])) {
+        $sectionKeys[$key] = 'enabled';
+        $enabled[$key] = TRUE;
+      }
+    }
+    $grouped = array(
+      'enabled' => $enabled,
+      'disabled' => array(),
+      'default:disabled' => array(),
+      'inherit' => array(),
+    );
+    foreach ($this->availableKeysMeta as $key => $meta) {
+      $sectionKey = $sectionKeys[$key];
+      $grouped[$sectionKey][$key] = $meta;
+    }
   }
 
   /**
