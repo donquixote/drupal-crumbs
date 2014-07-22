@@ -11,7 +11,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    * @var string $module
    *   The module for the current hook implementation.
    */
-  protected $module;
+  private $module;
 
   /**
    * @var crumbs_PluginInterface[]

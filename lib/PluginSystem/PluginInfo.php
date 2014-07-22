@@ -89,6 +89,7 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
 
   /**
    * @return string[][][]
+   *   Format: $['findParent'][$route][$plugin_key] = $method.
    *
    * @see crumbs_PluginSystem_PluginInfo::$routePluginMethodsUnsorted
    */
@@ -98,6 +99,7 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
 
   /**
    * @return string[][]
+   *   Format: $['findParent'][$plugin_key] = 'findParent'
    *
    * @see crumbs_PluginSystem_PluginInfo::$routelessPluginMethodsUnsorted
    */
@@ -135,6 +137,7 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
 
   /**
    * @return string[][]
+   *   Format: $['findParent'][$plugin_key] = $method
    *
    * @see crumbs_PluginSystem_PluginInfo::$routelessPluginMethods
    */
