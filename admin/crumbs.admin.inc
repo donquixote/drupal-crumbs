@@ -153,7 +153,7 @@ function crumbs_admin_display_form() {
       // Theme is disabled.
       continue;
     }
-    $path = 'admin/appearance_settings/' . $theme_name;
+    $path = 'admin/appearance/settings/' . $theme_name;
     $link = l($theme_obj->info['name'], $path);
     if (!isset($originals[$theme_name])) {
       $f = 'theme_breadcrumb';
