@@ -21,9 +21,10 @@ class crumbs_PluginOperation_describe {
   protected $keysByPlugin = array();
 
   /**
-   * @var array
+   * @var string[][]
+   *   Format: $[$key][] = $description
    */
-  protected $collectedInfo = array();
+  private $descriptions = array();
 
   //                                                             State variables
   // ---------------------------------------------------------------------------
@@ -109,7 +110,7 @@ class crumbs_PluginOperation_describe {
    * @param string $description
    */
   protected function _addDescription($key, $description) {
-    $this->collectedInfo['descriptions'][$key][] = $description;
+    $this->descriptions[$key][] = $description;
   }
 
   /**
@@ -167,9 +168,7 @@ class crumbs_PluginOperation_describe {
   function collectedInfo() {
     $container = new crumbs_Container_MultiWildcardData($this->keys);
     $container->__set('key', $this->keys);
-    foreach ($this->collectedInfo as $key => $data) {
-      $container->__set($key, $data);
-    }
+    $container->__set('descriptions', $this->descriptions);
     return $container;
   }
 }
