@@ -6,6 +6,11 @@
 class crumbs_Admin_WeightsTable {
 
   /**
+   * @var crumbs_UI_Table
+   */
+  private $table;
+
+  /**
    * @var crumbs_PluginSystem_PluginInfo
    */
   protected $pluginInfo;
@@ -29,7 +34,24 @@ class crumbs_Admin_WeightsTable {
    * @param crumbs_PluginSystem_PluginInfo $plugin_info
    */
   function __construct($plugin_info) {
+    $this->table = (new crumbs_UI_Table())
+      ->addColName('name')
+      ->addColName('tabledragWeight')
+      ->addColName('method')
+      ->addColname('route')
+      ->addColGroup('description', array(0))
+      ->addColName('weight')
+    ;
     $this->pluginInfo = $plugin_info;
+    /** @var crumbs_Container_MultiWildcardDataOffset[] $sectionMeta */
+    foreach ($plugin_info->availableKeysMetaGrouped as $sectionKey => $sectionMeta) {
+      $this->table->addRowName("sections.$sectionKey");
+      /** @var crumbs_Container_MultiWildcardDataOffset $meta */
+      foreach ($sectionMeta as $key => $meta) {
+        $this->table->addRowName("row:$key");
+        $this->table->addRowClass("row:$key", 'draggable');
+      }
+    }
   }
 
   /**
@@ -150,7 +172,7 @@ class crumbs_Admin_WeightsTable {
     unset($child['#description']);
     unset($child['#title']);
     $header = '<h3>' . $title . '</h3>' . drupal_render($child);
-    $this->sections[$section_key][$key]['data'][]['data'] = $header;
+    $this->table->td($section_key, '', $header);
   }
 
   /**
@@ -165,26 +187,22 @@ class crumbs_Admin_WeightsTable {
     $child['weight']['#attributes']['class'][] = 'crumbs-weight-element';
     $title = $child['#title'];
     unset($child['#title']);
-    $cells = array(
-      '<code>' . $title . '</code>  ',
-      drupal_render($child),
-    );
 
-    $this->rowAddMethodInfo($cells, $meta);
+    $rowName = "row:$key";
 
-    $this->sections[$section_key][$key] = array(
-      'data' => $cells,
-      'class' => array('draggable'),
-    );
+    $this->table->td($rowName, 'name', '<code>' . $title . '</code>');
+    $this->table->td($rowName, 'tabledragWeight', drupal_render($child));
+
+    $this->rowAddMethodInfo($rowName, $meta);
 
     $this->descriptions[$key] = $meta->getAll('descriptions');
   }
 
   /**
-   * @param array $cells
+   * @param string $rowName
    * @param crumbs_Container_MultiWildcardDataOffset $meta
    */
-  protected function rowAddMethodInfo(&$cells, $meta) {
+  protected function rowAddMethodInfo($rowName, $meta) {
     $methods = array();
     $routes = array();
     if (is_array($meta->routeMethods)) {
@@ -201,7 +219,8 @@ class crumbs_Admin_WeightsTable {
         $routes[] = '-';
       }
     }
-    $cells[] = '<code>' . implode('<br/>', $methods) . '</code>';
-    $cells[] = '<code>' . implode('<br/>', $routes) . '</code>';
+    $this->table->td($rowName, 'method', '<code>' . implode('<br/>', $methods) . '</code>');
+    $this->table->td($rowName, 'route', '<code>' . implode('<br/>', $routes) . '</code>');
   }
+
 }

@@ -32,6 +32,13 @@ class crumbs_Container_MultiWildcardDataOffset {
   }
 
   /**
+   * @return string
+   */
+  function getKey() {
+    return $this->key;
+  }
+
+  /**
    * @param string $key
    * @return mixed
    */
