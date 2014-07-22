@@ -195,15 +195,10 @@ class crumbs_Admin_WeightsTable {
         }
       }
     }
-    if (is_array($meta->routes)) {
-      $routes = array_merge($routes, $meta->routes);
-    }
     if (is_array($meta->basicMethods)) {
       foreach ($meta->basicMethods as $method) {
         $methods[] = $method . '()';
-        if (!is_array($meta->routes)) {
-          $routes[] = '-';
-        }
+        $routes[] = '-';
       }
     }
     $cells[] = '<code>' . implode('<br/>', $methods) . '</code>';
