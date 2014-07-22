@@ -190,14 +190,14 @@ class crumbs_Admin_WeightsTable {
     if (is_array($meta->routeMethods)) {
       foreach ($meta->routeMethods as $method => $method_routes) {
         foreach ($method_routes as $route => $cTrue) {
-          $methods[] = $method . '()';
+          $methods[] = '<span class="crumbs-' . $method . '">' . $method . '()</span>';
           $routes[] = $route;
         }
       }
     }
     if (is_array($meta->basicMethods)) {
       foreach ($meta->basicMethods as $method => $cTrue) {
-        $methods[] = $method . '()';
+        $methods[] = '<span class="crumbs-' . $method . '">' . $method . '()</span>';
         $routes[] = '-';
       }
     }
