@@ -114,6 +114,42 @@ class crumbs_UI_TableSection {
   }
 
   /**
+   * Returns rows that can be used in Drupal 7's theme('table').
+   *
+   * @return array[]
+   *   Format:
+   *   $[]['data'][]['data'] = $cellHtml
+   *   $[]['data'][]['header'] = true|false
+   *   $[]['data'][][$cellAttributeName] = $cellAttributeValue
+   *   $[][$rowAttributeName] = $rowAttributeValue
+   */
+  public function getDrupalRows() {
+    $drupalRows = array();
+    foreach ($this->getMatrix() as $rowName => $rowCells) {
+      $drupalCells = array();
+      foreach ($rowCells as $colName => $cell) {
+        list($cellHtml, $tagName, $attributes) = $cell;
+        $drupalCell = array();
+        $drupalCell['data'] = $cellHtml;
+        if ('th' === $tagName) {
+          $drupalCell['header'] = TRUE;
+        }
+        if (!empty($attributes)) {
+          $drupalCell += $attributes;
+        }
+        $drupalCells[] = $drupalCell;
+      }
+      $drupalRow = array();
+      $drupalRow['data'] = $drupalCells;
+      if (!empty($this->rowAttributes[$rowName])) {
+        $drupalRow += $this->rowAttributes[$rowName];
+      }
+      $drupalRows[] = $drupalRow;
+    }
+    return $drupalRows;
+  }
+
+  /**
    * @return array[][]
    */
   private function getMatrix() {

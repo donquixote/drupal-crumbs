@@ -151,4 +151,18 @@ class crumbs_UI_Table {
     return '<table>' . $html . '</table>';
   }
 
+  /**
+   * Get an array that is compatible with Drupal's theme('table').
+   *
+   * @return array[]
+   *   Format:
+   *   $[]['data'][]['data'] = $cellHtml
+   *   $[]['data'][]['header'] = true|false
+   *   $[]['data'][][$cellAttributeName] = $cellAttributeValue
+   *   $[][$rowAttributeName] = $rowAttributeValue
+   */
+  function getDrupalRows() {
+    return $this->tbody->getDrupalRows();
+  }
+
 } 
