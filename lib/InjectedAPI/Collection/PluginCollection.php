@@ -131,20 +131,26 @@ class crumbs_InjectedAPI_Collection_PluginCollection {
    *   Any legacy methods.
    */
   private function analyzePluginMethods($plugin_key, crumbs_PluginInterface $plugin) {
+
     $reflectionObject = new ReflectionObject($plugin);
     $legacyMethods = array();
+
+    $wildcardKey = ($plugin instanceof crumbs_MultiPlugin)
+      ? $plugin_key . '.*'
+      : $plugin_key;
+
     foreach ($reflectionObject->getMethods() as $method) {
       switch ($method->name) {
 
         case 'decorateBreadcrumb':
           $this->routelessPluginMethods['decorateBreadcrumb'][$plugin_key] = true;
-          $this->pluginRoutelessMethods[$plugin_key]['decorateBreadcrumb'] = true;
+          $this->pluginRoutelessMethods[$wildcardKey]['decorateBreadcrumb'] = true;
           break;
 
         case 'findParent':
         case 'findTitle':
           $this->routelessPluginMethods[$method->name][$plugin_key] = true;
-          $this->pluginRoutelessMethods[$plugin_key][$method->name] = true;
+          $this->pluginRoutelessMethods[$wildcardKey][$method->name] = true;
           break;
 
         default:
@@ -161,7 +167,7 @@ class crumbs_InjectedAPI_Collection_PluginCollection {
           }
           $route = crumbs_Util::routeFromMethodSuffix($methodSuffix);
           $this->routePluginMethods[$baseMethodName][$route][$plugin_key] = true;
-          $this->pluginRouteMethods[$plugin_key][$baseMethodName][$route] = true;
+          $this->pluginRouteMethods[$wildcardKey][$baseMethodName][$route] = true;
           $legacyMethods[$baseMethodName][$route] = $method->name;
       }
     }
@@ -183,19 +189,23 @@ class crumbs_InjectedAPI_Collection_PluginCollection {
     $method_suffix = crumbs_Util::buildMethodSuffix($route);
     $legacyMethods = array();
 
+    $wildcardKey = ($plugin instanceof crumbs_MultiPlugin)
+      ? $plugin_key . '.*'
+      : $plugin_key;
+
     foreach (array('findTitle', 'findParent') as $base_method_name) {
       if (!empty($method_suffix)) {
         $method_with_suffix = $base_method_name . '__' . $method_suffix;
         if (method_exists($plugin, $method_with_suffix)) {
           $this->routePluginMethods[$base_method_name][$route][$plugin_key] = true;
-          $this->pluginRouteMethods[$plugin_key][$base_method_name][$route] = true;
+          $this->pluginRouteMethods[$wildcardKey][$base_method_name][$route] = true;
           $legacyMethods[$base_method_name][$route] = $method_with_suffix;
           continue;
         }
       }
       if (method_exists($plugin, $base_method_name)) {
         $this->routePluginMethods[$base_method_name][$route][$plugin_key] = true;
-        $this->pluginRouteMethods[$plugin_key][$base_method_name][$route] = true;
+        $this->pluginRouteMethods[$wildcardKey][$base_method_name][$route] = true;
       }
     }
 
