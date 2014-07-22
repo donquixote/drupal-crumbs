@@ -93,68 +93,103 @@ class crumbs_InjectedAPI_Collection_PluginCollection {
     if (isset($this->plugins[$plugin_key])) {
       throw new Exception("There already is a plugin with key '$plugin_key'.");
     }
-    $this->plugins[$plugin_key] = $plugin;
     if (isset($route)) {
-      $this->analyzeRoutePluginMethods($route, $plugin_key, $plugin);
+      $legacyMethods = $this->analyzeRoutePluginMethods($route, $plugin_key, $plugin);
     }
     else {
-      $this->analyzePluginMethods($plugin_key, $plugin);
+      $legacyMethods = $this->analyzePluginMethods($plugin_key, $plugin);
     }
+
+    if (!empty($legacyMethods)) {
+      $legacyMethods += array(
+        'findParent' => array(),
+        'findTitle' => array(),
+      );
+      if ($plugin instanceof crumbs_MultiPlugin) {
+        $plugin = new crumbs_MultiPlugin_LegacyWrapper(
+          $plugin,
+          $legacyMethods['findParent'],
+          $legacyMethods['findTitle']);
+      }
+      elseif ($plugin instanceof crumbs_MonoPlugin) {
+        $plugin = new crumbs_MonoPlugin_LegacyWrapper(
+          $plugin,
+          $legacyMethods['findParent'],
+          $legacyMethods['findTitle']);
+      }
+    }
+
+    $this->plugins[$plugin_key] = $plugin;
   }
 
   /**
    * @param string $plugin_key
    * @param crumbs_PluginInterface $plugin
+   *
+   * @return string[][]
+   *   Format: $['findParent']['node/%'] = 'findParent__node_x'
+   *   Any legacy methods.
    */
   private function analyzePluginMethods($plugin_key, crumbs_PluginInterface $plugin) {
     $reflectionObject = new ReflectionObject($plugin);
+    $legacyMethods = array();
     foreach ($reflectionObject->getMethods() as $method) {
-      if ('decorateBreadcrumb' === $method->name) {
-        $this->routelessPluginMethods['decorateBreadcrumb'][$plugin_key] = $method->name;
-        $this->pluginRoutelessMethods[$plugin_key]['decorateBreadcrumb'] = $method->name;
-        continue;
-      }
-      $this->analyzePluginMethod($plugin_key, $method);
-    }
-  }
+      switch ($method->name) {
 
-  /**
-   * @param string $plugin_key
-   * @param ReflectionMethod $method
-   */
-  private function analyzePluginMethod($plugin_key, ReflectionMethod $method) {
-    foreach (array('findTitle', 'findParent') as $base_method_name) {
-      if ($base_method_name === $method->name) {
-        $this->routelessPluginMethods[$base_method_name][$plugin_key] = $base_method_name;
-        $this->pluginRoutelessMethods[$plugin_key][$base_method_name] = $base_method_name;
-        return;
-      }
-      elseif (0 === strpos($method->name, $base_method_name . '__')) {
-        // This method is only for a specific route.
-        $method_suffix = substr($method->name, strlen($base_method_name . '__'));
-        $route = crumbs_Util::routeFromMethodSuffix($method_suffix);
-        $this->routePluginMethods[$base_method_name][$route][$plugin_key] = $method->name;
-        $this->pluginRouteMethods[$plugin_key][$base_method_name][$route] = $method->name;
-        return;
+        case 'decorateBreadcrumb':
+          $this->routelessPluginMethods['decorateBreadcrumb'][$plugin_key] = 'decorateBreadcrumb';
+          $this->pluginRoutelessMethods[$plugin_key]['decorateBreadcrumb'] = 'decorateBreadcrumb';
+          break;
+
+        case 'findParent':
+        case 'findTitle':
+          $this->routelessPluginMethods[$method->name][$plugin_key] = $method->name;
+          $this->pluginRoutelessMethods[$plugin_key][$method->name] = $method->name;
+          break;
+
+        default:
+          if (0 === strpos($method->name, 'findParent__')) {
+            $baseMethodName = 'findParent';
+            $methodSuffix = substr($method->name, 12);
+          }
+          elseif (0 === strpos($method->name, 'findTitle__')) {
+            $baseMethodName = 'findTitle';
+            $methodSuffix = substr($method->name, 12);
+          }
+          else {
+            break;
+          }
+          $route = crumbs_Util::routeFromMethodSuffix($methodSuffix);
+          $this->routePluginMethods[$baseMethodName][$route][$plugin_key] = $baseMethodName;
+          $this->pluginRouteMethods[$plugin_key][$baseMethodName][$route] = $baseMethodName;
+          $legacyMethods[$baseMethodName][$route] = $method->name;
       }
     }
+
+    return $legacyMethods;
   }
 
   /**
    * @param string $route
    * @param string $plugin_key
    * @param crumbs_PluginInterface $plugin
+   *
+   * @return string[][]
+   *   Format: $['findParent']['node/%'] = 'findParent__node_x'
+   *   Any legacy methods.
    */
   private function analyzeRoutePluginMethods($route, $plugin_key, crumbs_PluginInterface $plugin) {
 
     $method_suffix = crumbs_Util::buildMethodSuffix($route);
+    $legacyMethods = array();
 
     foreach (array('findTitle', 'findParent') as $base_method_name) {
       if (!empty($method_suffix)) {
         $method_with_suffix = $base_method_name . '__' . $method_suffix;
         if (method_exists($plugin, $method_with_suffix)) {
-          $this->routePluginMethods[$base_method_name][$route][$plugin_key] = $method_with_suffix;
-          $this->pluginRouteMethods[$plugin_key][$base_method_name][$route] = $method_with_suffix;
+          $this->routePluginMethods[$base_method_name][$route][$plugin_key] = $base_method_name;
+          $this->pluginRouteMethods[$plugin_key][$base_method_name][$route] = $base_method_name;
+          $legacyMethods[$base_method_name][$route] = $method_with_suffix;
           continue;
         }
       }
@@ -163,6 +198,8 @@ class crumbs_InjectedAPI_Collection_PluginCollection {
         $this->pluginRouteMethods[$plugin_key][$base_method_name][$route] = $base_method_name;
       }
     }
+
+    return $legacyMethods;
   }
 
 } 
