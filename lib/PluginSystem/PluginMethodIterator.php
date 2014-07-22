@@ -28,11 +28,9 @@ class crumbs_PluginSystem_PluginMethodIterator implements Iterator {
   private $pluginMethod;
 
   /**
-   * The plugin at the current iterator position.
-   *
-   * @var crumbs_PluginInterface
+   * @var crumbs_PluginSystem_PluginMethodIteratorPosition
    */
-  private $plugin;
+  private $iteratorPosition;
 
   /**
    * @param true[] $pluginMethods
@@ -56,36 +54,10 @@ class crumbs_PluginSystem_PluginMethodIterator implements Iterator {
   }
 
   /**
-   * @return bool
-   *   TRUE, if the current plugin is a multi plugin.
-   */
-  function isMultiPlugin() {
-    return $this->plugin instanceof crumbs_MultiPlugin;
-  }
-
-  /**
-   * @return bool
-   *   TRUE, if the current plugin is a mono plugin.
-   */
-  function isMonoPlugin() {
-    return $this->plugin instanceof crumbs_MonoPlugin;
-  }
-
-  /**
-   * @param mixed[] $args
-   *   E.g. array($path, $item, $breadcrumb) for findTitle().
-   *
-   * @return mixed
-   */
-  function invokeFinderMethod(array $args) {
-    return call_user_func_array(array($this->plugin, $this->pluginMethod), $args);
-  }
-
-  /**
    * @return $this
    */
   function current() {
-    return $this;
+    return $this->iteratorPosition;
   }
 
   /**
@@ -131,14 +103,16 @@ class crumbs_PluginSystem_PluginMethodIterator implements Iterator {
       if ($pluginKey === FALSE) {
         // When next($array) returns false, Iterator::key() should return NULL.
         $this->pluginKey = NULL;
-        $this->plugin = NULL;
         return;
       }
       if (isset($this->plugins[$pluginKey])) {
         $plugin = $this->plugins[$pluginKey];
         if (method_exists($plugin, $this->pluginMethod)) {
           $this->pluginKey = $pluginKey;
-          $this->plugin = $plugin;
+          $this->iteratorPosition = new crumbs_PluginSystem_PluginMethodIteratorPosition(
+            $pluginKey,
+            $this->pluginMethod,
+            $plugin);
           return;
         }
       }
