@@ -168,7 +168,7 @@ class crumbs_PluginOperation_describe {
   function collectedInfo() {
     $container = new crumbs_Container_MultiWildcardData($this->keys);
     $container->__set('key', $this->keys);
-    $container->__set('descriptions', $this->descriptions);
+    $container->descriptions = $this->descriptions;
     return $container;
   }
 }

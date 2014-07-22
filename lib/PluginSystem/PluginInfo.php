@@ -258,8 +258,8 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
     }
     $info = $op->collectedInfo();
 
-    $info->__set('basicMethods', $this->pluginRoutelessMethods);
-    $info->__set('routeMethods', $this->pluginRouteMethods);
+    $info->basicMethods = $this->pluginRoutelessMethods;
+    $info->routeMethods = $this->pluginRouteMethods;
 
     return $info;
   }
