@@ -11,26 +11,26 @@ class crumbs_InjectedAPI_Collection_PluginCollection {
   private $plugins = array();
 
   /**
-   * @var string[][]
-   *   Format: $['findParent'][$pluginKey] = $method
+   * @var true[][]
+   *   Format: $['findParent'][$pluginKey] = true
    */
   private $routelessPluginMethods = array();
 
   /**
-   * @var string[][]
-   *   Format: $[$pluginKey]['findParent'] = $method
+   * @var true[][]
+   *   Format: $[$pluginKey]['findParent'] = true
    */
   private $pluginRoutelessMethods = array();
 
   /**
-   * @var string[][][]
-   *   Format: $['findParent'][$route][$pluginKey] = $method
+   * @var true[][][]
+   *   Format: $['findParent'][$route][$pluginKey] = true
    */
   private $routePluginMethods = array();
 
   /**
-   * @var string[][][]
-   *   Format: $[$pluginKey]['findParent'][$route] = $method
+   * @var true[][][]
+   *   Format: $[$pluginKey]['findParent'][$route] = true
    */
   private $pluginRouteMethods = array();
 
@@ -67,16 +67,16 @@ class crumbs_InjectedAPI_Collection_PluginCollection {
   }
 
   /**
-   * @return string[][]
-   *   Format: $[$pluginKey]['findParent'] = $method
+   * @return true[][]
+   *   Format: $[$pluginKey]['findParent'] = true
    */
   function getPluginRoutelessMethods() {
     return $this->pluginRoutelessMethods;
   }
 
   /**
-   * @return string[][][]
-   *   Format: $[$pluginKey]['findParent'][$route] = $method
+   * @return true[][][]
+   *   Format: $[$pluginKey]['findParent'][$route] = true
    */
   function getPluginRouteMethods() {
     return $this->pluginRouteMethods;
@@ -137,14 +137,14 @@ class crumbs_InjectedAPI_Collection_PluginCollection {
       switch ($method->name) {
 
         case 'decorateBreadcrumb':
-          $this->routelessPluginMethods['decorateBreadcrumb'][$plugin_key] = 'decorateBreadcrumb';
-          $this->pluginRoutelessMethods[$plugin_key]['decorateBreadcrumb'] = 'decorateBreadcrumb';
+          $this->routelessPluginMethods['decorateBreadcrumb'][$plugin_key] = true;
+          $this->pluginRoutelessMethods[$plugin_key]['decorateBreadcrumb'] = true;
           break;
 
         case 'findParent':
         case 'findTitle':
-          $this->routelessPluginMethods[$method->name][$plugin_key] = $method->name;
-          $this->pluginRoutelessMethods[$plugin_key][$method->name] = $method->name;
+          $this->routelessPluginMethods[$method->name][$plugin_key] = true;
+          $this->pluginRoutelessMethods[$plugin_key][$method->name] = true;
           break;
 
         default:
@@ -160,8 +160,8 @@ class crumbs_InjectedAPI_Collection_PluginCollection {
             break;
           }
           $route = crumbs_Util::routeFromMethodSuffix($methodSuffix);
-          $this->routePluginMethods[$baseMethodName][$route][$plugin_key] = $baseMethodName;
-          $this->pluginRouteMethods[$plugin_key][$baseMethodName][$route] = $baseMethodName;
+          $this->routePluginMethods[$baseMethodName][$route][$plugin_key] = true;
+          $this->pluginRouteMethods[$plugin_key][$baseMethodName][$route] = true;
           $legacyMethods[$baseMethodName][$route] = $method->name;
       }
     }
@@ -187,15 +187,15 @@ class crumbs_InjectedAPI_Collection_PluginCollection {
       if (!empty($method_suffix)) {
         $method_with_suffix = $base_method_name . '__' . $method_suffix;
         if (method_exists($plugin, $method_with_suffix)) {
-          $this->routePluginMethods[$base_method_name][$route][$plugin_key] = $base_method_name;
-          $this->pluginRouteMethods[$plugin_key][$base_method_name][$route] = $base_method_name;
+          $this->routePluginMethods[$base_method_name][$route][$plugin_key] = true;
+          $this->pluginRouteMethods[$plugin_key][$base_method_name][$route] = true;
           $legacyMethods[$base_method_name][$route] = $method_with_suffix;
           continue;
         }
       }
       if (method_exists($plugin, $base_method_name)) {
-        $this->routePluginMethods[$base_method_name][$route][$plugin_key] = $base_method_name;
-        $this->pluginRouteMethods[$plugin_key][$base_method_name][$route] = $base_method_name;
+        $this->routePluginMethods[$base_method_name][$route][$plugin_key] = true;
+        $this->pluginRouteMethods[$plugin_key][$base_method_name][$route] = true;
       }
     }
 

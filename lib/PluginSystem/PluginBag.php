@@ -9,21 +9,21 @@ class crumbs_PluginSystem_PluginBag {
   protected $plugins;
 
   /**
-   * @var string[][]
-   *   Format: $['findParent'][$plugin_key] = $method
+   * @var true[][]
+   *   Format: $['findParent'][$plugin_key] = true
    */
   protected $routelessPluginMethods = array();
 
   /**
-   * @var string[][][]
-   *   Format: $['findParent'][$route][$plugin_key] = $method
+   * @var true[][][]
+   *   Format: $['findParent'][$route][$plugin_key] = true
    */
   protected $routePluginMethods = array();
 
   /**
    * @param crumbs_PluginInterface[] $plugins
-   * @param string[][] $routelessPluginMethods
-   * @param string[][][] $routePluginMethods
+   * @param true[][] $routelessPluginMethods
+   * @param true[][][] $routePluginMethods
    */
   function __construct($plugins, $routelessPluginMethods, $routePluginMethods) {
     $this->plugins = $plugins;
@@ -56,7 +56,7 @@ class crumbs_PluginSystem_PluginBag {
    */
   function getRoutePluginMethodIterator($base_method_name, $route) {
     $methods = $this->getRoutePluginMethods($base_method_name, $route);
-    return new crumbs_PluginSystem_PluginMethodIterator($methods, $this->plugins);
+    return new crumbs_PluginSystem_PluginMethodIterator($methods, $this->plugins, $base_method_name);
   }
 
   /**
@@ -65,8 +65,8 @@ class crumbs_PluginSystem_PluginBag {
    * @param string $route
    *   A route, e.g. 'node/%'.
    *
-   * @return string[]
-   *   Format: $[$plugin_key] = $method.
+   * @return true[]
+   *   Format: $[$plugin_key] = true.
    */
   private function getRoutePluginMethods($base_method_name, $route) {
     if (isset($this->routePluginMethods[$base_method_name][$route])) {

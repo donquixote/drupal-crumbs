@@ -7,20 +7,20 @@
  * @property crumbs_Container_WeightMap $weightMap
  * @property array $defaultWeights
  *
- * @property string[][] $routelessPluginMethodsUnsorted
- *   Format: $['findParent'][$plugin_key] = $method
- * @property string[][][] $routePluginMethodsUnsorted
- *   Format: $['findParent'][$route][$plugin_key] = $method.
+ * @property true[][] $routelessPluginMethodsUnsorted
+ *   Format: $['findParent'][$plugin_key] = true
+ * @property true[][][] $routePluginMethodsUnsorted
+ *   Format: $['findParent'][$route][$plugin_key] = true.
  *
- * @property string[][] $pluginRoutelessMethods
- *   Format: $[$pluginKey]['findParent'] = $method
- * @property string[][][] $pluginRouteMethods
- *   Format: $[$pluginKey]['findParent'][$route] = $method
+ * @property true[][] $pluginRoutelessMethods
+ *   Format: $[$pluginKey]['findParent'] = true
+ * @property true[][][] $pluginRouteMethods
+ *   Format: $[$pluginKey]['findParent'][$route] = true
  *
- * @property string[][] $routelessPluginMethods
- *   Format: $['findParent'][$plugin_key] = $method
- * @property string[][][] $routePluginMethods
- *   Format: $['findParent'][$route][$plugin_key] = $method.
+ * @property true[][] $routelessPluginMethods
+ *   Format: $['findParent'][$plugin_key] = true
+ * @property true[][][] $routePluginMethods
+ *   Format: $['findParent'][$route][$plugin_key] = true.
  *
  * @property array $userWeights
  * @property crumbs_Container_MultiWildcardData $availableKeysMeta
@@ -103,8 +103,8 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
   }
 
   /**
-   * @return string[][][]
-   *   Format: $['findParent'][$route][$plugin_key] = $method.
+   * @return true[][][]
+   *   Format: $['findParent'][$route][$plugin_key] = true.
    *
    * @see crumbs_PluginSystem_PluginInfo::$routePluginMethodsUnsorted
    */
@@ -113,8 +113,8 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
   }
 
   /**
-   * @return string[][]
-   *   Format: $['findParent'][$plugin_key] = 'findParent'
+   * @return true[][]
+   *   Format: $['findParent'][$plugin_key] = true
    *
    * @see crumbs_PluginSystem_PluginInfo::$routelessPluginMethodsUnsorted
    */
@@ -123,8 +123,8 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
   }
 
   /**
-   * @return string[][]
-   *   Format: $[$pluginKey]['findParent'] = $method
+   * @return true[][]
+   *   Format: $[$pluginKey]['findParent'] = true
    *
    * @see crumbs_PluginSystem_PluginInfo::$pluginRoutelessMethods
    */
@@ -133,8 +133,8 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
   }
 
   /**
-   * @return string[][][]
-   *   Format: $[$pluginKey]['findParent'] = $method
+   * @return true[][][]
+   *   Format: $[$pluginKey]['findParent'] = true
    *
    * @see crumbs_PluginSystem_PluginInfo::$pluginRouteMethods
    */
@@ -143,7 +143,8 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
   }
 
   /**
-   * @return string[][][]
+   * @return true[][][]
+   *   Format: $['findParent'][$route][$plugin_key] = true.
    *
    * @see crumbs_PluginSystem_PluginInfo::$routePluginMethods
    */
@@ -171,7 +172,7 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
   }
 
   /**
-   * @return string[][]
+   * @return true[][]
    *   Format: $['findParent'][$plugin_key] = $method
    *
    * @see crumbs_PluginSystem_PluginInfo::$routelessPluginMethods

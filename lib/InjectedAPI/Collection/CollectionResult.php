@@ -36,32 +36,32 @@ class crumbs_InjectedAPI_Collection_CollectionResult {
   }
 
   /**
-   * @return string[][]
-   *   Format: $['findParent'][$plugin_key] = $method
+   * @return true[][]
+   *   Format: $['findParent'][$plugin_key] = true
    */
   function getRoutelessPluginMethods() {
     return $this->pluginCollection->getRoutelessPluginMethods();
   }
 
   /**
-   * @return string[][][]
-   *   Format: $['findParent'][$route][$plugin_key] = $method.
+   * @return true[][][]
+   *   Format: $['findParent'][$route][$plugin_key] = true.
    */
   function getRoutePluginMethods() {
     return $this->pluginCollection->getRoutePluginMethods();
   }
 
   /**
-   * @return string[][]
-   *   Format: $[$pluginKey]['findParent'] = $method
+   * @return true[][]
+   *   Format: $[$pluginKey]['findParent'] = true
    */
   function getPluginRoutelessMethods() {
     return $this->pluginCollection->getPluginRoutelessMethods();
   }
 
   /**
-   * @return string[][][]
-   *   Format: $[$pluginKey]['findParent'][$route] = $method
+   * @return true[][][]
+   *   Format: $[$pluginKey]['findParent'][$route] = true
    */
   function getPluginRouteMethods() {
     return $this->pluginCollection->getPluginRouteMethods();

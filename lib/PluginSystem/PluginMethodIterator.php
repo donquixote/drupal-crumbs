@@ -4,11 +4,6 @@
 class crumbs_PluginSystem_PluginMethodIterator implements Iterator {
 
   /**
-   * @var string[]
-   */
-  private $pluginMethods;
-
-  /**
    * @var crumbs_PluginInterface[]
    */
   private $plugins;
@@ -40,14 +35,21 @@ class crumbs_PluginSystem_PluginMethodIterator implements Iterator {
   private $plugin;
 
   /**
-   * @param string[] $pluginMethods
-   *   Format: $[$plugin_key] = $method
+   * @param true[] $pluginMethods
+   *   Format: $[$plugin_key] = true
    * @param crumbs_PluginInterface[] $plugins
+   * @param string $method
+   *   One of 'findParent' and 'findTitle'.
+   *
+   * @throws Exception
    */
-  function __construct($pluginMethods, $plugins) {
-    $this->pluginMethods = $pluginMethods;
+  function __construct($pluginMethods, $plugins, $method) {
     $this->plugins = $plugins;
     $this->pluginKeys = array_keys($pluginMethods);
+    if ($method !== 'findParent' && $method !== 'findTitle') {
+      throw new \Exception("Invalid plugin method '$method'.");
+    }
+    $this->pluginMethod = $method;
 
     // Set iterator start position.
     $this->setFirstValidIteratorPosition(reset($this->pluginKeys));
@@ -130,16 +132,13 @@ class crumbs_PluginSystem_PluginMethodIterator implements Iterator {
         // When next($array) returns false, Iterator::key() should return NULL.
         $this->pluginKey = NULL;
         $this->plugin = NULL;
-        $this->pluginMethod = NULL;
         return;
       }
       if (isset($this->plugins[$pluginKey])) {
         $plugin = $this->plugins[$pluginKey];
-        $method = $this->pluginMethods[$pluginKey];
-        if (method_exists($plugin, $method)) {
+        if (method_exists($plugin, $this->pluginMethod)) {
           $this->pluginKey = $pluginKey;
           $this->plugin = $plugin;
-          $this->pluginMethod = $method;
           return;
         }
       }

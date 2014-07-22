@@ -189,14 +189,14 @@ class crumbs_Admin_WeightsTable {
     $routes = array();
     if (is_array($meta->routeMethods)) {
       foreach ($meta->routeMethods as $method => $method_routes) {
-        foreach ($method_routes as $route => $method_with_suffix) {
+        foreach ($method_routes as $route => $cTrue) {
           $methods[] = $method . '()';
           $routes[] = $route;
         }
       }
     }
     if (is_array($meta->basicMethods)) {
-      foreach ($meta->basicMethods as $method) {
+      foreach ($meta->basicMethods as $method => $cTrue) {
         $methods[] = $method . '()';
         $routes[] = '-';
       }
