@@ -6,16 +6,31 @@
  * @property array $weights
  * @property crumbs_Container_WeightMap $weightMap
  * @property array $defaultWeights
- * @property string[][][] $routePluginMethodsUnsorted
+ *
  * @property string[][] $routelessPluginMethodsUnsorted
- * @property string[][][] $routePluginMethods
+ *   Format: $['findParent'][$plugin_key] = $method
+ * @property string[][][] $routePluginMethodsUnsorted
+ *   Format: $['findParent'][$route][$plugin_key] = $method.
+ *
+ * @property string[][] $pluginRoutelessMethods
+ *   Format: $[$pluginKey]['findParent'] = $method
+ * @property string[][][] $pluginRouteMethods
+ *   Format: $[$pluginKey]['findParent'][$route] = $method
+ *
  * @property string[][] $routelessPluginMethods
+ *   Format: $['findParent'][$plugin_key] = $method
+ * @property string[][][] $routePluginMethods
+ *   Format: $['findParent'][$route][$plugin_key] = $method.
+ *
  * @property array $userWeights
  * @property crumbs_Container_MultiWildcardData $availableKeysMeta
  *
  * @property crumbs_PluginInterface[] $plugins
  * @property array $pluginsCached
- * @property crumbs_InjectedAPI_hookCrumbsPlugins $discovery
+ *
+ * @property crumbs_InjectedAPI_Collection_CollectionResult $discovery
+ *   The result of running hook_crumbs_plugins()
+ *
  * @property array $pluginOrder
  * @property array $pluginsSorted
  * @property bool $includePluginFiles
@@ -105,6 +120,26 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
    */
   protected function get_routelessPluginMethodsUnsorted() {
     return $this->discovery->getRoutelessPluginMethods();
+  }
+
+  /**
+   * @return string[][]
+   *   Format: $[$pluginKey]['findParent'] = $method
+   *
+   * @see crumbs_PluginSystem_PluginInfo::$pluginRoutelessMethods
+   */
+  protected function get_pluginRoutelessMethods() {
+    return $this->discovery->getPluginRoutelessMethods();
+  }
+
+  /**
+   * @return string[][][]
+   *   Format: $[$pluginKey]['findParent'] = $method
+   *
+   * @see crumbs_PluginSystem_PluginInfo::$pluginRouteMethods
+   */
+  protected function get_pluginRouteMethods() {
+    return $this->discovery->getPluginRouteMethods();
   }
 
   /**
@@ -221,7 +256,12 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
     foreach ($this->defaultWeights as $key => $default_weight) {
       $op->setDefaultWeight($key, $default_weight);
     }
-    return $op->collectedInfo();
+    $info = $op->collectedInfo();
+
+    $info->__set('basicMethods', $this->pluginRoutelessMethods);
+    $info->__set('routeMethods', $this->pluginRouteMethods);
+
+    return $info;
   }
 
   /**
@@ -259,27 +299,30 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
   /**
    * Information returned from hook_crumbs_plugins()
    *
-   * @return crumbs_InjectedAPI_hookCrumbsPlugins
+   * @return crumbs_InjectedAPI_Collection_CollectionResult
    *
    * @see crumbs_PluginSystem_PluginInfo::$discovery
    */
   protected function get_discovery() {
     $this->includePluginFiles;
+
     // Pass a by-reference parameter to the $api object, that can only be
     // changed from here.
-    $discovery_ongoing = TRUE;
-    $api = new crumbs_InjectedAPI_hookCrumbsPlugins($discovery_ongoing);
+    $api = new crumbs_InjectedAPI_hookCrumbsPlugins(
+      $pluginCollection = new crumbs_InjectedAPI_Collection_PluginCollection,
+      $entityPluginCollection = new crumbs_InjectedAPI_Collection_EntityPluginCollection,
+      new crumbs_InjectedAPI_Collection_CallbackCollection,
+      $defaultValueCollection = new crumbs_InjectedAPI_Collection_DefaultValueCollection);
+
     foreach (module_implements('crumbs_plugins') as $module) {
       $function = $module .'_crumbs_plugins';
       $api->setModule($module);
       $function($api);
     }
-    // $api still has a reference to the $discovery_ongoing variable.
-    // Set it to FALSE before calling $api->finalize().
-    /** @noinspection PhpUnusedLocalVariableInspection */
-    $discovery_ongoing = FALSE;
-    $api->finalize();
-    return $api;
+
+    $entityPluginCollection->finalize($pluginCollection);
+
+    return new crumbs_InjectedAPI_Collection_CollectionResult($pluginCollection, $defaultValueCollection);
   }
 
   /**
