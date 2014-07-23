@@ -60,6 +60,8 @@ class crumbs_CurrentPageInfo extends crumbs_Container_AbstractLazyData {
    * Check if the breadcrumb is to be suppressed altogether.
    *
    * @return bool
+   *
+   * @see crumbs_CurrentPageInfo::$breadcrumbSuppressed
    */
   protected function breadcrumbSuppressed() {
     // @todo Make this work!
@@ -74,6 +76,8 @@ class crumbs_CurrentPageInfo extends crumbs_Container_AbstractLazyData {
    * Assemble all breadcrumb data.
    *
    * @return array
+   *
+   * @see crumbs_CurrentPageInfo::$breadcrumbData
    */
   protected function breadcrumbData() {
     if (empty($this->breadcrumbItems)) {
@@ -90,6 +94,8 @@ class crumbs_CurrentPageInfo extends crumbs_Container_AbstractLazyData {
    * Build the Crumbs trail.
    *
    * @return array
+   *
+   * @see crumbs_CurrentPageInfo::$trail
    */
   protected function trail() {
     return $this->trails->getForPath($this->path);
@@ -148,6 +154,8 @@ class crumbs_CurrentPageInfo extends crumbs_Container_AbstractLazyData {
    * Determine if we want to show the breadcrumb item for the current page.
    *
    * @return bool
+   *
+   * @see crumbs_CurrentPageInfo::$showCurrentPage
    */
   protected function showCurrentPage() {
     return variable_get('crumbs_show_current_page', FALSE) & ~CRUMBS_TRAILING_SEPARATOR;
@@ -155,6 +163,8 @@ class crumbs_CurrentPageInfo extends crumbs_Container_AbstractLazyData {
 
   /**
    * @return bool
+   *
+   * @see crumbs_CurrentPageInfo::$trailingSeparator
    */
   protected function trailingSeparator() {
     return variable_get('crumbs_show_current_page', FALSE) & CRUMBS_TRAILING_SEPARATOR;
@@ -164,6 +174,8 @@ class crumbs_CurrentPageInfo extends crumbs_Container_AbstractLazyData {
    * Determine if we want to show the breadcrumb item for the front page.
    *
    * @return bool
+   *
+   * @see crumbs_CurrentPageInfo::$showFrontPage
    */
   protected function showFrontPage() {
     return variable_get('crumbs_show_front_page', TRUE);
@@ -173,6 +185,8 @@ class crumbs_CurrentPageInfo extends crumbs_Container_AbstractLazyData {
    * If there are fewer trail items than this, we hide the breadcrumb.
    *
    * @return int
+   *
+   * @see crumbs_CurrentPageInfo::$minTrailItems
    */
   protected function minTrailItems() {
     return variable_get('crumbs_minimum_trail_items', 2);
@@ -182,6 +196,8 @@ class crumbs_CurrentPageInfo extends crumbs_Container_AbstractLazyData {
    * Determine separator string, e.g. ' &raquo; ' or ' &gt; '.
    *
    * @return string
+   *
+   * @see crumbs_CurrentPageInfo::$separator
    */
   protected function separator() {
     return variable_get('crumbs_separator', ' &raquo; ');
@@ -191,6 +207,8 @@ class crumbs_CurrentPageInfo extends crumbs_Container_AbstractLazyData {
    * Determine separator string, e.g. ' &raquo; ' or ' &gt; '.
    *
    * @return string
+   *
+   * @see crumbs_CurrentPageInfo::$separatorSpan
    */
   protected function separatorSpan() {
     return variable_get('crumbs_separator_span', FALSE);
@@ -204,6 +222,8 @@ class crumbs_CurrentPageInfo extends crumbs_Container_AbstractLazyData {
    * - Any item where the title is FALSE will be hidden / skipped over.
    *
    * @return int
+   *
+   * @see crumbs_CurrentPageInfo::$minVisibleItems
    */
   protected function minVisibleItems() {
     $n = $this->minTrailItems;
@@ -220,6 +240,8 @@ class crumbs_CurrentPageInfo extends crumbs_Container_AbstractLazyData {
    * Build altered breadcrumb items.
    *
    * @return array
+   *
+   * @see crumbs_CurrentPageInfo::$breadcrumbItems
    */
   protected function breadcrumbItems() {
     $breadcrumb_items = $this->rawBreadcrumbItems;
@@ -237,6 +259,8 @@ class crumbs_CurrentPageInfo extends crumbs_Container_AbstractLazyData {
    * Build the breadcrumb HTML.
    *
    * @return string
+   *
+   * @see crumbs_CurrentPageInfo::$breadcrumbHtml
    */
   protected function breadcrumbHtml() {
     $breadcrumb_items = $this->breadcrumbItems;
@@ -273,6 +297,8 @@ class crumbs_CurrentPageInfo extends crumbs_Container_AbstractLazyData {
    * Determine current path.
    *
    * @return string
+   *
+   * @see crumbs_CurrentPageInfo::$path
    */
   protected function path() {
     return $_GET['q'];
