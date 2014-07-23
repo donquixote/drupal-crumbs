@@ -21,8 +21,12 @@ class crumbs_Admin_DebugTable {
   function __construct() {
     $this->table = (new crumbs_UI_Table())
       ->addColGroup('candidate', array('key', 'weight'))
-      ->addRowName('link')
       ->addRowName('path')
+      ->addRowName('route')
+      ->addRowName('link')
+      ->td('path', 'candidate', t('Trail paths'))
+      ->td('route', 'candidate', t('Router path'))
+      ->td('link', 'candidate', t('Breadcrumb items'))
     ;
   }
 
@@ -47,6 +51,8 @@ class crumbs_Admin_DebugTable {
     foreach ($this->paths as $i => $path) {
       $title = isset($titles[$path]) ? $titles[$path] : NULL;
       $this->addTrailItemColumns($i, $path, $i + 1 >= count($trail), $title);
+      $route_code = '<code>' . $trail[$path]['route'] . '</code>';
+      $this->table->td('route', "item.$i", $route_code);
     }
   }
 
@@ -95,16 +101,16 @@ class crumbs_Admin_DebugTable {
       $path_eff = '<front>';
     }
 
-    $this->table
-      ->td('path', "item.$i", '<code>' . check_plain($path_eff) . '</code>')
-    ;
+    $path_code = '<code>' . check_plain($path_eff) . '</code>';
+    # $path_link = l($path_code, $path_eff, array('html' => TRUE));
+    $this->table->td('path', "item.$i", $path_code);
 
     if (isset($title)) {
       $this->table->td('link', "item.$i", l($title, $path_eff));
     }
     else {
       // No title - the breadcrumb item will be skipped.
-      $this->table->td('link', "item.$i", '<del><code>' . l($path_eff, $path_eff) . '</code></del>');
+      $this->table->td('link', "item.$i", 'no title, skipped');
     }
   }
 
