@@ -202,7 +202,9 @@ class views_CrumbsMonoPlugin_PageTitle implements crumbs_MonoPlugin_FindTitleInt
     }
 
     if (!empty($token_string)) {
-      return strtr($token_string, $view->build_info['substitutions']);
+      // Use decode_entities() to undo duplicate check_plain().
+      // See https://drupal.org/comment/7916895#comment-7916895
+      return decode_entities(strtr($token_string, $view->build_info['substitutions']));
     }
 
     return NULL;
