@@ -66,10 +66,9 @@ function views_crumbs_plugins($api) {
 
   foreach ($dynamicDisplays as $view_name => $displays) {
     foreach ($displays as $view_display_id => $routes) {
-      if (1 < count($routes)) {
-        dpm($routes);
-      }
       $api->routeMonoPlugin(
+        // There should be only one route.
+        // If there are more, we take the first.
         $routes[0],
         "argTitle.$view_name.$view_display_id",
         new views_CrumbsMonoPlugin_PageTitle($view_name, $view_display_id));
@@ -78,7 +77,8 @@ function views_crumbs_plugins($api) {
 }
 
 /**
- * Determines a breadcrumb item title based on
+ * Determines a breadcrumb item title based on the view title of a page view.
+ * The same plugin class is used for Views displays with or without arguments.
  */
 class views_CrumbsMonoPlugin_PageTitle implements crumbs_MonoPlugin_FindTitleInterface {
 
@@ -111,7 +111,6 @@ class views_CrumbsMonoPlugin_PageTitle implements crumbs_MonoPlugin_FindTitleInt
    *   return a string label.
    */
   function describe($api) {
-    // TODO: Implement describe() method.
     return t('Views page title');
   }
 
@@ -131,14 +130,11 @@ class views_CrumbsMonoPlugin_PageTitle implements crumbs_MonoPlugin_FindTitleInt
       return NULL;
     }
 
-    if (FALSE && '%' !== substr($item['route'], -1)) {
+    if ('%' !== substr($item['route'], -1)) {
       return $this->viewsPageTitle();
     }
     else {
       $args = array_slice($item['page_arguments'], 2);
-      foreach ($args as $i => $pos) {
-
-      }
       return $this->viewsArgTitle($args);
     }
   }
