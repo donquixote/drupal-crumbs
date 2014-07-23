@@ -24,6 +24,9 @@
  * @property array $breadcrumbItems
  * @property string $breadcrumbHtml
  * @property string $path
+ *
+ * @see crumbs_Container_AbstractLazyData::__get()
+ * @see crumbs_Container_AbstractLazyData::__set()
  */
 class crumbs_CurrentPageInfo extends crumbs_Container_AbstractLazyData {
 

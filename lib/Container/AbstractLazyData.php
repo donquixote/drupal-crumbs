@@ -24,16 +24,14 @@ abstract class crumbs_Container_AbstractLazyData {
   /**
    * @param string $key
    * @param mixed $value
+   *
+   * @throws Exception
    */
-  function set($key, $value) {
+  function __set($key, $value) {
+    if (array_key_exists($key, $this->data)) {
+      throw new Exception("Value at '$key' already initialized.");
+    }
     $this->data[$key] = $value;
-  }
-
-  /**
-   * @param string $key
-   */
-  function reset($key) {
-    unset($this->data[$key]);
   }
 
 }

@@ -105,7 +105,7 @@ function _crumbs_admin_debug_matrix($path_to_test) {
   // Create a local version of the service container.
   $services = new crumbs_DIC_ServiceContainer();
   $page_info = $services->page;
-  $page_info->set('path', $path_to_test);
+  $page_info->path = $path_to_test;
 
   $unfilteredPluginBag = new crumbs_PluginSystem_PluginBag(
     $services->pluginInfo->plugins,
