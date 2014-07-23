@@ -107,6 +107,11 @@ function _crumbs_admin_debug_matrix($path_to_test) {
   $page_info = $services->page;
   $page_info->path = $path_to_test;
 
+  // Change the settings so that all breadcrumb items are visible.
+  $page_info->minTrailItems = 1;
+  $page_info->showFrontPage = TRUE;
+  $page_info->showCurrentPage = TRUE;
+
   $unfilteredPluginBag = new crumbs_PluginSystem_PluginBag(
     $services->pluginInfo->plugins,
     $services->pluginInfo->routelessPluginMethodsUnsorted,
