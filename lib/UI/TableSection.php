@@ -25,6 +25,15 @@ class crumbs_UI_TableSection {
   private $cells = array();
 
   /**
+   * Cells with colspan, that start at the specified position, and end where
+   * another cell begins.
+   *
+   * @var array[][]
+   *   Format: $[$rowName][$firstColName] = array($html, 'td', $attributes)
+   */
+  private $openEndCells = array();
+
+  /**
    * @param crumbs_UI_TableColumns $columns
    */
   function __construct(crumbs_UI_TableColumns $columns) {
@@ -83,6 +92,34 @@ class crumbs_UI_TableSection {
   function th($rowName, $colName, $content) {
     $this->cells[$rowName][$colName] = array($content, 'th', array());
     return $this;
+  }
+
+  /**
+   * Adds a td cell with colspan, that start at the specified position, and ends
+   * where another cell begins.
+   *
+   * @param string $rowName
+   * @param string $colName
+   * @param string $content
+   *
+   * @return $this
+   */
+  function tdOpenEnd($rowName, $colName, $content) {
+    $this->openEndCells[$rowName][$colName] = array($content, 'td', array());
+  }
+
+  /**
+   * Adds a th cell with colspan, that start at the specified position, and ends
+   * where another cell begins.
+   *
+   * @param string $rowName
+   * @param string $colName
+   * @param string $content
+   *
+   * @return $this
+   */
+  function thOpenEnd($rowName, $colName, $content) {
+    $this->openEndCells[$rowName][$colName] = array($content, 'td', array());
   }
 
   /**
@@ -166,7 +203,7 @@ class crumbs_UI_TableSection {
       foreach ($cols as $colName => $cTrue) {
         $matrix[$rowName][$colName] = isset($this->cells[$rowName][$colName])
           ? $this->cells[$rowName][$colName]
-          : array('', 'td', array());
+          : array('', 'td', array(), TRUE);
       }
     }
 
@@ -217,6 +254,47 @@ class crumbs_UI_TableSection {
         $matrix[$rowNames[0]][$colName] = $cell;
         for ($i = 1; $i < count($rowNames); ++$i) {
           unset($matrix[$rowNames[$i]][$colName]);
+        }
+      }
+    }
+
+    // Fill open-end cell ranges (colspan).
+    foreach ($this->openEndCells as $rowName => $openEndCells) {
+      $openEndCellColIndex = NULL;
+      $openEndCellColName = NULL;
+      $openEndCell = NULL;
+      // Iterate over the positions in this row.
+      foreach ($colNames as $iCol => $colName) {
+        if (isset($openEndCells[$colName])) {
+          // An open-end cell begins here.
+          // Finish the previous range cell.
+          $colspan = $iCol - $openEndCellColIndex;
+          if ($colspan > 1) {
+            $openEndCell[2]['colspan'] = $colspan;
+          }
+          $matrix[$rowName][$openEndCellColName] = $openEndCell;
+          // Set state to the new range cell.
+          $openEndCellColIndex = $iCol;
+          $openEndCellColName = $colName;
+          $openEndCell = $openEndCells[$colName];
+        }
+        elseif (!isset($matrix[$rowName][$colName][3])) {
+          // The cell is occupied.
+          // Finish the previous range cell.
+          $colspan = $iCol - $openEndCellColIndex;
+          if ($colspan > 1) {
+            $openEndCell[2]['colspan'] = $colspan;
+          }
+          $matrix[$rowName][$openEndCellColName] = $openEndCell;
+          // Unset range cell state.
+          $openEndCellColIndex = NULL;
+          $openEndCellColName = NULL;
+          $openEndCell = NULL;
+        }
+        elseif (isset($openEndCellColIndex)) {
+          // Continue previous range cell.
+          // Free up matrix position.
+          unset($matrix[$rowName][$colName]);
         }
       }
     }

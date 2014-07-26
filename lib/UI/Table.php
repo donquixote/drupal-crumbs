@@ -142,6 +142,34 @@ class crumbs_UI_Table {
   }
 
   /**
+   * Adds a td cell with colspan, that start at the specified position, and ends
+   * where another cell begins.
+   *
+   * @param string $rowName
+   * @param string $colName
+   * @param string $content
+   *
+   * @return $this
+   */
+  function tdOpenEnd($rowName, $colName, $content) {
+    $this->tbody->tdOpenEnd($rowName, $colName, $content);
+  }
+
+  /**
+   * Adds a th cell with colspan, that start at the specified position, and ends
+   * where another cell begins.
+   *
+   * @param string $rowName
+   * @param string $colName
+   * @param string $content
+   *
+   * @return $this
+   */
+  function thOpenEnd($rowName, $colName, $content) {
+    $this->tbody->thOpenEnd($rowName, $colName, $content);
+  }
+
+  /**
    * @return string
    *   Rendered table html.
    */
