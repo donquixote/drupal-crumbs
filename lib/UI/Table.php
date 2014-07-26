@@ -1,6 +1,11 @@
 <?php
 
-
+/**
+ * A class to render HTML tables.
+ *
+ * This is a small version of the cellbrush library.
+ * @link https://github.com/donquixote/cellbrush
+ */
 class crumbs_UI_Table {
 
   /**
