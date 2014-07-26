@@ -19,7 +19,8 @@ class crumbs_Admin_DebugTable {
   private $paths;
 
   function __construct() {
-    $this->table = (new crumbs_UI_Table())
+    $this->table = new crumbs_UI_Table();
+    $this->table
       ->addColGroup('candidate', array('key', 'weight'))
       ->addRowName('path')
       ->addRowName('route')
