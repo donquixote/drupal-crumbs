@@ -20,6 +20,7 @@ class crumbs_UI_TableSection {
 
   /**
    * @var array[][]
+   *   Format: $[$rowName][$colName] = array($html, 'td', $attributes)
    */
   private $cells = array();
 
@@ -85,6 +86,8 @@ class crumbs_UI_TableSection {
   }
 
   /**
+   * Renders the table section as a tbody, thead or tfoot.
+   *
    * @param string $sectionTagName
    *   Either 'thead' or 'tbody' or 'tfoot'.
    *
@@ -187,7 +190,7 @@ class crumbs_UI_TableSection {
       }
     }
 
-    // Fill full-width cell groups (colspan).
+    // Fill full-width cells (colspan).
     foreach ($this->cells as $rowName => $rowCellGroups) {
       if (!isset($this->rows[$rowName])) {
         continue;
@@ -203,7 +206,7 @@ class crumbs_UI_TableSection {
       }
     }
 
-    // Fill full-height cell groups (rowspan).
+    // Fill full-height cells (rowspan).
     if (isset($this->cells[''])) {
       $rowNames = array_keys($this->rows);
       foreach ($this->cells[''] as $colName => $cell) {
