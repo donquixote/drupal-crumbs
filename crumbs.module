@@ -15,7 +15,7 @@ if (!module_exists('xautoload')) {
   spl_autoload_register('_crumbs_autoload');
 }
 
-require_once __DIR__ . '/includes/crumbs.callbacks.inc';
+require_once dirname(__FILE__) . '/includes/crumbs.callbacks.inc';
 
 /**
  * Crumbs autoloader.
@@ -77,7 +77,7 @@ function crumbs_module_implements_alter(&$implementations, $hook) {
       return;
   }
 
-  require_once __DIR__ . '/crumbs.' . $implementations['crumbs'] . '.inc';
+  require_once dirname(__FILE__) . '/crumbs.' . $implementations['crumbs'] . '.inc';
 }
 
 
