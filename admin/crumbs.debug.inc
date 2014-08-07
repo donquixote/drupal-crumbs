@@ -132,6 +132,11 @@ function _crumbs_admin_debug_matrix($path_to_test) {
     $unfilteredPluginEngine,
     $services->pluginInfo->weightMap);
 
+  // Trigger all intermediate results to be computed.
+  $page_info->breadcrumbHtml;
+
+  dpm($page_info);
+
   $html = $table->render();
   return '<div style="overflow-x: auto;">' . $html . '</div>';
 }

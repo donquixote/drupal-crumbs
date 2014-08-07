@@ -8,7 +8,7 @@ abstract class crumbs_Container_AbstractLazyData {
   /**
    * @var array
    */
-  private $data = array();
+  public $data = array();
 
   /**
    * @param string $key
