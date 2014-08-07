@@ -33,6 +33,10 @@ function views_crumbs_plugins($api) {
       continue;
     }
     list($view_name, $view_display_id) = $args;
+    if (!is_string($view_name) || !is_string($view_display_id)) {
+      // Not really a views display, wrong type of arguments.
+      continue;
+    }
 
     if ('%' !== substr($row->path, -1)) {
       // The path does not end with "%", so the title should not depend on a
