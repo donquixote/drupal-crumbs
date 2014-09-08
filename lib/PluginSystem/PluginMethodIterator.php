@@ -55,8 +55,12 @@ class crumbs_PluginSystem_PluginMethodIterator implements Iterator {
 
   /**
    * @return $this
+   * @throws Exception
    */
   function current() {
+    if (!isset($this->iteratorPosition)) {
+      throw new \Exception("Iterator position should not be NULL when current() is called.");
+    }
     return $this->iteratorPosition;
   }
 

@@ -132,7 +132,7 @@ class crumbs_PluginSystem_PluginEngine {
     $best_candidate_key = NULL;
     /**
      * @var string $plugin_key
-     * @var crumbs_PluginSystem_PluginMethodIterator $position
+     * @var crumbs_PluginSystem_PluginMethodIteratorPosition $position
      */
     foreach ($iterator as $plugin_key => $position) {
       if ($position->isMultiPlugin()) {
@@ -204,7 +204,7 @@ class crumbs_PluginSystem_PluginEngine {
     $all_candidates = array();
     /**
      * @var string $plugin_key
-     * @var crumbs_PluginSystem_PluginMethodIterator $position
+     * @var crumbs_PluginSystem_PluginMethodIteratorPosition $position
      */
     foreach ($iterator as $plugin_key => $position) {
       if ($position->isMultiPlugin()) {
