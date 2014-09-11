@@ -47,7 +47,7 @@ function _crumbs_autoload($class) {
  *
  * See @link https://www.drupal.org/node/2328535
  */
-require_once __DIR__ . '/crumbs.block.inc';
+require_once dirname(__FILE__) . '/crumbs.block.inc';
 
 /**
  * Implements hook_module_implements_alter()
