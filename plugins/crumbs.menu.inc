@@ -108,7 +108,7 @@ class menu_CrumbsMultiPlugin_link_title implements crumbs_MultiPlugin_FindTitleI
       $language = LANGUAGE_NONE;
       if (isset($GLOBALS['language'])) {
         $language = array($language, $GLOBALS['language']->language);
-        $q->addExpression('ml.language = :language', 'has_language', array(':language' => LANGUAGE_NONE));
+        $q->addExpression('case ml.language when :language then 1 else 0 end', 'has_language', array(':language' => LANGUAGE_NONE));
         $q->orderBy('has_language');
       }
       $q->condition('language', $language);
