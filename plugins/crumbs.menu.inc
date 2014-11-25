@@ -39,6 +39,19 @@ class menu_CrumbsMultiPlugin_hierarchy implements crumbs_MultiPlugin_FindParentI
     $q->addExpression('child.plid', 'plid');
     $q->condition('child.link_path', $path);
 
+    if (module_exists('i18n_menu')) {
+      // Filter and sort by language.
+      // The 'language' column only exists if i18n_menu is installed.
+      // (See i18n_menu_install())
+      $language = LANGUAGE_NONE;
+      if (isset($GLOBALS['language'])) {
+        $language = array($language, $GLOBALS['language']->language);
+        $q->addExpression('parent.language = :language', 'has_language', array(':language' => LANGUAGE_NONE));
+        $q->orderBy('has_language');
+      }
+      $q->condition('parent.language', $language);
+    }
+
     // Top-level links have higher priority.
     $q->orderBy('parent.depth', 'ASC');
 
