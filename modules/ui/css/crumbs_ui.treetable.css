@@ -1,0 +1,71 @@
+
+.crumbs_ui-treetable > tbody > tr > td {
+  overflow: hidden;
+  vertical-align: middle;
+  padding-top: 0;
+  padding-bottom: 0;
+  line-height: 24px;
+}
+
+input.crumbs_ui-checkboxtree_item {
+  width: 14px;
+  height: 14px;
+  margin: 5px;
+}
+
+.crumbs_ui-treetable-indentContainer {
+  float: left;
+}
+
+.crumbs_ui-treetable-indent {
+  float: left;
+  width: 24px;
+  height: 24px;
+}
+
+.crumbs_ui-NS,
+.crumbs_ui-NE,
+.crumbs_ui-NSE {
+  background: url(../images/dotted-lines.png) no-repeat 11px top;
+}
+
+.crumbs_ui-NE,
+.crumbs_ui-NSE {
+  background-position: 11px -52px;
+}
+
+.crumbs_ui-NSE {
+  background-repeat: repeat-y;
+}
+
+.crumbs_ui-treetable-control {
+  cursor: pointer;
+  display: block;
+  width: 24px;
+  height: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.crumbs_ui-treetable-control::after {
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  height: 0;
+  margin: -6px 0 0 -4px;
+  border: 5px solid transparent;
+  border-right: none;
+  border-left: 9px solid #888;
+  height: 1px;
+  width: 1px;
+  content: '';
+  z-index: 0;
+}
+
+.crumbs_ui-treetable-expanded .crumbs_ui-treetable-control::after {
+  margin: -4px 0 0 -6px;
+  border: 5px solid transparent;
+  border-bottom: none;
+  border-top: 9px solid #888;
+}

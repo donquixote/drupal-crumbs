@@ -1,0 +1,4 @@
+name = Crumbs UI
+core = 7.x
+
+dependencies[] = xautoload

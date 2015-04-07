@@ -1,0 +1,123 @@
+<?php
+use Drupal\crumbs_ui\PluginKey\PluginKeyInterface;
+
+require __DIR__ . '/crumbs_ui.elements.inc';
+
+/**
+ * Implements hook_theme()
+ *
+ * @return array[]
+ */
+function crumbs_ui_theme() {
+  return array(
+    /** @see theme_crumbs_ui_element() */
+    'crumbs_ui_element' => array('render element' => 'element'),
+    // Replacement for theme('form_element') as element wrapper.
+    /** @see theme_crumbs_ui_form_element() */
+    'crumbs_ui_form_element' => array('render element' => 'element'),
+    /** @see theme_crumbs_ui_inline_element() */
+    'crumbs_ui_inline_element' => array('render element' => 'element'),
+  );
+}
+
+/**
+ * Implements hook_menu()
+ *
+ * @return array[]
+ */
+function crumbs_ui_menu() {
+  $items = array();
+  $items['admin/structure/crumbs/parent-finding'] = array(
+    'title' => 'Parent-finding',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_crumbs_ui_checkboxtree_form', 'parent-finding'),
+    'access arguments' => array('administer crumbs'),
+    'file' => 'crumbs_ui.checkboxtree_form.inc',
+  );
+  /*
+  $items['admin/structure/crumbs/plugin-keys'] = array(
+    'title' => 'Plugin keys',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_crumbs_ui_plugin_weights_form'),
+    'access arguments' => array('administer crumbs'),
+    'file' => 'crumbs_ui.plugin_weights_form.inc',
+  );
+  $items['admin/structure/crumbs/plugin-keys/%_crumbs_ui_plugin_key'] = array(
+    'title callback' => '_crumbs_plugin_key_title',
+    'title arguments' => array(4),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_crumbs_ui_plugin_key_form', 4),
+    'access arguments' => array('administer crumbs'),
+    'file' => 'crumbs_ui.plugin_key_form.inc',
+  );
+  */
+  return $items;
+}
+
+/**
+ * @param \Drupal\crumbs_ui\PluginKey\PluginKeyInterface $plugin_key
+ *
+ * @return string
+ */
+function _crumbs_ui_plugin_key_link(PluginKeyInterface $plugin_key) {
+  return l($plugin_key->__toString(), _crumbs_ui_plugin_key_path($plugin_key));
+}
+
+/**
+ * @param \Drupal\crumbs_ui\PluginKey\PluginKeyInterface $plugin_key
+ *
+ * @return string
+ */
+function _crumbs_ui_plugin_key_path(PluginKeyInterface $plugin_key) {
+  return 'admin/structure/crumbs/plugin-keys/' . _crumbs_ui_plugin_key_path_fragment($plugin_key);
+}
+
+function _crumbs_ui_plugin_key_path_fragment(PluginKeyInterface $plugin_key) {
+  // @todo Escape plugin key path fragment, to avoid any slashes.
+  return $plugin_key->__toString();
+}
+
+/**
+ * @param string $fragment
+ *   Path fragment identifying the plugin key, without slashes.
+ *
+ * @return \Drupal\crumbs_ui\PluginKey\PluginKeyInterface
+ */
+function _crumbs_ui_plugin_key_load($fragment) {
+  // @todo Unescape path fragment.
+  # $hierarchy = new \Drupal\crumbs_ui\PluginKey\StatefulHierarchy(crumbs()->pluginInfo);
+  # return $hierarchy->keyGetKey($fragment);
+}
+
+/**
+ * @param \Drupal\crumbs_ui\PluginKey\PluginKeyInterface $plugin_key
+ *
+ * @return string|NULL
+ */
+function _crumbs_plugin_key_title(PluginKeyInterface $plugin_key) {
+  return t('Plugin key: !plugin_key', array(
+    '!plugin_key' => $plugin_key->__toString(),
+  ));
+}
+
+/**
+ * Splits a part of the ['#title'] off each radio element, and adds it as a
+ * ['#description'].
+ *
+ * @param array $radios
+ *   Form element with type="radios", after being processed.
+ *   THe element contains a child of type="radio" for each option.
+ *
+ * @return array
+ *   The modified form element.
+ */
+function _crumbs_ui_radios_describe($radios) {
+  foreach (element_children($radios) as $key) {
+    $radio = &$radios[$key];
+    if (FALSE !== $pos = strpos($radio['#title'], '<br/>')) {
+      $radio['#description'] = substr($radio['#title'], $pos + 5);
+      $radio['#title'] = substr($radio['#title'], 0, $pos);
+    }
+  }
+  return $radios;
+}
