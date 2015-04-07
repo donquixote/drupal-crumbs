@@ -20,6 +20,7 @@ function crumbs_menu() {
   $items["$base"] = array(
     'title' => 'Crumbs',
     'page callback' => 'drupal_get_form',
+    /** @see crumbs_admin_weights_form() */
     'page arguments' => array('crumbs_admin_weights_form'),
     'access arguments' => array('administer crumbs'),
     'file' => 'admin/crumbs.admin.inc',
