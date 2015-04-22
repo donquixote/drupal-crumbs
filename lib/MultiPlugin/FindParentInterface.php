@@ -1,6 +1,8 @@
 <?php
 
-interface crumbs_MultiPlugin_FindParentInterface extends crumbs_MultiPlugin {
+use Drupal\crumbs\PluginSystem\Plugin\ParentPluginInterface;
+
+interface crumbs_MultiPlugin_FindParentInterface extends crumbs_MultiPlugin, ParentPluginInterface {
 
   /**
    * Find candidates for the parent path.
@@ -10,7 +12,7 @@ interface crumbs_MultiPlugin_FindParentInterface extends crumbs_MultiPlugin {
    * @param array $item
    *   Item as returned from crumbs_get_router_item()
    *
-   * @return array
+   * @return string[]
    *   Parent path candidates
    */
   function findParent($path, $item);

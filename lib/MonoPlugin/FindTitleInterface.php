@@ -1,6 +1,8 @@
 <?php
 
-interface crumbs_MonoPlugin_FindTitleInterface extends crumbs_MonoPlugin {
+use Drupal\crumbs\PluginSystem\Plugin\TitlePluginInterface;
+
+interface crumbs_MonoPlugin_FindTitleInterface extends crumbs_MonoPlugin, TitlePluginInterface {
 
   /**
    * Find candidates for the parent path.
@@ -10,8 +12,8 @@ interface crumbs_MonoPlugin_FindTitleInterface extends crumbs_MonoPlugin {
    * @param array $item
    *   Item as returned from crumbs_get_router_item()
    *
-   * @return string
-   *   Title candidate.
+   * @return NULL|string Title candidate.
+   * Title candidate.
    */
   function findTitle($path, $item);
 }

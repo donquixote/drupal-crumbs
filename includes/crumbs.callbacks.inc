@@ -208,7 +208,7 @@ function _crumbs_admin_flush_cache() {
   cache_clear_all();
 
   // Clear plugin info in 'cache' cache bin.
-  crumbs()->pluginInfo->flushCaches();
+  cache_clear_all('crumbs:', 'cache', TRUE);
 }
 
 /**

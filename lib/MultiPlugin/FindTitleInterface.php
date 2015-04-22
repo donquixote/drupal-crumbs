@@ -1,6 +1,8 @@
 <?php
 
-interface crumbs_MultiPlugin_FindTitleInterface extends crumbs_MultiPlugin {
+use Drupal\crumbs\PluginSystem\Plugin\TitlePluginInterface;
+
+interface crumbs_MultiPlugin_FindTitleInterface extends crumbs_MultiPlugin, TitlePluginInterface {
 
   /**
    * Find candidates for the parent path.

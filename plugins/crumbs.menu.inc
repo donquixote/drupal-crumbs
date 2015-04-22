@@ -21,10 +21,10 @@ class menu_CrumbsMultiPlugin_hierarchy implements crumbs_MultiPlugin_FindParentI
    * {@inheritdoc}
    */
   function describe($api) {
+    $api->addDescription(t('Menu hierarchy'));
     foreach (menu_get_menus() as $key => $title) {
-      $api->ruleWithLabel($key, $title, t('Menu'));
+      $api->addRule($key, $title);
     }
-    $api->descWithLabel(t('The parent item\'s path'), t('Parent'));
   }
 
   /**
@@ -82,7 +82,7 @@ class menu_CrumbsMultiPlugin_link_title implements crumbs_MultiPlugin_FindTitleI
     foreach (menu_get_menus() as $key => $title) {
       $api->ruleWithLabel($key, $title, t('Menu'));
     }
-    $api->descWithLabel(t('Menu link title'), t('Title'));
+    $api->addDescription(t('Menu link title'));
   }
 
   /**

@@ -259,6 +259,12 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
     foreach ($this->defaultWeights as $key => $default_weight) {
       $op->setDefaultWeight($key, $default_weight);
     }
+
+    // Add descriptions that were declared directly in hook_crumbs_plugins().
+    foreach ($this->discovery->getDescriptions() as $key => $description) {
+      $op->addDescription($description, $key);
+    }
+
     $info = $op->collectedInfo();
 
     $info->basicMethods = $this->pluginRoutelessMethods;
@@ -364,7 +370,8 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
       $pluginCollection = new crumbs_InjectedAPI_Collection_PluginCollection,
       $entityPluginCollection = new crumbs_InjectedAPI_Collection_EntityPluginCollection,
       new crumbs_InjectedAPI_Collection_CallbackCollection,
-      $defaultValueCollection = new crumbs_InjectedAPI_Collection_DefaultValueCollection);
+      $defaultValueCollection = new crumbs_InjectedAPI_Collection_DefaultValueCollection,
+      $descriptionCollection = new crumbs_InjectedAPI_Collection_DescriptionCollection);
 
     foreach (module_implements('crumbs_plugins') as $module) {
       $function = $module .'_crumbs_plugins';
@@ -374,7 +381,7 @@ class crumbs_PluginSystem_PluginInfo extends crumbs_Container_AbstractLazyDataCa
 
     $entityPluginCollection->finalize($pluginCollection);
 
-    return new crumbs_InjectedAPI_Collection_CollectionResult($pluginCollection, $defaultValueCollection);
+    return new crumbs_InjectedAPI_Collection_CollectionResult($pluginCollection, $defaultValueCollection, $descriptionCollection);
   }
 
   /**

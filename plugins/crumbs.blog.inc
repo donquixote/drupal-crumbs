@@ -18,7 +18,7 @@ class blog_CrumbsMonoPlugin_authorPage implements crumbs_MonoPlugin {
    * {@inheritdoc}
    */
   function describe($api) {
-    $api->titleWithLabel(t("The author's blog page"), t('Parent'));
+    $api->titleWithLabel(t("Author's blog page (blog/*) &raquo; Blog post (node/*)."), t('Parent'));
   }
 
   /**

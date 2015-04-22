@@ -168,26 +168,25 @@
       $('.crumbs_ui-treetable', context).each(function(){
         $('> tbody > tr', this).each(function(){
           var tr = this;
-          var depth = $(this).attr('data-crumbs_ui-tree_depth');
-          var is_parent = (depth !== undefined);
-          if (is_parent) {
-            if (trail.length > depth) {
-              $(indentElement).addClass('crumbs_ui-NE');
-              while (trail.length > depth) {
-                trail.pop();
-              }
+          var depth = $(tr).attr('data-crumbs_ui-tree_depth');
+          if (depth === undefined) {
+            throw "No depth specified.";
+          }
+          var is_parent = $(tr).attr('data-crumbs_ui-is_parent');
 
+          if (trail.length > depth) {
+            $(indentElement).addClass('crumbs_ui-NE');
+            while (trail.length > depth) {
+              trail.pop();
             }
-            else if (trail.length < depth) {
-              console.log('unexpected item depth');
-              throw "Unexpected item depth.";
-            }
-            else {
-              $(indentElement).addClass('crumbs_ui-NSE');
-            }
+
+          }
+          else if (trail.length < depth) {
+            console.log('unexpected item depth');
+            throw "Unexpected item depth.";
           }
           else {
-            depth = trail.length;
+            $(indentElement).addClass('crumbs_ui-NSE');
           }
 
           var parent = null;
@@ -218,10 +217,11 @@
         });
 
         if (trail[0]) {
-          trail[0].collapseChildren(2);
+          trail[0].collapseChildren(1);
         }
       });
     }
   };
+
 })(jQuery);
 

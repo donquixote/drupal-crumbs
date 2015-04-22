@@ -35,5 +35,9 @@ function crumbs_element_info() {
     /** @see theme_crumbs_weights_expansible() */
     '#theme' => 'crumbs_weights_expansible',
   ) + $common;
+  $types['crumbs_weights_checkboxtree'] = array(
+    /** @see theme_crumbs_weights_checkboxtree() */
+    '#theme' => 'crumbs_weights_checkboxtree',
+  ) + $common;
   return $types;
 }

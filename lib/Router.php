@@ -1,9 +1,10 @@
 <?php
+use Drupal\crumbs\Router\RouterInterface;
 
 /**
  * Wrapper for routing-related Drupal core functions.
  */
-class crumbs_Router {
+class crumbs_Router implements RouterInterface {
 
   /**
    * @var string

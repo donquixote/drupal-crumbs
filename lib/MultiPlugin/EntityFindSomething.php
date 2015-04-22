@@ -69,6 +69,7 @@ class crumbs_MultiPlugin_EntityFindSomething extends crumbs_MultiPlugin_EntityFi
    * {@inheritdoc}
    */
   function describe($api) {
+    $api->addDescription($this->entityType);
     return $this->describeGeneric($api, $this->entityType, t($this->bundleName));
   }
 

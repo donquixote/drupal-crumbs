@@ -1,11 +1,11 @@
 <?php
-
+use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
 
 /**
  * API object to be used as an argument for hook_crumbs_plugins()
  * This is a sandbox class, currently not used..
  */
-class crumbs_InjectedAPI_hookCrumbsPlugins {
+class crumbs_InjectedAPI_hookCrumbsPlugins implements ArgumentInterface {
 
   /**
    * @var string $module
@@ -34,21 +34,29 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
   private $defaultValueCollection;
 
   /**
+   * @var crumbs_InjectedAPI_Collection_DescriptionCollection
+   */
+  private $descriptionCollection;
+
+  /**
    * @param crumbs_InjectedAPI_Collection_PluginCollection $pluginCollection
    * @param crumbs_InjectedAPI_Collection_EntityPluginCollection $entityPluginCollection
    * @param crumbs_InjectedAPI_Collection_CallbackCollection $callbackCollection
    * @param crumbs_InjectedAPI_Collection_DefaultValueCollection $defaultValueCollection
+   * @param crumbs_InjectedAPI_Collection_DescriptionCollection $descriptionCollection
    */
   function __construct(
     crumbs_InjectedAPI_Collection_PluginCollection $pluginCollection,
     crumbs_InjectedAPI_Collection_EntityPluginCollection $entityPluginCollection,
     crumbs_InjectedAPI_Collection_CallbackCollection $callbackCollection,
-    crumbs_InjectedAPI_Collection_DefaultValueCollection $defaultValueCollection
+    crumbs_InjectedAPI_Collection_DefaultValueCollection $defaultValueCollection,
+    crumbs_InjectedAPI_Collection_DescriptionCollection $descriptionCollection
   ) {
     $this->pluginCollection = $pluginCollection;
     $this->entityPluginCollection = $entityPluginCollection;
     $this->callbackCollection = $callbackCollection;
     $this->defaultValueCollection = $defaultValueCollection;
+    $this->descriptionCollection = $descriptionCollection;
   }
 
   /**
@@ -163,7 +171,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
       $entity_plugin = new $class();
     }
     if ($entity_plugin instanceof crumbs_EntityPlugin) {
-      $this->entityPluginCollection->entityPlugin($type, $this->module . '.' . $key, $entity_plugin, $types);
+      $this->entityPluginCollection->entityPlugin($type, $this->module . '-' . $key, $entity_plugin, $types);
     }
   }
 
@@ -231,7 +239,7 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
    */
   private function addPluginByType(crumbs_PluginInterface $plugin = NULL, $key = NULL, $route = NULL, $is_multi) {
     $plugin_key = isset($key)
-      ? $this->module . '.' . $key
+      ? $this->module . '-' . $key
       : $this->module;
     if (!isset($plugin)) {
       $class = $is_multi
@@ -360,4 +368,19 @@ class crumbs_InjectedAPI_hookCrumbsPlugins {
     $this->defaultValueCollection->setDefaultValue($key, FALSE);
   }
 
+  /**
+   * @param string $key
+   * @param string $description
+   */
+  function describeFindParent($key, $description) {
+    // TODO: Implement describeFindParent() method.
+  }
+
+  /**
+   * @param string $key
+   * @param string $description
+   */
+  function describeFindTitle($key, $description) {
+    // TODO: Implement describeFindTitle() method.
+  }
 }

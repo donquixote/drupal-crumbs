@@ -30,12 +30,14 @@
         class_name = null;
         element.checked = false;
         element.indeterminate = false;
+        element.disabled = false;
       }
       else if (all_are_enabled) {
         state = true;
         class_name = 'crumbs_ui-tristate-enabled';
         element.checked = true;
         element.indeterminate = false;
+        element.disabled = false;
       }
       else {
         state = null;
@@ -43,6 +45,7 @@
         element.checked = false;
         // HTML5 rocks!
         element.indeterminate = true;
+        element.disabled = true;
       }
       if (class_name_before !== class_name) {
         if (class_name_before) {
@@ -117,15 +120,18 @@
         $('input:checkbox.crumbs_ui-checkboxtree_item', this).each(function() {
           var obj, parent;
           var depth = $(this).attr('data-crumbs_ui-tree_depth');
-          var is_parent = (depth !== undefined);
-          if (is_parent) {
-            while (trail.length > depth) {
-              trail.pop();
-            }
-            if (trail.length < depth) {
-              throw "Unexpected item depth.";
-            }
+          var name = $(this).attr('name');
+          if (depth === undefined) {
+            throw "No depth specified for " + name;
           }
+          while (trail.length > depth) {
+            trail.pop();
+          }
+          if (trail.length < depth) {
+            throw "Unexpected item depth.";
+          }
+
+          var is_parent = $(this).attr('data-crumbs_ui-is_parent');
 
           if (trail.length) {
             parent = trail[trail.length - 1];

@@ -1,0 +1,22 @@
+{
+  "name": "Drupal/crumbs",
+  "type": "Drupal 7 module",
+  "homepage": "http://drupal.org/project/crumbs",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Andreas Hennings",
+      "email": "andreas@dqxtech.net"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Drupal\\crumbs\\": "src/",
+      "Drupal\\crumbs_ui\\": "modules/ui/src/",
+      "Drupal\\crumbs\\Tests\\": "tests/src/"
+    },
+    "classmap": [
+      "lib"
+    ]
+  }
+}

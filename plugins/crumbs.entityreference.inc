@@ -12,8 +12,9 @@ function entityreference_crumbs_plugins($api) {
       && '1' === '' . $field_info['cardinality']
     ) {
       $plugin = new crumbs_EntityPlugin_Field_EntityReference($field_name, $field_info['bundles']);
-      $api->entityParentPlugin($field_name, $plugin, array_keys($field_info['bundles']));
+      $api->entityParentPlugin('field.' . $field_name, $plugin, array_keys($field_info['bundles']));
     }
   }
-  $api->disabledByDefault('*');
+  $api->describeFindParent('field.*', t('Entity reference fields'));
+  $api->disabledByDefault('field.*');
 }

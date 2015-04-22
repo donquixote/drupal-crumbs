@@ -6,6 +6,7 @@
  * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
  */
 function search_crumbs_plugins($api) {
-  $api->routeParentPath('search/node/%', 'node.result', 'search');
-  $api->routeParentPath('search/user/%', 'user.result', 'search');
+  $api->describeFindParent('search.*', t('Search pages'));
+  $api->routeParentPath('search/node/%', 'search.node', 'search');
+  $api->routeParentPath('search/user/%', 'search.user', 'search');
 }

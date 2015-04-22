@@ -7,6 +7,7 @@
  * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
  */
 function crumbs_crumbs_plugins($api) {
+
   if (module_exists('node')) {
     $api->entityRoute('node', 'node/%', 'type', 'Node type');
   }
@@ -18,8 +19,15 @@ function crumbs_crumbs_plugins($api) {
   }
 
   $api->monoPlugin('home_title');
-  $suffix = module_exists('token') ? 'TokenEnabled' : 'TokenDisabled';
-  $api->entityParentPlugin('entityParent', $suffix);
+
+  if (module_exists('token')) {
+    $api->entityParentPlugin('entityParent', new crumbs_CrumbsEntityPlugin_TokenEnabled());
+    $api->describeFindParent('entityParent.*', t('Custom entity parent paths.'));
+  }
+  else {
+    $api->entityParentPlugin('entityParent', new crumbs_CrumbsEntityPlugin_TokenDisabled());
+    $api->describeFindParent('entityParent.*', t('Custom entity parent paths.'));
+  }
 }
 
 

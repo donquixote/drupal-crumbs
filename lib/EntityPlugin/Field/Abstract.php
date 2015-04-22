@@ -35,12 +35,10 @@ abstract class crumbs_EntityPlugin_Field_Abstract implements crumbs_EntityPlugin
       }
       foreach ($this->bundlesByType[$entity_type] as $bundle_name) {
         if (isset($keys[$bundle_name])) {
-          $instance = field_info_instance($entity_type, $this->fieldKey, $bundle_name);
+          # $instance = field_info_instance($entity_type, $this->fieldKey, $bundle_name);
           $api->addRule($bundle_name, $keys[$bundle_name]);
-          $api->descWithLabel($instance['label'], t('Field'), $bundle_name);
         }
       }
-      // $api->addDescription('(' . $this->fieldKey . ')');
     }
   }
 

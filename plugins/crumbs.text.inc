@@ -1,9 +1,10 @@
 <?php
+use Drupal\crumbs\Plugin\TextFieldTitlePlugin;
 
 /**
  * Implements hook_crumbs_plugins().
  *
- * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
+ * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
  */
 function text_crumbs_plugins($api) {
   foreach (field_info_fields() as $field_name => $field_info) {
@@ -26,8 +27,13 @@ function text_crumbs_plugins($api) {
 
     if (!empty($instances)) {
       $plugin = new crumbs_EntityPlugin_Field_Text($field_name, $instances);
-      $api->entityTitlePlugin($field_name, $plugin, array_keys($instances));
+      $api->entityTitlePlugin('field.' . $field_name, $plugin, array_keys($instances));
+      $api->describeFindTitle('field.' . $field_name . '.*', t('Field') . ': ' . check_plain($field_name));
     }
   }
-  $api->disabledByDefault('*');
+
+  # $api->fieldTypeTitlePlugin('field.*', 'text', new TextFieldTitlePlugin());
+
+  $api->disabledByDefault('field.*');
+  $api->describeFindTitle('field.*', t('Text fields'));
 }

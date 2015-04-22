@@ -36,6 +36,19 @@ function _crumbs_autoload($class) {
   }
 }
 
+/**
+ * Implements hook_xautoload()
+ *
+ * @param \Drupal\xautoload\Adapter\LocalDirectoryAdapter $adapter
+ *   An adapter object that can register stuff into the class loader.
+ */
+function crumbs_xautoload($adapter) {
+  // xautoload does not currently support a combination of pear-flat and psr4 in
+  // the same module. This is why we need to manually register the namespaces.
+  $adapter->addPsr4('Drupal\crumbs\\', 'src');
+  $adapter->addPearFlat('crumbs_', 'lib');
+}
+
 
 // Hook management
 // -----------------------------------------------------------------------------
@@ -146,7 +159,7 @@ function crumbs_get_trail($path = NULL) {
   if (!isset($path)) {
     $path = $_GET['q'];
   }
-  return crumbs()->trails->getForPath($path);
+  return crumbs()->trailFinder->buildTrail($path);
 }
 
 /**

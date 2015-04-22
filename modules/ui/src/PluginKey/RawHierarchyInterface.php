@@ -25,4 +25,11 @@ interface RawHierarchyInterface {
    * @return bool
    */
   public function keyIsWildcard($key);
+
+  /**
+   * @param string $key
+   *
+   * @return bool
+   */
+  public function keyHasSolidChildren($key);
 }

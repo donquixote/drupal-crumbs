@@ -1,4 +1,7 @@
 <?php
+use Drupal\crumbs\PluginSystem\PluginType\ParentPluginType;
+use Drupal\crumbs\PluginSystem\PluginType\TitlePluginType;
+use Drupal\crumbs_ui\Form\CheckboxtreePluginForm;
 use Drupal\crumbs_ui\PluginKey\PluginKeyInterface;
 
 require __DIR__ . '/crumbs_ui.elements.inc';
@@ -27,12 +30,33 @@ function crumbs_ui_theme() {
  */
 function crumbs_ui_menu() {
   $items = array();
-  $items['admin/structure/crumbs/parent-finding'] = array(
-    'title' => 'Parent-finding',
+  $items['admin/structure/crumbs/plugins'] = array(
+    'weight' => -20,
+    'title' => 'Plugins',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('_crumbs_ui_checkboxtree_form', 'parent-finding'),
+    'page arguments' => array(
+      '_crumbs_ui_form',
+      new CheckboxtreePluginForm(new ParentPluginType()),
+    ),
     'access arguments' => array('administer crumbs'),
-    'file' => 'crumbs_ui.checkboxtree_form.inc',
+    # 'type' => MENU_LOCAL_TASK,
+    'file' => 'crumbs_ui.form.inc',
+  );
+  $items['admin/structure/crumbs/plugins/parent-finding'] = array(
+    'title' => 'Parent-finding',
+    'access arguments' => array('administer crumbs'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['admin/structure/crumbs/plugins/title-finding'] = array(
+    'title' => 'Title-finding',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array(
+      '_crumbs_ui_form',
+      new CheckboxtreePluginForm(new TitlePluginType()),
+    ),
+    'access arguments' => array('administer crumbs'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'crumbs_ui.form.inc',
   );
   /*
   $items['admin/structure/crumbs/plugin-keys'] = array(

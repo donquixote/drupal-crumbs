@@ -1,5 +1,5 @@
 <?php
-
+use Drupal\crumbs\PluginSystem\Discovery\Collection\DescriptionCollectionInterface;
 
 /**
  * Injected API object for the describe() method of multi plugins.
@@ -7,15 +7,24 @@
 class crumbs_InjectedAPI_describeMultiPlugin {
 
   /**
-   * @var crumbs_PluginOperation_describe
+   * @var string
+   *   The plugin key, without the '.*'.
    */
-  protected $pluginOperation;
+  private $pluginKey;
 
   /**
-   * @param crumbs_PluginOperation_describe $plugin_operation
+   * @var DescriptionCollectionInterface
    */
-  function __construct($plugin_operation) {
-    $this->pluginOperation = $plugin_operation;
+  private $descriptionCollection;
+
+  /**
+   * @param string $pluginKey
+   *   The plugin key, without the '.*'.
+   * @param \Drupal\crumbs\PluginSystem\Discovery\Collection\DescriptionCollectionInterface $descriptionCollection
+   */
+  function __construct($pluginKey, DescriptionCollectionInterface $descriptionCollection) {
+    $this->pluginKey = $pluginKey;
+    $this->descriptionCollection = $descriptionCollection;
   }
 
   /**
@@ -23,7 +32,8 @@ class crumbs_InjectedAPI_describeMultiPlugin {
    * @param bool $title
    */
   function addRule($key_suffix, $title = TRUE) {
-    $this->pluginOperation->addRule($key_suffix, $title);
+    $key = $this->pluginKey . '.' . $key_suffix;
+    $this->descriptionCollection->addDescription($key, $title);
   }
 
   /**
@@ -43,7 +53,27 @@ class crumbs_InjectedAPI_describeMultiPlugin {
    * @param string $key_suffix
    */
   function addDescription($description, $key_suffix = '*') {
-    $this->pluginOperation->addDescription($description, $key_suffix);
+    $key = $this->pluginKey . '.' . $key_suffix;
+    $this->descriptionCollection->addDescription($key, $description);
+  }
+
+  /**
+   * @param string $untranslated
+   * @param string[] $args
+   */
+  function translateDescription($untranslated, array $args = array()) {
+    $key = $this->pluginKey . '.*';
+    $this->descriptionCollection->translateDescription('*', $untranslated, $args);
+  }
+
+  /**
+   * @param string $key_suffix
+   * @param string $untranslated
+   * @param string[] $args
+   */
+  function keyTranslateDescription($key_suffix, $untranslated, array $args = array()) {
+    $key = $this->pluginKey . '.' . $key_suffix;
+    $this->descriptionCollection->translateDescription($key, $untranslated, $args);
   }
 
   /**

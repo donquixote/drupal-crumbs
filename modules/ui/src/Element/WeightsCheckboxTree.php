@@ -2,6 +2,7 @@
 
 namespace Drupal\crumbs_ui\Element;
 
+use Drupal\crumbs\PluginSystem\Discovery\Collection\LabeledPluginCollection;
 use Drupal\crumbs_ui\PluginKey\RawHierarchyInterface;
 
 class WeightsCheckboxTree implements ElementInterface, PreRenderInterface {
@@ -12,17 +13,17 @@ class WeightsCheckboxTree implements ElementInterface, PreRenderInterface {
   private $rawHierarchy;
 
   /**
-   * @var \crumbs_Container_MultiWildcardData
+   * @var \Drupal\crumbs\PluginSystem\Discovery\Collection\LabeledPluginCollection
    */
-  private $meta;
+  private $pluginCollection;
 
   /**
    * @param \Drupal\crumbs_ui\PluginKey\RawHierarchyInterface $raw_hierarchy
-   * @param \crumbs_Container_MultiWildcardData $meta
+   * @param \Drupal\crumbs\PluginSystem\Discovery\Collection\LabeledPluginCollection $pluginCollection
    */
-  function __construct(RawHierarchyInterface $raw_hierarchy, \crumbs_Container_MultiWildcardData $meta) {
-    $this->meta = $meta;
+  function __construct(RawHierarchyInterface $raw_hierarchy, LabeledPluginCollection $pluginCollection) {
     $this->rawHierarchy = $raw_hierarchy;
+    $this->pluginCollection = $pluginCollection;
   }
 
   /**
@@ -33,6 +34,7 @@ class WeightsCheckboxTree implements ElementInterface, PreRenderInterface {
    * @param array $form_state
    *
    * @return mixed
+   * @throws \Exception
    *
    * @see _crumbs_ui_element_value_callback()
    */
@@ -40,43 +42,71 @@ class WeightsCheckboxTree implements ElementInterface, PreRenderInterface {
     if ($input === FALSE) {
       return isset($element['#default_value']) ? $element['#default_value'] : array();
     }
-    else {
+    elseif (is_array($input)) {
       $toplevel_weight = empty($input['*']['distinct_weight'])
         ? 0
         : $input['*']['weight'];
-      $toplevel_value = empty($input['*']['status'])
+      $toplevel_status = empty($input['*']['status'])
         ? FALSE
-        : $toplevel_weight;
-      return $this->collectValues('*', $input, $toplevel_value, $toplevel_weight);
+        : TRUE;
+      return array(
+        'statuses' => $this->collectStatuses('*', $input, $toplevel_status),
+        'weights' => $this->collectWeights('*', $input, $toplevel_weight),
+      );
+    }
+    elseif (!isset($input)) {
+      throw new \Exception("Unexpected input NULL.");
+    }
+    else {
+      throw new \Exception("Unexpected input.");
     }
   }
 
   /**
    * @param string $parent_key
    * @param array $input
-   * @param false|int $parent_value
-   * @param int $parent_weight
+   * @param bool $parent_status
    *
-   * @return mixed[]
+   * @return bool[]
    */
-  protected function collectValues($parent_key, array $input, $parent_value, $parent_weight) {
-    $values_all = array();
+  protected function collectStatuses($parent_key, array $input, $parent_status) {
+    $statuses_all = array();
     foreach ($this->rawHierarchy->keyGetChildren($parent_key) as $child_key) {
       if (!isset($input[$child_key])) {
         throw new \RuntimeException("Missing key in input.");
       }
-      $child_weight = empty($input[$child_key]['distinct_weight'])
-        ? $parent_weight
-        : $input[$child_key]['weight'];
-      $child_value = empty($input[$child_key]['status'])
-        ? FALSE
-        : $child_weight;
-      if ($child_value !== $parent_value) {
-        $values_all[$child_key] = $child_value;
+      $child_status = !empty($input[$child_key]['status']) ? TRUE : FALSE;
+      if ($child_status !== $parent_status) {
+        $statuses_all[$child_key] = $child_status;
       }
-      $values_all += $this->collectValues($child_key, $input, $child_value, $child_weight);
+      $statuses_all += $this->collectStatuses($child_key, $input, $child_status);
     }
-    return $values_all;
+    return $statuses_all;
+  }
+
+  /**
+   * @param string $parent_key
+   * @param array $input
+   *
+   * @return mixed[]
+   */
+  protected function collectWeights($parent_key, array $input) {
+    $weights_all = array();
+    foreach ($this->rawHierarchy->keyGetChildren($parent_key) as $child_key) {
+      if (!isset($input[$child_key])) {
+        throw new \RuntimeException("Missing key in input.");
+      }
+      if (!empty($input[$child_key]['distinct_weight'])) {
+        if (isset($input[$child_key]['weight'])) {
+          $child_weight = $input[$child_key]['weight'];
+          if ((string)(int)$child_weight === (string)$child_weight) {
+            $weights_all[$child_key] = (int)$child_weight;
+          }
+        }
+      }
+      $weights_all += $this->collectWeights($child_key, $input);
+    }
+    return $weights_all;
   }
 
   /**
@@ -99,31 +129,31 @@ class WeightsCheckboxTree implements ElementInterface, PreRenderInterface {
    */
   public function process($element, $form_state) {
     $value_all = $element['#value'];
-    $element += $this->buildTree($value_all, '*', 0, 0);
+    $element += $this->buildTree($value_all, '*', TRUE, 0);
     return $element;
   }
 
   /**
    * @param array $value_all
    * @param string $parent_key
-   * @param int|FALSE $default_value
+   * @param bool $default_status
    * @param int $default_weight
    *
    * @return array
    */
-  protected function buildTree(array $value_all, $parent_key, $default_value, $default_weight) {
-    $parent_value = isset($value_all[$parent_key])
-      ? $value_all[$parent_key]
-      : $default_value;
-    $parent_status = is_numeric($parent_value);
-    $parent_weight = $parent_status
-      ? $parent_value
-      : $default_value;
+  protected function buildTree(array $value_all, $parent_key, $default_status, $default_weight) {
+    $parent_status = isset($value_all['statuses'][$parent_key])
+      ? $value_all['statuses'][$parent_key]
+      : $default_status;
+    $distinct_weight = isset($value_all['weights'][$parent_key]);
+    $parent_weight = isset($value_all['weights'][$parent_key])
+      ? $value_all['weights'][$parent_key]
+      : $default_weight;
 
     $elements = array();
-    $elements[$parent_key] = $this->buildChildElement($parent_key, $parent_status, $parent_weight !== $default_weight, $parent_weight);
+    $elements[$parent_key] = $this->buildChildElement($parent_key, $parent_status, $distinct_weight, $parent_weight);
     foreach ($this->rawHierarchy->keyGetChildren($parent_key) as $child_key) {
-      $elements += $this->buildTree($value_all, $child_key, $parent_value, $parent_weight);
+      $elements += $this->buildTree($value_all, $child_key, $parent_status, $parent_weight);
     }
     return $elements;
   }
@@ -170,7 +200,7 @@ class WeightsCheckboxTree implements ElementInterface, PreRenderInterface {
     foreach (element_children($element) as $plugin_key) {
       $name = $element[$plugin_key]['distinct_weight']['#name'];
       $element[$plugin_key]['weight']['#states'] = array(
-        'enabled' => array(
+        'invisible' => array(
           // @todo Sanitize the name.
           ':input[name="' . $name . '"]' => array('checked' => TRUE),
         ),

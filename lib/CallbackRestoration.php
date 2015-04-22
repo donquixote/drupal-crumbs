@@ -36,7 +36,8 @@ class crumbs_CallbackRestoration {
       new crumbs_InjectedAPI_Collection_PluginCollection,
       new crumbs_InjectedAPI_Collection_EntityPluginCollection,
       $this->callbackCollection,
-      new crumbs_InjectedAPI_Collection_DefaultValueCollection);
+      new crumbs_InjectedAPI_Collection_DefaultValueCollection,
+      new crumbs_InjectedAPI_Collection_DescriptionCollection);
   }
 
   /**

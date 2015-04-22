@@ -4,7 +4,7 @@
 /**
  * Implements hook_crumbs_plugins().
  *
- * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
+ * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
  */
 function views_crumbs_plugins($api) {
 
@@ -82,8 +82,18 @@ function views_crumbs_plugins($api) {
         $routes[0],
         "pageTitle.$view_name.$view_display_id",
         new views_CrumbsMonoPlugin_PageTitle($view_name, $view_display_id));
+
+      $api->describeFindTitle(
+        "pageTitle.$view_name.$view_display_id",
+        t('Display ID') . ': ' . check_plain($view_display_id));
     }
+
+    $api->describeFindTitle(
+      "pageTitle.$view_name.*",
+      t('View') . ': ' . check_plain($view_name));
   }
+
+  $api->describeFindTitle('pageTitle.*', t('Views page title'));
 
   foreach ($dynamicDisplays as $view_name => $displays) {
     foreach ($displays as $view_display_id => $routes) {
@@ -93,8 +103,18 @@ function views_crumbs_plugins($api) {
         $routes[0],
         "argTitle.$view_name.$view_display_id",
         new views_CrumbsMonoPlugin_PageTitle($view_name, $view_display_id));
+
+      $api->describeFindTitle(
+        "pageTitle.$view_name.$view_display_id",
+        t('Display ID') . ': ' . check_plain($view_display_id));
     }
+
+    $api->describeFindTitle(
+      "pageTitle.$view_name.*",
+      t('View') . ': ' . check_plain($view_name));
   }
+
+  $api->describeFindTitle('argTitle.*', t('Views argument title'));
 }
 
 /**
@@ -132,7 +152,7 @@ class views_CrumbsMonoPlugin_PageTitle implements crumbs_MonoPlugin_FindTitleInt
    *   return a string label.
    */
   function describe($api) {
-    return t('Views page title');
+    // This is done in the hook.
   }
 
   /**

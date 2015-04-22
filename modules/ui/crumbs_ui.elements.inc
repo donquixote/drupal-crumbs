@@ -35,6 +35,9 @@ function crumbs_ui_element_info() {
  * @return array|bool
  */
 function _crumbs_ui_element_value_callback(&$element, $input = FALSE, $form_state = array()) {
+  if (!isset($input)) {
+    throw new \InvalidArgumentException("Unexpected input NULL.");
+  }
   return _crumbs_ui_element_object($element)->value_callback($element, $input, $form_state);
 }
 

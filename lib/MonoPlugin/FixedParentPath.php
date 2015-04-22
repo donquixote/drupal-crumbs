@@ -18,7 +18,7 @@ class crumbs_MonoPlugin_FixedParentPath implements crumbs_MonoPlugin_FindParentI
    * {@inheritdoc}
    */
   function describe($api) {
-    $api->titleWithLabel($this->parentPath, t('Parent'));
+    // This is done elsewhere.
   }
 
   /**

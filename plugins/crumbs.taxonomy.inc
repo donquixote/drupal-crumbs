@@ -8,11 +8,14 @@
  */
 function taxonomy_crumbs_plugins($api) {
 
-  $api->multiPlugin('termParent');
+  $api->routeMultiPlugin('taxonomy/term/%', 'termParent');
+
+  $api->describeFindParent('termReference.*', t('Term reference fields'));
 
   foreach (field_info_fields() as $field_name => $field_info) {
     if ($field_info['type'] === 'taxonomy_term_reference') {
       $plugin = new crumbs_EntityPlugin_Field_TermReference($field_name, $field_info['bundles']);
+      $api->describeFindParent('termReference.' . $field_name . '.*', $field_name);
       $api->entityParentPlugin('termReference.' . $field_name, $plugin, array_keys($field_info['bundles']));
     }
   }
@@ -20,29 +23,31 @@ function taxonomy_crumbs_plugins($api) {
 }
 
 
-class taxonomy_CrumbsMultiPlugin_termParent implements crumbs_MultiPlugin {
+class taxonomy_CrumbsMultiPlugin_termParent implements crumbs_MultiPlugin_FindParentInterface {
 
   /**
    * {@inheritdoc}
    */
   function describe($api) {
+    // Now set a generic title for the entire plugin.
+    $api->addDescription(t('Taxonomy term hierarchy'));
     foreach (taxonomy_get_vocabularies() as $voc) {
       $api->ruleWithLabel($voc->machine_name, $voc->name, t('Vocabulary'));
     }
-    // Now set a generic title for the entire plugin.
-    $api->descWithLabel(t('The parent term'), t('Parent'));
   }
 
   /**
    * Terms get their parent terms as breadcrumb parent.
-   * The method name matches the router path "taxonomy/term/%".
    *
    * @param string $path
+   *   The path that we want to find a parent for.
    * @param array $item
+   *   Item as returned from crumbs_get_router_item()
    *
    * @return array
+   *   Parent path candidates
    */
-  function findParent__taxonomy_term_x($path, $item) {
+  function findParent($path, $item) {
     if (FALSE === $term = crumbs_Util::itemExtractEntity($item, 'taxonomy_term', 2)) {
       return NULL;
     }

@@ -16,15 +16,23 @@ class crumbs_InjectedAPI_Collection_CollectionResult {
   private $defaultValueCollection;
 
   /**
+   * @var crumbs_InjectedAPI_Collection_DescriptionCollection
+   */
+  private $descriptionCollection;
+
+  /**
    * @param crumbs_InjectedAPI_Collection_PluginCollection $pluginCollection
    * @param crumbs_InjectedAPI_Collection_DefaultValueCollection $defaultValueCollection
+   * @param crumbs_InjectedAPI_Collection_DescriptionCollection $descriptionCollection
    */
   function __construct(
     crumbs_InjectedAPI_Collection_PluginCollection $pluginCollection,
-    crumbs_InjectedAPI_Collection_DefaultValueCollection $defaultValueCollection
+    crumbs_InjectedAPI_Collection_DefaultValueCollection $defaultValueCollection,
+    crumbs_InjectedAPI_Collection_DescriptionCollection $descriptionCollection
   ) {
     $this->pluginCollection = $pluginCollection;
     $this->defaultValueCollection = $defaultValueCollection;
+    $this->descriptionCollection = $descriptionCollection;
   }
 
   /**
