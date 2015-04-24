@@ -1,4 +1,5 @@
 <?php
+use Drupal\crumbs\Util;
 
 /**
  * Note: We could achieve the same with the nodeParent / entityParent,
@@ -29,7 +30,7 @@ class crumbs_example_CrumbsMultiPlugin_ListOfNews implements crumbs_MultiPlugin 
    *   Candidates for the parent path, or NULL.
    */
   function findParent__node_x($path, $item) {
-    if (FALSE === $node = crumbs_Util::itemExtractEntity($item, 'node', 1)) {
+    if (FALSE === $node = Util::itemExtractEntity($item, 'node', 1)) {
       return NULL;
     }
 

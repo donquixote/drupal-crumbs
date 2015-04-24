@@ -2,6 +2,9 @@
 
 namespace Drupal\crumbs\ParentFinder;
 
+use Drupal\crumbs\ParentFinder\Approval\CheckerInterface;
+use Drupal\crumbs\Router\RouterInterface;
+
 class ParentFront extends ParentFinderDecoratorBase {
 
   /**
@@ -12,27 +15,57 @@ class ParentFront extends ParentFinderDecoratorBase {
   protected $frontPath;
 
   /**
-   * @param \Drupal\crumbs\ParentFinder\ParentFinderInterface $decorated
-   * @param string $frontPath
-   *   System path of the frontpage.
+   * @var array
+   *   The frontpage router item.
    */
-  function __construct(ParentFinderInterface $decorated, $frontPath) {
-    $this->frontPath = $frontPath;
+  private $frontRouterItem;
+
+  /**
+   * @param \Drupal\crumbs\ParentFinder\ParentFinderInterface $decorated
+   * @param \Drupal\crumbs\Router\RouterInterface $router
+   *
+   * @return static
+   */
+  static function createFromRouter(ParentFinderInterface $decorated, RouterInterface $router) {
+    $frontNormalPath = $router->getFrontNormalPath();
+    $frontRouterItem = $router->getRouterItem($frontNormalPath);
+    return new static($decorated, $frontRouterItem);
   }
 
   /**
-   * @param string $path
-   * @param array $item
-   *
-   * @return string|NULL
+   * @param \Drupal\crumbs\ParentFinder\ParentFinderInterface $decorated
+   * @param array $frontRouterItem
+   *   System path of the frontpage.
    */
-  function findParent($path, array $item) {
-    if ($path === $this->frontPath) {
-      return NULL;
+  function __construct(ParentFinderInterface $decorated, array $frontRouterItem) {
+    parent::__construct($decorated);
+    $this->frontPath = $frontRouterItem['link_path'];
+    $this->frontRouterItem = $frontRouterItem;
+  }
+
+  /**
+   * @param array $routerItem
+   *   The router item to find a parent for..
+   * @param \Drupal\crumbs\ParentFinder\Approval\CheckerInterface $checker
+   *
+   * @return bool
+   *   TRUE, if it was found.
+   */
+  function findParentRouterItem(array $routerItem, CheckerInterface $checker) {
+
+    if ($routerItem['link_path'] === $this->frontPath) {
+      // The frontpage has no parent.
+      return FALSE;
     }
-    $parentPath = $this->decorated->findParent($path, $item);
-    return isset($parentPath)
-      ? $parentPath
-      : $this->frontPath;
+
+    if ($this->decorated->findParentRouterItem($routerItem, $checker)) {
+      return TRUE;
+    }
+
+    if ($checker->checkParentPath($this->frontPath, '.ParentFront')) {
+      return TRUE;
+    }
+
+    return FALSE;
   }
 }

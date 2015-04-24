@@ -41,13 +41,6 @@ class crumbs_MonoPlugin_TitleCallback implements crumbs_MonoPlugin_FindTitleInte
   /**
    * {@inheritdoc}
    */
-  function describe($api) {
-    $api->titleWithLabel(t('Callback result.'), t('Title'));
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   function findTitle($path, $item) {
     if (!isset($this->callback)) {
       // Restore the callback after serialization.

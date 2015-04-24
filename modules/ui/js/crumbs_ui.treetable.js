@@ -162,9 +162,7 @@
     attach: function(context) {
       var trail = [];
       var indentMatrix = new IndentMatrix();
-      var indentElements = [];
       var indentElement;
-      var indentElementWrapper;
       $('.crumbs_ui-treetable', context).each(function(){
         $('> tbody > tr', this).each(function(){
           var tr = this;

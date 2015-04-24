@@ -1,25 +1,23 @@
 <?php
-
+use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
+use Drupal\crumbs\Util;
 
 /**
  * Implements hook_crumbs_plugins().
  *
- * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
+ * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
  */
-function blog_crumbs_plugins($api) {
-  $api->monoPlugin('authorPage');
-  $api->monoPlugin('authorName');
+function blog_crumbs_plugins(ArgumentInterface $api) {
+
+  $api->routeMonoPlugin('node/%', 'authorPage', new blog_CrumbsMonoPlugin_authorPage);
+  $api->describeFindParent('authorPage', t("Author's blog page (blog/*) &raquo; Blog post (node/*)."));
+
+  $api->routeMonoPlugin('blog/%', 'authorName', new blog_CrumbsMonoPlugin_authorName);
+  $api->describeFindTitle('authorName', t('"!name\'s blog", where !name is the author\'s username.'));
 }
 
 
-class blog_CrumbsMonoPlugin_authorPage implements crumbs_MonoPlugin {
-
-  /**
-   * {@inheritdoc}
-   */
-  function describe($api) {
-    $api->titleWithLabel(t("Author's blog page (blog/*) &raquo; Blog post (node/*)."), t('Parent'));
-  }
+class blog_CrumbsMonoPlugin_authorPage implements crumbs_MonoPlugin_FindParentInterface {
 
   /**
    * Still under constructon..
@@ -29,8 +27,8 @@ class blog_CrumbsMonoPlugin_authorPage implements crumbs_MonoPlugin {
    *
    * @return null|string
    */
-  function findParent__node_x($path, $item) {
-    $node = crumbs_Util::itemExtractEntity($item, 'node', 1);
+  function findParent($path, $item) {
+    $node = Util::itemExtractEntity($item, 'node', 1);
 
     if ($node === FALSE || $node->type !== 'blog') {
       return NULL;
@@ -41,14 +39,7 @@ class blog_CrumbsMonoPlugin_authorPage implements crumbs_MonoPlugin {
 }
 
 
-class blog_CrumbsMonoPlugin_authorName implements crumbs_MonoPlugin {
-
-  /**
-   * {@inheritdoc}
-   */
-  function describe($api) {
-    $api->titleWithLabel(t('"!name\'s blog", where !name is the author\'s username.'), t('Title'));
-  }
+class blog_CrumbsMonoPlugin_authorName implements crumbs_MonoPlugin_FindTitleInterface {
 
   /**
    * Still under constructon..
@@ -58,8 +49,8 @@ class blog_CrumbsMonoPlugin_authorName implements crumbs_MonoPlugin {
    *
    * @return null|string
    */
-  function findTitle__blog_x($path, $item) {
-    if (FALSE === $user = crumbs_Util::itemExtractEntity($item, 'user', 1)) {
+  function findTitle($path, $item) {
+    if (FALSE === $user = Util::itemExtractEntity($item, 'user', 1)) {
       return NULL;
     }
 

@@ -1,12 +1,10 @@
 <?php
 namespace Drupal\crumbs\PluginSystem\Discovery\Hook\Arg;
 
-use Drupal\crumbs\PluginSystem\FieldTypePlugin\FieldTypePluginInterface;
-
 /**
  * Interface for the argument passed to hook_crumbs_plugins().
  */
-interface ArgumentInterface {
+interface ArgumentInterface extends \crumbs_InjectedAPI_hookCrumbsPlugins {
 
   /**
    * @param string $module
@@ -32,6 +30,8 @@ interface ArgumentInterface {
    * @param string[]|string|NULL $types
    *   An array of entity types, or a single entity type, or NULL to allow all
    *   entity types.
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function entityParentPlugin($key, $entity_plugin = NULL, $types = NULL);
 
@@ -45,6 +45,8 @@ interface ArgumentInterface {
    * @param string[]|string|NULL $types
    *   An array of entity types, or a single entity type, or NULL to allow all
    *   entity types.
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function entityParentCallback($key, $callback, $types = NULL);
 
@@ -56,6 +58,8 @@ interface ArgumentInterface {
    * @param string[]|string|NULL $types
    *   An array of entity types, or a single entity type, or NULL to allow all
    *   entity types.
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function entityTitlePlugin($key, $entity_plugin = NULL, $types = NULL);
 
@@ -75,6 +79,8 @@ interface ArgumentInterface {
    * @param string[]|string|NULL $types
    *   An array of entity types, or a single entity type, or NULL to allow all
    *   entity types.
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function entityTitleCallback($key, $callback, $types = NULL);
 
@@ -89,6 +95,8 @@ interface ArgumentInterface {
    *   Or NULL, to have the plugin object automatically created based on a
    *   class name guessed from the $key parameter and the module name.
    *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
+   *
    * @throws \Exception
    */
   function monoPlugin($key = NULL, \crumbs_MonoPlugin $plugin = NULL);
@@ -99,6 +107,8 @@ interface ArgumentInterface {
    * @param string $route
    * @param string $key
    * @param \crumbs_MonoPlugin $plugin
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeMonoPlugin($route, $key = NULL, \crumbs_MonoPlugin $plugin = NULL);
 
@@ -113,6 +123,8 @@ interface ArgumentInterface {
    *   Or NULL, to have the plugin object automatically created based on a
    *   class name guessed from the $key parameter and the module name.
    *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
+   *
    * @throws \Exception
    */
   function multiPlugin($key = NULL, \crumbs_MultiPlugin $plugin = NULL);
@@ -121,6 +133,8 @@ interface ArgumentInterface {
    * @param string $route
    * @param string|null $key
    * @param \crumbs_MultiPlugin|null $plugin
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeMultiPlugin($route, $key = NULL, \crumbs_MultiPlugin $plugin = NULL);
 
@@ -128,6 +142,8 @@ interface ArgumentInterface {
    * @param string $route
    * @param string $key
    * @param string $parent_path
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeParentPath($route, $key, $parent_path);
 
@@ -143,6 +159,8 @@ interface ArgumentInterface {
    *   The callback, e.g. an anonymous function. The signature must be
    *   $callback(string $path, array $item), like the findParent() method of
    *   a typical crumbs_MonoPlugin.
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeParentCallback($route, $key, $callback);
 
@@ -150,6 +168,8 @@ interface ArgumentInterface {
    * @param string $route
    * @param string $key
    * @param string $title
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeTranslateTitle($route, $key, $title);
 
@@ -165,12 +185,16 @@ interface ArgumentInterface {
    *   The callback, e.g. an anonymous function. The signature must be
    *   $callback(string $path, array $item), like the findParent() method of
    *   a typical crumbs_MonoPlugin.
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeTitleCallback($route, $key, $callback);
 
   /**
    * @param string $route
    * @param string $key
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeSkipItem($route, $key);
 
@@ -200,7 +224,7 @@ interface ArgumentInterface {
    * @param string $field_type
    * @param \Drupal\crumbs\PluginSystem\FieldTypePlugin\FieldTypePluginInterface $plugin
    */
-  function fieldTypeParentPlugin($key, $field_type, FieldTypePluginInterface $plugin);
+  # function fieldTypeParentPlugin($key, $field_type, FieldTypePluginInterface $plugin);
 
   /**
    * @param string $key

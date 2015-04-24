@@ -10,6 +10,12 @@ class TrailAccessFilter extends TrailFinderDecoratorBase {
    * @return array[]
    */
   function buildTrail($path) {
-    // TODO: Implement buildTrail() method.
+    $trail = $this->decorated->buildTrail($path);
+    foreach ($trail as $path => $item) {
+      if (empty($item['access'])) {
+        unset($trail[$path]);
+      }
+    }
+    return $trail;
   }
 }

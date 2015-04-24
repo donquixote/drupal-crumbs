@@ -1,15 +1,16 @@
 <?php
-
+use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
 
 /**
  * Implements hook_crumbs_plugins().
  *
- * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
+ * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
  */
-function path_crumbs_plugins($api) {
+function path_crumbs_plugins(ArgumentInterface $api) {
   // Just one plugin for the entire module.
-  $api->monoPlugin('alias');
-  $api->disabledByDefault('alias');
+  $api->monoPlugin('alias')
+    ->translateDescription('Url alias')
+    ->disabledByDefault();
 }
 
 
@@ -18,14 +19,6 @@ function path_crumbs_plugins($api) {
  * on the behalf of path module.
  */
 class path_CrumbsMonoPlugin_alias implements crumbs_MonoPlugin_FindParentInterface {
-
-  /**
-   * {@inheritdoc}
-   */
-  function describe($api) {
-    return t('Url alias');
-    # return t('Chop off the last fragment of the path alias, consider the result as the parent path.');
-  }
 
   /**
    * {@inheritdoc}

@@ -2,7 +2,12 @@
 
 namespace Drupal\crumbs\ParentFinder;
 
+use Drupal\crumbs\ParentFinder\Approval\CheckerInterface;
+use Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection;
+use Drupal\crumbs\PluginSystem\Engine\FactoryUtil;
 use Drupal\crumbs\PluginSystem\Engine\ParentFinderEngine;
+use Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap;
+use Drupal\crumbs\Router\RouterInterface;
 
 class ParentFinder implements ParentFinderInterface {
 
@@ -26,31 +31,57 @@ class ParentFinder implements ParentFinderInterface {
   }
 
   /**
-   * @param string $path
-   * @param array $item
+   * @param \Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection $pluginCollection
+   * @param \Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap $statusMap
+   * @param \Drupal\crumbs\Router\RouterInterface $router
    *
-   * @return string|NULL
-   *   The normalized parent path, or NULL.
+   * @return static
    */
-  function findParent($path, array $item) {
-    $route = $item['route'];
-    return isset($this->routePluginEngines[$route])
-      ? $this->routePluginEngines[$route]->findParent($path, $item)
-      : $this->fallbackPluginEngine->findParent($path, $item);
+  public static function create(
+    RawPluginCollection $pluginCollection,
+    PluginStatusWeightMap $statusMap,
+    RouterInterface $router
+  ) {
+    $fallbackPluginsByWeight = FactoryUtil::groupParentPluginsByWeight(
+      $pluginCollection->getRoutelessPlugins(),
+      $statusMap
+    );
+
+    $fallbackPluginsSorted = FactoryUtil::flattenPluginsByWeight($fallbackPluginsByWeight);
+
+    $fallbackPluginEngine = new ParentFinderEngine($fallbackPluginsSorted, $router);
+
+    $routePluginEngines = array();
+    foreach ($pluginCollection->getRoutePluginsByRoute() as $route => $plugins) {
+      $pluginsByWeight = FactoryUtil::groupParentPluginsByWeight($plugins, $statusMap);
+      foreach ($fallbackPluginsByWeight as $weight => $fallbackPlugins) {
+        if (isset($pluginsByWeight[$weight])) {
+          $pluginsByWeight[$weight] += $fallbackPlugins;
+        }
+        else {
+          $pluginsByWeight[$weight] = $fallbackPlugins;
+        }
+      }
+      $routePluginsSorted = FactoryUtil::flattenPluginsByWeight($pluginsByWeight);
+      $routePluginEngines[$route] = new ParentFinderEngine($routePluginsSorted, $router);
+    }
+
+    return new static($routePluginEngines, $fallbackPluginEngine);
   }
 
   /**
-   * @param string $path
-   * @param array $item
+   * @param array $routerItem
+   *   The router item to find a parent for..
+   * @param \Drupal\crumbs\ParentFinder\Approval\CheckerInterface $checker
    *
-   * @return string[]
-   *   The normalized parent path candidates.
+   * @return array|NULL
+   *   The parent router item, or NULL.
    */
-  function findAllParents($path, array $item) {
-    $route = $item['route'];
+  function findParentRouterItem(array $routerItem, CheckerInterface $checker) {
+    $route = $routerItem['route'];
     return isset($this->routePluginEngines[$route])
-      ? $this->routePluginEngines[$route]->findAllParents($path, $item)
-      : $this->fallbackPluginEngine->findAllParents($path, $item);
+      ? $this->routePluginEngines[$route]->findParentRouterItem($routerItem, $checker)
+      : $this->fallbackPluginEngine->findParentRouterItem($routerItem, $checker);
   }
 
 }

@@ -1,11 +1,12 @@
 <?php
+use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
 
 /**
  * Implements hook_crumbs_plugins().
  *
- * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
+ * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
  */
-function entityreference_crumbs_plugins($api) {
+function entityreference_crumbs_plugins(ArgumentInterface $api) {
   foreach (field_info_fields() as $field_name => $field_info) {
     if (1
       && 'entityreference' === $field_info['type']

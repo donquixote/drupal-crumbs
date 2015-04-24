@@ -5,6 +5,9 @@
  *   Provides an API for building breadcrumbs.
  */
 
+use Drupal\crumbs\Util;
+use Drupal\crumbs\DIC\ServiceContainer;
+
 define('CRUMBS_SHOW_CURRENT_PAGE', 1);
 define('CRUMBS_TRAILING_SEPARATOR', 2);
 define('CRUMBS_SHOW_CURRENT_PAGE_SPAN', 5);
@@ -109,6 +112,16 @@ function crumbs_module_implements_alter(&$implementations, $hook) {
  */
 function crumbs_preprocess_page(&$vars) {
 
+  return;
+
+  $item = crumbs()->router->getRouterItem($_GET['q']);
+  \Drupal\krumong\dpm(crumbs()->parentCollector->findAllParentRouterItems($item));
+  \Drupal\krumong\dpm(crumbs()->trailFinder->buildTrail($_GET['q']));
+
+  \Drupal\krumong\dpm(crumbs()->page->breadcrumbItems);
+
+  \Drupal\krumong\dpm(crumbs()->titleFinder->findTitle('node', crumbs()->router->getRouterItem('node')));
+
   $vars['crumbs_trail'] = crumbs()->page->trail;
   $vars['breadcrumb'] = crumbs()->page->breadcrumbHtml;
 }
@@ -205,7 +218,7 @@ function crumbs_reduce_path($path, $depth = -1) {
  *   An array of options used to generate the replacements.
  */
 function crumbs_clean_token_values(&$replacements, $data = array(), $options = array()) {
-  crumbs_Util::cleanTokenValues($replacements, $data, $options);
+  Util::cleanTokenValues($replacements, $data, $options);
 }
 
 
@@ -219,13 +232,13 @@ function crumbs_clean_token_values(&$replacements, $data = array(), $options = a
  * @param string|null $key
  *   Optional service name.
  *
- * @return crumbs_DIC_ServiceContainer|object
+ * @return ServiceContainer|object
  *   The service container, or a service obtained from the container.
  */
 function crumbs($key = NULL) {
   static $services = NULL;
   if (!isset($services)) {
-    $services = new crumbs_DIC_ServiceContainer();
+    $services = new ServiceContainer();
   }
   if (isset($key)) {
     return $services->__get($key);

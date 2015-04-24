@@ -7,8 +7,8 @@ use Drupal\crumbs\PluginSystem\Discovery\PluginDiscovery;
 use Drupal\crumbs\PluginSystem\PluginType\ParentPluginType;
 use Drupal\crumbs\PluginSystem\PluginType\PluginTypeInterface;
 use Drupal\crumbs\PluginSystem\PluginType\TitlePluginType;
-use Drupal\crumbs_ui\Element\Theme\CheckboxTreeTable;
-use Drupal\crumbs_ui\Element\WeightsCheckboxTree;
+use Drupal\crumbs_ui\FormElement\Theme\CheckboxTreeTable;
+use Drupal\crumbs_ui\FormElement\WeightsCheckboxTree;
 use Drupal\crumbs_ui\PluginKey\RawHierarchy;
 
 class CheckboxtreePluginForm implements FormBuilderInterface {
@@ -68,7 +68,8 @@ class CheckboxtreePluginForm implements FormBuilderInterface {
     $settings_key = $this->pluginType->getSettingsKey();
 
     $descriptions = $labeledPluginCollection->getDescriptions();
-    $raw_hierarchy = RawHierarchy::createFromKeys(array_keys($descriptions));
+    $leaves = $labeledPluginCollection->getLeaves();
+    $raw_hierarchy = RawHierarchy::createFromKeys($descriptions + $leaves);
 
     $form[$settings_key] = array(
       '#title' => $this->isParentForm

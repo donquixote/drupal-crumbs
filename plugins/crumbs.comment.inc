@@ -1,24 +1,23 @@
 <?php
+use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
 
 /**
  * Implements hook_crumbs_plugins().
  *
- * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
+ * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
  */
-function comment_crumbs_plugins($api) {
-  $api->monoPlugin('reply');
-  $api->monoPlugin('comment');
-  $api->monoPlugin('skip');
+function comment_crumbs_plugins(ArgumentInterface $api) {
+
+  $api->routeMonoPlugin('comment/reply/%', 'reply', new comment_CrumbsMonoPlugin_reply)
+    ->describe("<code>node/123</code> &raquo; <code>comment/reply/123</code>");
+
+  $api->routeMonoPlugin('comment/%', 'comment', new comment_CrumbsMonoPlugin_comment)
+    ->describe("<code>node/%node</code> &raquo; <code>comment/reply/%comment</code>");
+
+  $api->routeSkipItem('comment/%', 'skip');
 }
 
-class comment_CrumbsMonoPlugin_reply implements crumbs_MonoPlugin {
-
-  /**
-   * {@inheritdoc}
-   */
-  function describe($api) {
-    $api->titleWithLabel(t("The comment's node"), t('Parent'));
-  }
+class comment_CrumbsMonoPlugin_reply implements crumbs_MonoPlugin_FindParentInterface {
 
   /**
    * findParent callback for comment/reply/%.
@@ -30,20 +29,13 @@ class comment_CrumbsMonoPlugin_reply implements crumbs_MonoPlugin {
    *
    * @return string
    */
-  function findParent__comment_reply_x($path, $item) {
+  function findParent($path, $item) {
     $nid = $item['fragments'][2];
     return 'node/'. $nid;
   }
 }
 
-class comment_CrumbsMonoPlugin_comment implements crumbs_MonoPlugin {
-
-  /**
-   * {@inheritdoc}
-   */
-  function describe($api) {
-    $api->titleWithLabel(t("The comment's node"), t('Parent'));
-  }
+class comment_CrumbsMonoPlugin_comment implements crumbs_MonoPlugin_FindParentInterface {
 
   /**
    * Make node/% the parent for comment/%.
@@ -54,7 +46,7 @@ class comment_CrumbsMonoPlugin_comment implements crumbs_MonoPlugin {
    *
    * @return string
    */
-  function findParent__comment_x($path, $item) {
+  function findParent($path, $item) {
     $comment = comment_load($item['original_map'][1]);
     if (!empty($comment->nid)) {
       return 'node/' . $comment->nid;
@@ -63,28 +55,4 @@ class comment_CrumbsMonoPlugin_comment implements crumbs_MonoPlugin {
     return NULL;
   }
 
-}
-
-class comment_CrumbsMonoPlugin_skip implements crumbs_MonoPlugin {
-
-  /**
-   * {@inheritdoc}
-   */
-  function describe($api) {
-    return t('Skip comment/% in the breadcrumb.');
-  }
-
-  /**
-   * The default title for comment/% is "Comment permalink",
-   * so not very useful to have in the breadcrumb.
-   *
-   * @param string $path
-   * @param array $item
-   *
-   * @return false
-   *   A value of FALSE indicates that the breadcrumb item should be skipped.
-   */
-  function findTitle__comment_x($path, $item) {
-    return FALSE;
-  }
 }

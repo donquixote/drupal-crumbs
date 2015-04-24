@@ -1,12 +1,12 @@
 <?php
-
+use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
 
 /**
  * Implements hook_crumbs_plugins().
  *
- * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
+ * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
  */
-function crumbs_crumbs_plugins($api) {
+function crumbs_crumbs_plugins(ArgumentInterface $api) {
 
   if (module_exists('node')) {
     $api->entityRoute('node', 'node/%', 'type', 'Node type');
@@ -18,15 +18,19 @@ function crumbs_crumbs_plugins($api) {
     $api->entityRoute('taxonomy_term', 'taxonomy/term/%', 'vocabulary_machine_name', 'Vocabulary');
   }
 
-  $api->monoPlugin('home_title');
+  $home_title = variable_get('crumbs_home_link_title', 'Home');
+  $api->monoPlugin('home_title')
+    ->translateDescription('Set t("@title") as the title for the root item.', array(
+      '@title' => $home_title,
+    ));
 
   if (module_exists('token')) {
-    $api->entityParentPlugin('entityParent', new crumbs_CrumbsEntityPlugin_TokenEnabled());
-    $api->describeFindParent('entityParent.*', t('Custom entity parent paths.'));
+    $api->entityParentPlugin('entityParent', new crumbs_CrumbsEntityPlugin_TokenEnabled())
+      ->translateDescription('Custom entity parent paths.');
   }
   else {
-    $api->entityParentPlugin('entityParent', new crumbs_CrumbsEntityPlugin_TokenDisabled());
-    $api->describeFindParent('entityParent.*', t('Custom entity parent paths.'));
+    $api->entityParentPlugin('entityParent', new crumbs_CrumbsEntityPlugin_TokenDisabled())
+      ->translateDescription('Custom entity parent paths.');
   }
 }
 
@@ -34,20 +38,25 @@ function crumbs_crumbs_plugins($api) {
 class crumbs_CrumbsMonoPlugin_home_title implements crumbs_MonoPlugin_FindTitleInterface {
 
   /**
+   * @var string
+   */
+  private $pathToFront;
+
+  function __construct() {
+    $this->pathToFront = crumbs()->router->getFrontNormalPath();
+  }
+
+  /**
    * {@inheritdoc}
    */
   function describe($api) {
-    $home_title = variable_get('crumbs_home_link_title', 'Home');
-    return t('Set t("@title") as the title for the root item.', array(
-      '@title' => $home_title,
-    ));
   }
 
   /**
    * {@inheritdoc}
    */
   function findTitle($path, $item) {
-    if ('<front>' === $item['href']) {
+    if ($item['href'] === $this->pathToFront) {
       $home_title = variable_get('crumbs_home_link_title', 'Home');
       return t($home_title);
     }

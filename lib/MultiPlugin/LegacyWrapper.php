@@ -1,4 +1,5 @@
 <?php
+use Drupal\crumbs\PluginSystem\Discovery\DescribeMultiPluginArg;
 
 /**
  * A wrapper for legacy plugins with suffixed methods like findTitle__node_x().
@@ -40,7 +41,7 @@ class crumbs_MultiPlugin_LegacyWrapper implements crumbs_MultiPlugin_FindParentI
   }
 
   /**
-   * @param crumbs_InjectedAPI_describeMultiPlugin $api
+   * @param DescribeMultiPluginArg $api
    *   Injected API object, with methods that allows the plugin to further
    *   describe itself.
    *

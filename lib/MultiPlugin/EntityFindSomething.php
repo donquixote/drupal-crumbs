@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\crumbs\Util;
+
 class crumbs_MultiPlugin_EntityFindSomething extends crumbs_MultiPlugin_EntityFindAbstract {
 
   /**
@@ -48,24 +50,6 @@ class crumbs_MultiPlugin_EntityFindSomething extends crumbs_MultiPlugin_EntityFi
   }
 
   /**
-   * @param crumbs_Container_WeightMap $localWeightMap
-   */
-  function initWeights($localWeightMap) {
-
-    if ('user' !== $this->entityType) {
-      return;
-    }
-
-    foreach (user_roles(TRUE) as $rid => $role) {
-      $weight = $localWeightMap->valueAtKey($role);
-      if (FALSE !== $weight) {
-        $this->weights[$rid] = $weight;
-      }
-    }
-    asort($this->weights);
-  }
-
-  /**
    * {@inheritdoc}
    */
   function describe($api) {
@@ -79,7 +63,7 @@ class crumbs_MultiPlugin_EntityFindSomething extends crumbs_MultiPlugin_EntityFi
    * @return array
    */
   protected function find($path, $item) {
-    if (FALSE === $entity = crumbs_Util::itemExtractEntity($item, $this->entityType)) {
+    if (FALSE === $entity = Util::itemExtractEntity($item, $this->entityType)) {
       return NULL;
     }
 

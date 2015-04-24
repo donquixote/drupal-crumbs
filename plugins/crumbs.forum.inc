@@ -1,32 +1,38 @@
 <?php
-
+use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
+use Drupal\crumbs\Util;
 
 /**
  * Implements hook_crumbs_plugins().
  *
- * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
+ * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
  */
-function forum_crumbs_plugins($api) {
+function forum_crumbs_plugins(ArgumentInterface $api) {
 
-  $api->monoPlugin('forumTerm');
-  $api->monoPlugin('forumTermName');
-  $api->monoPlugin('forumThread');
-  $api->monoPlugin('forumThreadCreate');
-  $api->monoPlugin('forumThreadCreateTitle');
+  $api->routeMonoPlugin('forum/%', 'forum.term', new forum_CrumbsMonoPlugin_forumTerm)
+    ->translateDescription('Forum term hierarchy');
+
+  $api->routeMonoPlugin('forum/%', 'forum.termName', new forum_CrumbsMonoPlugin_forumTermName)
+    ->translateDescription('Forum term name');
+
+  $api->routeMonoPlugin('node/%', 'forum.thread', new forum_CrumbsMonoPlugin_forumThread)
+    ->describe('forum/% &raquo; node/%');
+
+  $api->monoPlugin('forum.threadCreate', new forum_CrumbsMonoPlugin_forumThreadCreate)
+    ->describe('forum/% &raquo; node/add/*/*');
+
+  $api->monoPlugin('forum.threadCreateTitle', new forum_CrumbsMonoPlugin_forumThreadCreateTitle)
+    ->translateDescription('Title "New topic" for node/add/*/* in a forum.');
+
+  $api->describeFindParent('forum.*', t('Forum'));
+  $api->describeFindParent('forum.*', t('Forum'));
 }
 
 
 // -----------------------------------------------------------------------------
 
 
-class forum_CrumbsMonoPlugin_forumTerm implements crumbs_MonoPlugin {
-
-  /**
-   * {@inheritdoc}
-   */
-  function describe($api) {
-    $api->titleWithLabel(t('The parent forum'), t('Parent'));
-  }
+class forum_CrumbsMonoPlugin_forumTerm implements crumbs_MonoPlugin_FindParentInterface {
 
   /**
    * Forums get their parent forums as breadcrumb parent.
@@ -38,11 +44,11 @@ class forum_CrumbsMonoPlugin_forumTerm implements crumbs_MonoPlugin {
    *
    * @return string|null
    */
-  function findParent__forum_x($path, $item) {
+  function findParent($path, $item) {
     // Load the forum term, even if the wildcard loader has been replaced or
     // removed. This will use entity_load() and not forum_forum_load(), because
     // we don't need the forum stuff here.
-    $term = crumbs_Util::itemExtractEntity($item, 'taxonomy_term', 1);
+    $term = Util::itemExtractEntity($item, 'taxonomy_term', 1);
     if (FALSE === $term) {
       return NULL;
     }
@@ -63,14 +69,7 @@ class forum_CrumbsMonoPlugin_forumTerm implements crumbs_MonoPlugin {
 // -----------------------------------------------------------------------------
 
 
-class forum_CrumbsMonoPlugin_forumTermName implements crumbs_MonoPlugin {
-
-  /**
-   * {@inheritdoc}
-   */
-  function describe($api) {
-    $api->titleWithLabel(t('The forum\'s term name'), t('Title'));
-  }
+class forum_CrumbsMonoPlugin_forumTermName implements crumbs_MonoPlugin_FindTitleInterface {
 
   /**
    * Forums get their parent forums as breadcrumb parent.
@@ -82,11 +81,11 @@ class forum_CrumbsMonoPlugin_forumTermName implements crumbs_MonoPlugin {
    *
    * @return string|null
    */
-  function findTitle__forum_x($path, $item) {
+  function findTitle($path, $item) {
     // Load the forum term, even if the wildcard loader has been replaced or
     // removed. This will use entity_load() and not forum_forum_load(), because
     // we don't need the forum stuff here.
-    $term = crumbs_Util::itemExtractEntity($item, 'taxonomy_term', 1);
+    $term = Util::itemExtractEntity($item, 'taxonomy_term', 1);
     if (FALSE === $term || empty($term->name)) {
       return NULL;
     }
@@ -98,14 +97,7 @@ class forum_CrumbsMonoPlugin_forumTermName implements crumbs_MonoPlugin {
 // -----------------------------------------------------------------------------
 
 
-class forum_CrumbsMonoPlugin_forumThread implements crumbs_MonoPlugin {
-
-  /**
-   * {@inheritdoc}
-   */
-  function describe($api) {
-    $api->titleWithLabel(t('The forum the node belongs to'), t('Parent'));
-  }
+class forum_CrumbsMonoPlugin_forumThread implements crumbs_MonoPlugin_FindParentInterface {
 
   /**
    * Forum nodes get their forum terms as breadcrumb parents.
@@ -116,8 +108,8 @@ class forum_CrumbsMonoPlugin_forumThread implements crumbs_MonoPlugin {
    *
    * @return string|null
    */
-  function findParent__node_x($path, $item) {
-    $node = crumbs_Util::itemExtractEntity($item, 'node', 1);
+  function findParent($path, $item) {
+    $node = Util::itemExtractEntity($item, 'node', 1);
     if ( FALSE === $node
       || empty($node->forum_tid)
       || !_forum_node_check_node_type($node)
@@ -134,14 +126,6 @@ class forum_CrumbsMonoPlugin_forumThread implements crumbs_MonoPlugin {
 
 
 class forum_CrumbsMonoPlugin_forumThreadCreate implements crumbs_MonoPlugin_FindParentInterface {
-
-  /**
-   * {@inheritdoc}
-   */
-  function describe($api) {
-    $api->titleWithLabel(t('node/add/*/* in a forum'), t('Path'));
-    $api->titleWithLabel(t('The forum where the node is going to be created.'), t('Parent'));
-  }
 
   /**
    * Set a parent path for e.g. node/add/(type)/(tid), where
@@ -178,14 +162,6 @@ class forum_CrumbsMonoPlugin_forumThreadCreate implements crumbs_MonoPlugin_Find
 
 
 class forum_CrumbsMonoPlugin_forumThreadCreateTitle implements crumbs_MonoPlugin_FindTitleInterface {
-
-  /**
-   * {@inheritdoc}
-   */
-  function describe($api) {
-    $api->titleWithLabel(t('node/add/*/* in a forum'), t('Path'));
-    $api->titleWithLabel('"' . t('New topic') . '"', t('Title'));
-  }
 
   /**
    * Set a breadcrumb item title for e.g. node/add/(type)/(tid), where

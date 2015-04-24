@@ -1,32 +1,26 @@
 <?php
+use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
 
 /**
  * Implementation of hook_crumbs_plugins()
  *
- * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
+ * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
  */
-function commerce_checkout_crumbs_plugins($api) {
+function commerce_checkout_crumbs_plugins(ArgumentInterface $api) {
 
   // The parent path and title for checkout/%/% will be determined by the
   // commerce_checkout_CrumbsMonoPlugin_checkoutPages plugin.
-  $api->routeMonoPlugin('checkout/%/%', 'checkoutPages');
+  $api->routeMonoPlugin('checkout/%/%', 'checkout.checkoutPages', new commerce_checkout_CrumbsMonoPlugin_checkoutPages);
+  $api->describeFindParent('checkoutPages', t('Commerce checkout pages'));
+  $api->describeFindTitle('checkoutPages', t('Commerce checkout pages'));
 
   // The parent path for 'checkout/%' should always be 'cart'.
-  $api->routeParentPath('checkout/%', 'cartToCheckout', 'cart');
+  $api->routeParentPath('checkout/%', 'checkout.cartToCheckout', 'cart');
 
-  // This plugin needs to be explicitly enabled.
-  $api->disabledByDefault('*');
+  $api->disabledByDefault('checkout.*');
 }
 
-
 class commerce_checkout_CrumbsMonoPlugin_checkoutPages implements crumbs_MonoPlugin_FindParentInterface, crumbs_MonoPlugin_FindTitleInterface {
-
-  /**
-   * {@inheritdoc}
-   */
-  function describe($api) {
-    $api->titleWithLabel(t('Previous page in checkout process'), t('Parent'));
-  }
 
   /**
    * {@inheritdoc}

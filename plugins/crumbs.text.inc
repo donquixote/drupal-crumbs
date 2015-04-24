@@ -1,5 +1,4 @@
 <?php
-use Drupal\crumbs\Plugin\TextFieldTitlePlugin;
 
 /**
  * Implements hook_crumbs_plugins().

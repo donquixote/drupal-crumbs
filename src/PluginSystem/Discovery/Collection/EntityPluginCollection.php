@@ -2,7 +2,7 @@
 
 namespace Drupal\crumbs\PluginSystem\Discovery\Collection;
 
-use Drupal\crumbs\PluginSystem\FieldTypePlugin\FieldTypePluginInterface;
+
 
 class EntityPluginCollection {
 

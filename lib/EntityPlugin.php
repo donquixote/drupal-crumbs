@@ -1,4 +1,5 @@
 <?php
+use Drupal\crumbs\PluginSystem\Discovery\DescribeMultiPluginArg;
 
 /**
  * Interface for entity title plugins registered with hook_crumbs_plugins().
@@ -6,7 +7,7 @@
 interface crumbs_EntityPlugin {
 
   /**
-   * @param crumbs_InjectedAPI_describeMultiPlugin $api
+   * @param DescribeMultiPluginArg $api
    * @param string $entity_type
    * @param array $keys
    */

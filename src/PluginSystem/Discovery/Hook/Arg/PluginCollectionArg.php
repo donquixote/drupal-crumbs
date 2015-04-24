@@ -2,11 +2,14 @@
 
 namespace Drupal\crumbs\PluginSystem\Discovery\Hook\Arg;
 
-use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Helper;
-use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
+use Drupal\crumbs\PluginSystem\Discovery\Collection\EmptyPluginCollection;
 use Drupal\crumbs\PluginSystem\Discovery\Collection\EntityPluginCollection;
+use Drupal\crumbs\PluginSystem\Discovery\Collection\PluginCollectionCollection;
 use Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection;
+use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffset;
 use Drupal\crumbs\PluginSystem\FieldTypePlugin\FieldTypePluginInterface;
+use Drupal\crumbs\PluginSystem\Plugin\ParentPluginInterface;
+use Drupal\crumbs\PluginSystem\Plugin\TitlePluginInterface;
 
 class PluginCollectionArg implements ArgumentInterface {
 
@@ -83,11 +86,14 @@ class PluginCollectionArg implements ArgumentInterface {
    * @param string[]|string|NULL $types
    *   An array of entity types, or a single entity type, or NULL to allow all
    *   entity types.
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function entityParentPlugin($key, $entity_plugin = NULL, $types = NULL) {
     $entity_plugin = $this->helper->entityPluginFromKey($entity_plugin);
     $key = $this->helper->buildAbsoluteKey($key);
     $this->entityParentPluginCollection->entityPlugin($key, $entity_plugin, $types);
+    return new ArgumentOffset($this->parentPluginCollection, $key . '.*');
   }
 
   /**
@@ -100,11 +106,14 @@ class PluginCollectionArg implements ArgumentInterface {
    * @param string[]|string|NULL $types
    *   An array of entity types, or a single entity type, or NULL to allow all
    *   entity types.
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function entityParentCallback($key, $callback, $types = NULL) {
     $entity_plugin = new \crumbs_EntityPlugin_Callback($callback, $this->helper->getModule(), $key, 'entityParent');
     $key = $this->helper->buildAbsoluteKey($key);
     $this->entityParentPluginCollection->entityPlugin($key, $entity_plugin, $types);
+    return new ArgumentOffset($this->parentPluginCollection, $key . '.*');
   }
 
   /**
@@ -115,11 +124,14 @@ class PluginCollectionArg implements ArgumentInterface {
    * @param string[]|string|NULL $types
    *   An array of entity types, or a single entity type, or NULL to allow all
    *   entity types.
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function entityTitlePlugin($key, $entity_plugin = NULL, $types = NULL) {
     $entity_plugin = $this->helper->entityPluginFromKey($entity_plugin);
     $key = $this->helper->buildAbsoluteKey($key);
     $this->entityTitlePluginCollection->entityPlugin($key, $entity_plugin, $types);
+    return new ArgumentOffset($this->titlePluginCollection, $key . '.*');
   }
 
   /**
@@ -138,11 +150,14 @@ class PluginCollectionArg implements ArgumentInterface {
    * @param string[]|string|NULL $types
    *   An array of entity types, or a single entity type, or NULL to allow all
    *   entity types.
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function entityTitleCallback($key, $callback, $types = NULL) {
     $entity_plugin = new \crumbs_EntityPlugin_Callback($callback, $this->helper->getModule(), $key, 'entityParent');
     $key = $this->helper->buildAbsoluteKey($key);
     $this->entityTitlePluginCollection->entityPlugin($key, $entity_plugin, $types);
+    return new ArgumentOffset($this->titlePluginCollection, $key . '.*');
   }
 
   /**
@@ -156,6 +171,8 @@ class PluginCollectionArg implements ArgumentInterface {
    *   Or NULL, to have the plugin object automatically created based on a
    *   class name guessed from the $key parameter and the module name.
    *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
+   *
    * @throws \Exception
    * @deprecated Use dedicated methods for title and parent plugins.
    */
@@ -164,12 +181,10 @@ class PluginCollectionArg implements ArgumentInterface {
       $plugin = $this->helper->monoPluginFromKey($key);
     }
     $key = $this->helper->buildAbsoluteKey($key);
-    if ($plugin instanceof \crumbs_MonoPlugin_FindParentInterface) {
-      $this->parentPluginCollection->addMonoPlugin($key, $plugin);
-    }
-    if ($plugin instanceof \crumbs_MonoPlugin_FindTitleInterface) {
-      $this->titlePluginCollection->addMonoPlugin($key, $plugin);
-    }
+
+    $pluginCollection = $this->pluginGetCollection($plugin);
+    $pluginCollection->addMonoPlugin($key, $plugin);
+    return new ArgumentOffset($pluginCollection, $key);
   }
 
   /**
@@ -178,18 +193,18 @@ class PluginCollectionArg implements ArgumentInterface {
    * @param string $route
    * @param string $key
    * @param \crumbs_MonoPlugin $plugin
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeMonoPlugin($route, $key = NULL, \crumbs_MonoPlugin $plugin = NULL) {
     if (!isset($plugin)) {
       $plugin = $this->helper->monoPluginFromKey($key);
     }
     $key = $this->helper->buildAbsoluteKey($key);
-    if ($plugin instanceof \crumbs_MonoPlugin_FindParentInterface) {
-      $this->parentPluginCollection->addMonoPlugin($key, $plugin, $route);
-    }
-    if ($plugin instanceof \crumbs_MonoPlugin_FindTitleInterface) {
-      $this->titlePluginCollection->addMonoPlugin($key, $plugin, $route);
-    }
+
+    $pluginCollection = $this->pluginGetCollection($plugin);
+    $pluginCollection->addMonoPlugin($key, $plugin, $route);
+    return new ArgumentOffset($pluginCollection, $key);
   }
 
   /**
@@ -203,6 +218,8 @@ class PluginCollectionArg implements ArgumentInterface {
    *   Or NULL, to have the plugin object automatically created based on a
    *   class name guessed from the $key parameter and the module name.
    *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
+   *
    * @throws \Exception
    */
   function multiPlugin($key = NULL, \crumbs_MultiPlugin $plugin = NULL) {
@@ -210,43 +227,42 @@ class PluginCollectionArg implements ArgumentInterface {
       $plugin = $this->helper->multiPluginFromKey($key);
     }
     $key = $this->helper->buildAbsoluteKey($key);
-    if ($plugin instanceof \crumbs_MultiPlugin_FindParentInterface) {
-      $this->parentPluginCollection->addMultiPlugin($key, $plugin);
-    }
-    if ($plugin instanceof \crumbs_MultiPlugin_FindTitleInterface) {
-      $this->titlePluginCollection->addMultiPlugin($key, $plugin);
-    }
+
+    $pluginCollection = $this->pluginGetCollection($plugin);
+    $pluginCollection->addMultiPlugin($key, $plugin);
+    return new ArgumentOffset($pluginCollection, $key . '.*');
   }
 
   /**
    * @param string $route
    * @param string|null $key
    * @param \crumbs_MultiPlugin|null $plugin
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeMultiPlugin($route, $key = NULL, \crumbs_MultiPlugin $plugin = NULL) {
     if (!isset($plugin)) {
       $plugin = $this->helper->multiPluginFromKey($key);
     }
     $key = $this->helper->buildAbsoluteKey($key);
-    if ($plugin instanceof \crumbs_MultiPlugin_FindParentInterface) {
-      $this->parentPluginCollection->addMultiPlugin($key, $plugin, $route);
-    }
-    if ($plugin instanceof \crumbs_MultiPlugin_FindTitleInterface) {
-      $this->titlePluginCollection->addMultiPlugin($key, $plugin, $route);
-    }
+
+    $pluginCollection = $this->pluginGetCollection($plugin);
+    $pluginCollection->addMultiPlugin($key, $plugin, $route);
+    return new ArgumentOffset($pluginCollection, $key . '.*');
   }
 
   /**
    * @param string $route
    * @param string $key
    * @param string $parent_path
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeParentPath($route, $key, $parent_path) {
-    $this->routeMonoPlugin($route, $key, new \crumbs_MonoPlugin_FixedParentPath($parent_path));
-    $this->describeFindParent($key, t("Parent path !parent_path for route !route", array(
-      '!parent_path' => '<code>' . check_plain($parent_path) . '</code>',
-      '!route' => '<code>' . check_plain($route) . '</code>',
-    )));
+    $plugin = new \crumbs_MonoPlugin_FixedParentPath($parent_path);
+    return $this->routeMonoPlugin($route, $key, $plugin)
+      ->describe('<code>' . check_plain($parent_path) . '</code>' . ' &raquo; '
+        . '<code>' . check_plain($route) . '</code>');
   }
 
   /**
@@ -261,9 +277,11 @@ class PluginCollectionArg implements ArgumentInterface {
    *   The callback, e.g. an anonymous function. The signature must be
    *   $callback(string $path, array $item), like the findParent() method of
    *   a typical crumbs_MonoPlugin.
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeParentCallback($route, $key, $callback) {
-    $this->routeMonoPlugin(
+    return $this->routeMonoPlugin(
       $route,
       $key,
       new \crumbs_MonoPlugin_ParentPathCallback(
@@ -276,13 +294,16 @@ class PluginCollectionArg implements ArgumentInterface {
    * @param string $route
    * @param string $key
    * @param string $title
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeTranslateTitle($route, $key, $title) {
-    $this->routeMonoPlugin($route, $key, new \crumbs_MonoPlugin_TranslateTitle($title));
-    $this->describeFindParent($key, t("Title t('@title') for route '@route'", array(
-      '@title' => $title,
-      '@route' => $route,
-    )));
+    $plugin = new \crumbs_MonoPlugin_TranslateTitle($title);
+    return $this->routeMonoPlugin($route, $key, $plugin)
+      ->translateDescription("Title t('@title') for route '@route'", array(
+        '@title' => $title,
+        '@route' => $route,
+      ));
   }
 
   /**
@@ -297,9 +318,11 @@ class PluginCollectionArg implements ArgumentInterface {
    *   The callback, e.g. an anonymous function. The signature must be
    *   $callback(string $path, array $item), like the findParent() method of
    *   a typical crumbs_MonoPlugin.
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeTitleCallback($route, $key, $callback) {
-    $this->routeMonoPlugin(
+    return $this->routeMonoPlugin(
       $route,
       $key,
       new \crumbs_MonoPlugin_TitleCallback(
@@ -311,9 +334,14 @@ class PluginCollectionArg implements ArgumentInterface {
   /**
    * @param string $route
    * @param string $key
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeSkipItem($route, $key) {
-    $this->routeMonoPlugin($route, $key, new \crumbs_MonoPlugin_SkipItem());
+    return $this->routeMonoPlugin($route, $key, new \crumbs_MonoPlugin_SkipItem())
+      ->translateDescription('Skip links with route !route', array(
+        '!route' => '<code>' . check_plain($route) . '</code>',
+      ));
   }
 
   /**
@@ -382,5 +410,30 @@ class PluginCollectionArg implements ArgumentInterface {
    */
   function fieldTypeParentPlugin($key, $field_type, FieldTypePluginInterface $plugin) {
     // TODO: Implement fieldTypeParentPlugin() method.
+  }
+
+  /**
+   * @param \crumbs_PluginInterface $plugin
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Collection\PluginCollectionInterface
+   */
+  private function pluginGetCollection(\crumbs_PluginInterface $plugin) {
+    /** @var \Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection[] $pluginCollections */
+    $pluginCollections = array();
+    if ($plugin instanceof ParentPluginInterface) {
+      $pluginCollections[] = $this->parentPluginCollection;
+    }
+    if ($plugin instanceof TitlePluginInterface) {
+      $pluginCollections[] = $this->titlePluginCollection;
+    }
+    switch (count($pluginCollections)) {
+      case 0:
+        dpm($plugin);
+        return new EmptyPluginCollection();
+      case 1:
+        return $pluginCollections[0];
+      default:
+        return new PluginCollectionCollection($pluginCollections);
+    }
   }
 }

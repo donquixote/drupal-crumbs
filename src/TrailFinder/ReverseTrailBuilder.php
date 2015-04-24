@@ -2,6 +2,7 @@
 
 namespace Drupal\crumbs\TrailFinder;
 
+use Drupal\crumbs\ParentFinder\Approval\AccessChecker;
 use Drupal\crumbs\ParentFinder\ParentFinderInterface;
 use Drupal\crumbs\Router\RouterInterface;
 
@@ -36,47 +37,54 @@ class ReverseTrailBuilder implements TrailFinderInterface {
    *   Format: $[$normalpath] = $router_item
    */
   function buildTrail($path) {
-    $path = $this->router->getNormalPath($path);
-    $trail_reverse = array();
-    while (isset($path)) {
-      if (isset($trail_reverse[$path])) {
+
+    $routerItem = $this->router->getRouterItem($path);
+    $reverseTrail = array();
+
+    $checker = new AccessChecker($this->router);
+
+    while (TRUE) {
+      $path = $routerItem['link_path'];
+
+      if (isset($reverseTrail[$path])) {
         // We found a loop! To prevent infinite recursion, we remove the loopy
         // paths from the trail and return the part that is not loopy.
-        while (isset($trail_reverse[$path])) {
-          array_pop($trail_reverse);
+        while (isset($reverseTrail[$path])) {
+          array_pop($reverseTrail);
         }
-        return $trail_reverse;
+        break;
       }
-      $item = $this->router->getRouterItem($path);
-      if (!is_array($item)) {
-        return $trail_reverse;
-      }
+
       // If this menu item is a default local task and links to its parent,
       // skip it and start the search from the parent instead.
-      if ($item['type'] & MENU_LINKS_TO_PARENT) {
-        $path = $item['tab_parent_href'];
-        $item = $this->router->getRouterItem($item['tab_parent_href']);
-        if (!is_array($item)) {
-          return $trail_reverse;
+      if ($routerItem['type'] & MENU_LINKS_TO_PARENT) {
+        $path = $routerItem['tab_parent_href'];
+        $routerItem = $this->router->getRouterItem($routerItem['tab_parent_href']);
+        if (!is_array($routerItem)) {
+          break;
         }
       }
 
-      $trail_reverse[$path] = $item;
+      // Add the item to the trail.
+      // Items with no access will be removed later.
+      $reverseTrail[$path] = $routerItem;
 
-      // For a path to be included in the trail, it must resolve to a valid
-      // router item, and the access check must pass.
-      if ($item['access']) {
+      $parentRouterItem = $this->parentFinder->findParentRouterItem($routerItem, $checker);
+      if (!isset($parentRouterItem)) {
+        break;
       }
-      $parent_path = $this->parentFinder->findParent($path, $item);
-      if ($parent_path === $path) {
+
+      if ($parentRouterItem['link_path'] === $path) {
         // This is again a loop, but with just one step.
         // Not as evil as the other kind of loop.
-        return $trail_reverse;
+        break;
       }
-      $path = $parent_path;
+
+      // Continue with the parent.
+      $routerItem = $parentRouterItem;
     }
 
-    return $trail_reverse;
+    return $reverseTrail;
   }
 
 }

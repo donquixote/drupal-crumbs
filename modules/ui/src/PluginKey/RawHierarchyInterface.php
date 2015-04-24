@@ -31,5 +31,5 @@ interface RawHierarchyInterface {
    *
    * @return bool
    */
-  public function keyHasSolidChildren($key);
+  public function keyExists($key);
 }

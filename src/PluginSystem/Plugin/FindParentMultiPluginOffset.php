@@ -2,9 +2,11 @@
 
 namespace Drupal\crumbs\PluginSystem\Plugin;
 
+use Drupal\crumbs\ParentFinder\Approval\CheckerInterface;
+use Drupal\crumbs\ParentFinder\ParentFinderInterface;
 use Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap;
 
-class FindParentMultiPluginOffset implements \crumbs_MonoPlugin_FindParentInterface {
+class FindParentMultiPluginOffset implements ParentFinderInterface {
 
   /**
    * @var \crumbs_MultiPlugin_FindParentInterface
@@ -45,60 +47,26 @@ class FindParentMultiPluginOffset implements \crumbs_MonoPlugin_FindParentInterf
   }
 
   /**
-   * @param \crumbs_InjectedAPI_describeMonoPlugin $api
-   *   Injected API object, with methods that allows the plugin to further
-   *   describe itself.
+   * @param array $routerItem
+   *   The router item to find a parent for..
+   * @param \Drupal\crumbs\ParentFinder\Approval\CheckerInterface $checker
    *
-   * @return string|void
-   *   As an alternative to the API object's methods, the plugin can simply
-   *   return a string label.
-   *
-   * @throws \Exception
+   * @return bool
+   *   The parent router item, or NULL.
    */
-  function describe($api) {
-    throw new \Exception("Not supported.");
-  }
-
-  /**
-   * Find candidates for the parent path.
-   *
-   * @param string $path
-   *   The path that we want to find a parent for.
-   * @param array $item
-   *   Item as returned from crumbs_get_router_item()
-   *
-   * @return string
-   *   Parent path candidate.
-   */
-  function findParent($path, $item) {
-    foreach ($this->multiPlugin->findParent($path, $item) as $candidateKey => $candidate) {
-      if (!isset($candidate)) {
+  function findParentRouterItem(array $routerItem, CheckerInterface $checker) {
+    $path = $routerItem['link_path'];
+    foreach ($this->multiPlugin->findParent($path, $routerItem) as $key => $parentPathCandidate) {
+      if (!isset($parentPathCandidate)) {
         continue;
       }
-      if ($this->weight === $this->localStatusMap->keyGetWeightOrFalse($candidateKey)) {
-        return $candidate;
-      }
-    }
-    return NULL;
-  }
-
-  /**
-   * @param string $path
-   * @param array $item
-   *
-   * @return string[]
-   */
-  public function findAllParents($path, $item) {
-    $all = array();
-    foreach ($this->multiPlugin->findParent($path, $item) as $candidateKey => $candidate) {
-      if (!isset($candidate)) {
+      if ($this->weight !== $this->localStatusMap->keyGetWeightOrFalse($key)) {
         continue;
       }
-      if ($this->weight === $this->localStatusMap->keyGetWeightOrFalse($candidateKey)) {
-        $all[$this->pluginKey . '.' . $candidateKey] = $candidate;
+      if ($checker->checkParentPath($parentPathCandidate, $key)) {
+        return TRUE;
       }
     }
-    return $all;
+    return FALSE;
   }
-
 }

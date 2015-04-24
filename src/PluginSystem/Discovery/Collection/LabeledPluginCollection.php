@@ -2,6 +2,8 @@
 
 namespace Drupal\crumbs\PluginSystem\Discovery\Collection;
 
+use Drupal\crumbs\PluginSystem\Discovery\DescribeMultiPluginArg;
+
 class LabeledPluginCollection extends RawPluginCollection {
 
   /**
@@ -24,12 +26,6 @@ class LabeledPluginCollection extends RawPluginCollection {
   function addMonoPlugin($key, \crumbs_MonoPlugin $plugin, $route = NULL) {
     parent::addMonoPlugin($key, $plugin, $route);
     $this->leaves[$key] = TRUE;
-
-    $api = new \crumbs_InjectedAPI_describeMonoPlugin($key, $this);
-    $descriptionOrNull = $plugin->describe($api);
-    if (is_string($descriptionOrNull)) {
-      $this->addDescription($key, $descriptionOrNull);
-    }
   }
 
   /**
@@ -41,7 +37,7 @@ class LabeledPluginCollection extends RawPluginCollection {
   function addMultiPlugin($key, \crumbs_MultiPlugin $plugin, $route = NULL) {
     parent::addMultiPlugin($key, $plugin, $route);
 
-    $api = new \crumbs_InjectedAPI_describeMultiPlugin($key, $this);
+    $api = new DescribeMultiPluginArg($key, $this);
     $descriptionOrNull = $plugin->describe($api);
     if (is_string($descriptionOrNull)) {
       $this->addDescription($key . '.*', $descriptionOrNull);
@@ -53,7 +49,7 @@ class LabeledPluginCollection extends RawPluginCollection {
    * @param string $description
    */
   public function addDescription($key, $description) {
-    if ('*' !== $description && '.*' !== substr($description, -2)) {
+    if ('*' !== $key && '.*' !== substr($key, -2)) {
       $this->leaves[$key] = TRUE;
     }
     $this->descriptions[$key][] = $description;

@@ -35,17 +35,8 @@ class HookCrumbsPlugins implements HookInterface {
       }
     }
 
-    // Organic groups is a special case,
-    // because 7.x-2.x behaves different from 7.x-1.x.
-    if (1
-      && isset($files['og'])
-      && !function_exists('og_get_group')
-    ) {
-      // We are using the og-7.x-1.x branch.
-      $files['og'] = $dir . '/crumbs.og.2.inc';
-    }
-
     // Since the directory order may be anything, sort alphabetically.
+    // @todo Probably the sorting is not necessary at all.
     ksort($files);
     foreach ($files as $file) {
       require_once $file;

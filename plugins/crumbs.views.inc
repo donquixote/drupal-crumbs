@@ -143,19 +143,6 @@ class views_CrumbsMonoPlugin_PageTitle implements crumbs_MonoPlugin_FindTitleInt
   }
 
   /**
-   * @param crumbs_InjectedAPI_describeMonoPlugin $api
-   *   Injected API object, with methods that allows the plugin to further
-   *   describe itself.
-   *
-   * @return string|void
-   *   As an alternative to the API object's methods, the plugin can simply
-   *   return a string label.
-   */
-  function describe($api) {
-    // This is done in the hook.
-  }
-
-  /**
    * {@inheritdoc}
    */
   function findTitle($path, $item) {

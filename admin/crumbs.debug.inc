@@ -7,7 +7,6 @@
  *   The rendered HTML for the debug page.
  */
 function crumbs_debug_page() {
-  drupal_set_title('Crumbs debug');
 
   $path_to_test = '';
   if (isset($_GET['path_to_test'])) {

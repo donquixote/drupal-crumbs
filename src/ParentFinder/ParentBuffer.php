@@ -2,27 +2,31 @@
 
 namespace Drupal\crumbs\ParentFinder;
 
+use Drupal\crumbs\ParentFinder\Approval\CheckerInterface;
+
 /**
  * Runtime cache for parent-finding.
  */
 class ParentBuffer extends ParentFinderDecoratorBase {
 
   /**
-   * @var (string|NULL)[]
-   *   Format: $[$path] = $parentPath
+   * @var (array|NULL)[]
+   *   Format: $[$path] = $parentRouterItem
    */
   private $cache = array();
 
   /**
-   * @param string $path
-   * @param array $item
+   * @param array $routerItem
+   *   The router item to find a parent for..
+   * @param \Drupal\crumbs\ParentFinder\Approval\CheckerInterface $checker
    *
-   * @return string|NULL
-   *   The normalized parent path, or NULL.
+   * @return array|NULL
+   *   The parent router item, or NULL.
    */
-  function findParent($path, array $item) {
+  function findParentRouterItem(array $routerItem, CheckerInterface $checker) {
+    $path = $routerItem['link_path'];
     return isset($this->cache[$path])
       ? $this->cache[$path]
-      : $this->cache[$path] = $this->decorated->findParent($path, $item);
+      : $this->cache[$path] = $this->decorated->findParentRouterItem($routerItem, $checker);
   }
 }

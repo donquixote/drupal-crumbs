@@ -45,21 +45,6 @@ class FindTitleMultiPluginOffset implements \crumbs_MonoPlugin_FindTitleInterfac
   }
 
   /**
-   * @param \crumbs_InjectedAPI_describeMonoPlugin $api
-   *   Injected API object, with methods that allows the plugin to further
-   *   describe itself.
-   *
-   * @return string|void
-   *   As an alternative to the API object's methods, the plugin can simply
-   *   return a string label.
-   *
-   * @throws \Exception
-   */
-  function describe($api) {
-    throw new \Exception("Not supported.");
-  }
-
-  /**
    * Find candidates for the title.
    *
    * @param string $path

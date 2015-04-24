@@ -52,7 +52,7 @@ class MockRouter implements RouterInterface {
    *   TRUE, if external path.
    */
   function urlIsExternal($url) {
-    return url_is_external($url);
+    return FALSE;
   }
 
   /**

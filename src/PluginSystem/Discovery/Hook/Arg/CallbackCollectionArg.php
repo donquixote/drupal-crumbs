@@ -2,6 +2,8 @@
 
 namespace Drupal\crumbs\PluginSystem\Discovery\Hook\Arg;
 
+use Drupal\crumbs\PluginSystem\Discovery\Collection\CallbackCollection;
+use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\EmptyArgumentOffset;
 use Drupal\crumbs\PluginSystem\FieldTypePlugin\FieldTypePluginInterface;
 
 class CallbackCollectionArg implements ArgumentInterface {
@@ -12,14 +14,14 @@ class CallbackCollectionArg implements ArgumentInterface {
   private $module;
 
   /**
-   * @var \crumbs_InjectedAPI_Collection_CallbackCollection
+   * @var \Drupal\crumbs\PluginSystem\Discovery\Collection\CallbackCollection
    */
   private $callbackCollection;
 
   /**
-   * @param \crumbs_InjectedAPI_Collection_CallbackCollection $callbackCollection
+   * @param \Drupal\crumbs\PluginSystem\Discovery\Collection\CallbackCollection $callbackCollection
    */
-  function __construct(\crumbs_InjectedAPI_Collection_CallbackCollection $callbackCollection) {
+  function __construct(CallbackCollection $callbackCollection) {
     $this->callbackCollection = $callbackCollection;
   }
 
@@ -51,9 +53,12 @@ class CallbackCollectionArg implements ArgumentInterface {
    * @param string[]|string|NULL $types
    *   An array of entity types, or a single entity type, or NULL to allow all
    *   entity types.
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function entityParentPlugin($key, $entity_plugin = NULL, $types = NULL) {
     // Do nothing, because this is not a callback.
+    return new EmptyArgumentOffset();
   }
 
   /**
@@ -66,9 +71,12 @@ class CallbackCollectionArg implements ArgumentInterface {
    * @param string[]|string|NULL $types
    *   An array of entity types, or a single entity type, or NULL to allow all
    *   entity types.
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function entityParentCallback($key, $callback, $types = NULL) {
     $this->callbackCollection->addCallback($this->module, 'entityParent', $key, $callback);
+    return new EmptyArgumentOffset();
   }
 
   /**
@@ -79,9 +87,12 @@ class CallbackCollectionArg implements ArgumentInterface {
    * @param string[]|string|NULL $types
    *   An array of entity types, or a single entity type, or NULL to allow all
    *   entity types.
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function entityTitlePlugin($key, $entity_plugin = NULL, $types = NULL) {
     // Do nothing, because this is not a callback.
+    return new EmptyArgumentOffset();
   }
 
   /**
@@ -100,9 +111,12 @@ class CallbackCollectionArg implements ArgumentInterface {
    * @param string[]|string|NULL $types
    *   An array of entity types, or a single entity type, or NULL to allow all
    *   entity types.
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function entityTitleCallback($key, $callback, $types = NULL) {
     $this->callbackCollection->addCallback($this->module, 'entityTitle', $key, $callback);
+    return new EmptyArgumentOffset();
   }
 
   /**
@@ -116,10 +130,13 @@ class CallbackCollectionArg implements ArgumentInterface {
    *   Or NULL, to have the plugin object automatically created based on a
    *   class name guessed from the $key parameter and the module name.
    *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
+   *
    * @throws \Exception
    */
   function monoPlugin($key = NULL, \crumbs_MonoPlugin $plugin = NULL) {
     // Do nothing, because this is not a callback.
+    return new EmptyArgumentOffset();
   }
 
   /**
@@ -128,9 +145,12 @@ class CallbackCollectionArg implements ArgumentInterface {
    * @param string $route
    * @param string $key
    * @param \crumbs_MonoPlugin $plugin
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeMonoPlugin($route, $key = NULL, \crumbs_MonoPlugin $plugin = NULL) {
     // Do nothing, because this is not a callback.
+    return new EmptyArgumentOffset();
   }
 
   /**
@@ -144,28 +164,37 @@ class CallbackCollectionArg implements ArgumentInterface {
    *   Or NULL, to have the plugin object automatically created based on a
    *   class name guessed from the $key parameter and the module name.
    *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
+   *
    * @throws \Exception
    */
   function multiPlugin($key = NULL, \crumbs_MultiPlugin $plugin = NULL) {
     // Do nothing, because this is not a callback.
+    return new EmptyArgumentOffset();
   }
 
   /**
    * @param string $route
    * @param string|null $key
-   * @param \crumbs_MultiPlugin|null $plugin
+   * @param \crumbs_MultiPlugin|NULL $plugin
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeMultiPlugin($route, $key = NULL, \crumbs_MultiPlugin $plugin = NULL) {
     // Do nothing, because this is not a callback.
+    return new EmptyArgumentOffset();
   }
 
   /**
    * @param string $route
    * @param string $key
    * @param string $parent_path
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeParentPath($route, $key, $parent_path) {
     // Do nothing, because this is not a callback.
+    return new EmptyArgumentOffset();
   }
 
   /**
@@ -180,18 +209,24 @@ class CallbackCollectionArg implements ArgumentInterface {
    *   The callback, e.g. an anonymous function. The signature must be
    *   $callback(string $path, array $item), like the findParent() method of
    *   a typical crumbs_MonoPlugin.
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeParentCallback($route, $key, $callback) {
     $this->callbackCollection->addCallback($this->module, 'routeParent', $key, $callback);
+    return new EmptyArgumentOffset();
   }
 
   /**
    * @param string $route
    * @param string $key
    * @param string $title
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeTranslateTitle($route, $key, $title) {
     // Do nothing, because this is not a callback.
+    return new EmptyArgumentOffset();
   }
 
   /**
@@ -206,17 +241,23 @@ class CallbackCollectionArg implements ArgumentInterface {
    *   The callback, e.g. an anonymous function. The signature must be
    *   $callback(string $path, array $item), like the findParent() method of
    *   a typical crumbs_MonoPlugin.
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeTitleCallback($route, $key, $callback) {
     $this->callbackCollection->addCallback($this->module, 'routeTitle', $key, $callback);
+    return new EmptyArgumentOffset();
   }
 
   /**
    * @param string $route
    * @param string $key
+   *
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\Offset\ArgumentOffsetInterface
    */
   function routeSkipItem($route, $key) {
     // Do nothing, because this is not a callback.
+    return new EmptyArgumentOffset();
   }
 
   /**

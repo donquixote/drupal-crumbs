@@ -7,6 +7,12 @@ namespace Drupal\crumbs_ui\Form;
  */
 interface FormSubmitInterface {
 
-  function submit($form, &$form_state);
+  /**
+   * Form submit callback.
+   *
+   * @param array $form
+   * @param array $form_state
+   */
+  function submit(array $form, array &$form_state);
 
 }

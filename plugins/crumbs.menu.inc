@@ -1,17 +1,22 @@
 <?php
-
+use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
 
 /**
  * Implementation of hook_crumbs_plugins()
  *
- * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
+ * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
  */
-function menu_crumbs_plugins($api) {
-  $api->multiPlugin('hierarchy');
-  $api->multiPlugin('link_title');
-  $api->disabledByDefault('hierarchy.*');
-  $api->disabledByDefault('link_title.*');
-  $api->routeMonoPlugin('crumbs/special-menu-item/%', 'specialItems');
+function menu_crumbs_plugins(ArgumentInterface $api) {
+  $offset = $api->multiPlugin('hierarchy')
+    ->translateDescription('Menu hierarchy')
+    ->disabledByDefault();
+
+  $api->multiPlugin('link_title')
+    ->translateDescription('Menu link title')
+    ->disabledByDefault();
+
+  $api->routeMonoPlugin('crumbs/special-menu-item/%', 'specialItems')
+    ->translateDescription('Special menu items');
 }
 
 
@@ -21,7 +26,6 @@ class menu_CrumbsMultiPlugin_hierarchy implements crumbs_MultiPlugin_FindParentI
    * {@inheritdoc}
    */
   function describe($api) {
-    $api->addDescription(t('Menu hierarchy'));
     foreach (menu_get_menus() as $key => $title) {
       $api->addRule($key, $title);
     }
@@ -82,7 +86,6 @@ class menu_CrumbsMultiPlugin_link_title implements crumbs_MultiPlugin_FindTitleI
     foreach (menu_get_menus() as $key => $title) {
       $api->ruleWithLabel($key, $title, t('Menu'));
     }
-    $api->addDescription(t('Menu link title'));
   }
 
   /**
@@ -177,13 +180,6 @@ class menu_CrumbsMultiPlugin_link_title implements crumbs_MultiPlugin_FindTitleI
 }
 
 class menu_CrumbsMonoPlugin_specialItems implements crumbs_MonoPlugin_FindParentInterface {
-
-  /**
-   * {@inheritdoc}
-   */
-  function describe($api) {
-    return 'Special menu items';
-  }
 
   /**
    * {@inheritdoc}

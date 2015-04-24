@@ -3,13 +3,14 @@
 
 // Menu system callbacks
 // -----------------------------------------------------------------------------
+use Drupal\crumbs\Exception\UnserializeException;
 
 /**
  * Page callback for 'crumbs/special-menu-item/%menu_link'
  *
  * @param array $menu_link
  */
-function crumbs_special_menu_link_page(array $menu_link) {
+function _crumbs_special_menu_link_page(array $menu_link) {
   drupal_goto('<front>');
 }
 
@@ -18,8 +19,23 @@ function crumbs_special_menu_link_page(array $menu_link) {
  *
  * @param array $menu_link
  */
-function crumbs_special_menu_link_title(array $menu_link) {
+function _crumbs_special_menu_link_title(array $menu_link) {
   return $menu_link['title'];
+}
+
+/**
+ * Page callback for admin/structure/crumbs.
+ *
+ * @return string
+ */
+function _crumbs_ui_not_installed_warning_page() {
+  if (!module_exists('crumbs_ui')) {
+    return t('The Crumbs UI (crumbs_ui) module is currently not installed.');
+  }
+  else {
+    menu_rebuild();
+    return t('The Crumbs UI (crumbs_ui) module is installed, but the menu had to be rebuilt. Please refresh the page.');
+  }
 }
 
 /**
@@ -73,110 +89,6 @@ function _crumbs_user_access_or(array $permissions, $account = NULL) {
 }
 
 
-// Form element callbacks
-// -----------------------------------------------------------------------------
-
-/**
- * Value callback for tabledrag element ($element['#value_callback']).
- *
- * @param array $element
- * @param array|bool $input
- * @param array $form_state
- *
- * @throws Exception
- * @return array|bool
- */
-function _crumbs_element_value_callback(&$element, $input = FALSE, $form_state = array()) {
-  return _crumbs_element_object($element)->value_callback($element, $input, $form_state);
-}
-
-/**
- * Processor callback for tabledrag element ($element['#process']).
- * See form_process_checkboxes() for an example how these processors work.
- *
- * @param array $element
- * @param array $form_state
- *
- * @throws Exception
- * @return array
- */
-function _crumbs_element_process($element, $form_state) {
-  return _crumbs_element_object($element)->process($element, $form_state);
-}
-
-/**
- * After build callback for tabledrag element ($element['#after_build']).
- *
- * @param array $element
- * @param array $form_state
- *
- * @throws Exception
- * @return array
- */
-function _crumbs_element_after_build($element, $form_state) {
-  return _crumbs_element_object($element)->after_build($element, $form_state);
-}
-
-/**
- * Pre-render callback for tabledrag element ($element['#pre_render']).
- *
- * @param array $element
- *
- * @throws Exception
- * @return array
- */
-function _crumbs_element_pre_render($element) {
-  return _crumbs_element_object($element)->pre_render($element);
-}
-
-/**
- * Validation callback for tabledrag element ($element['#element_validate']).
- *
- * @param array $element
- * @param array $form_state
- *
- * @throws Exception
- */
-function _crumbs_element_validate(&$element, &$form_state) {
-  _crumbs_element_object($element)->validate($element, $form_state);
-}
-
-/**
- * Lazy-create an object representing the form element.
- * This allows to use methods instead of procedural callbacks.
- *
- * There will be one instance per element, so the object can actually hold some
- * state information.
- *
- * This mechanic would even make sense as a reusable module, but for now we just
- * have it crumbs-specific.
- *
- * @param array $element
- *
- * @throws Exception
- * @return crumbs_Admin_ElementObject_WeightsAbstract
- */
-function _crumbs_element_object(&$element) {
-  if (!isset($element['#crumbs_element_object'])) {
-    switch ($element['#type']) {
-      case 'crumbs_weights_tabledrag':
-        $obj = new crumbs_Admin_ElementObject_WeightsTabledrag($element);
-        break;
-      case 'crumbs_weights_textual':
-        $obj = new crumbs_Admin_ElementObject_WeightsTextual($element);
-        break;
-      case 'crumbs_weights_expansible':
-        $obj = new crumbs_Admin_ElementObject_WeightsExpansible($element);
-        break;
-      default:
-        throw new Exception('Unknown element type "' . $element['#type'] . '".');
-    }
-    $element['#crumbs_element_object'] = $obj;
-  }
-  return $element['#crumbs_element_object'];
-}
-
-
 // Other callbacks
 // -----------------------------------------------------------------------------
 
@@ -215,8 +127,9 @@ function _crumbs_admin_flush_cache() {
  * Callback to be registered with ini_set('unserialize_callback_func', *)
  *
  * @param string $class
- * @throws crumbs_UnserializeException
+ *
+*@throws UnserializeException
  */
 function _crumbs_unserialize_failure($class) {
-  throw new crumbs_UnserializeException();
+  throw new UnserializeException();
 }

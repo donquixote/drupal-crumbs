@@ -2,91 +2,11 @@
 
 namespace Drupal\crumbs\PluginSystem\Engine;
 
-use Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection;
-use Drupal\crumbs\ParentFinder\ParentFinder;
 use Drupal\crumbs\PluginSystem\Plugin\FindParentMultiPluginOffset;
 use Drupal\crumbs\PluginSystem\Plugin\FindTitleMultiPluginOffset;
 use Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap;
-use Drupal\crumbs\Router\RouterInterface;
-use Drupal\crumbs\TitleFinder\TitleFinder;
 
 class FactoryUtil {
-
-  /**
-   * @param RawPluginCollection $pluginCollection
-   * @param \Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap $statusMap
-   * @param \crumbs_Router|\Drupal\crumbs\Router\RouterInterface $router
-   *
-   * @return \Drupal\crumbs\ParentFinder\ParentFinder
-   * @throws \Exception
-   */
-  static function createParentFinder(
-    RawPluginCollection $pluginCollection,
-    PluginStatusWeightMap $statusMap,
-    RouterInterface $router
-  ) {
-    $fallbackPluginsByWeight = static::groupParentPluginsByWeight(
-      $pluginCollection->getRoutelessPlugins(),
-      $statusMap);
-
-    $fallbackPluginsSorted = static::flattenPluginsByWeight($fallbackPluginsByWeight);
-
-    $fallbackPluginEngine = new ParentFinderEngine($fallbackPluginsSorted, $router);
-
-    $routePluginEngines = array();
-    foreach ($pluginCollection->getRoutePluginsByRoute() as $route => $plugins) {
-      $pluginsByWeight = static::groupParentPluginsByWeight($plugins, $statusMap);
-      foreach ($fallbackPluginsByWeight as $weight => $fallbackPlugins) {
-        if (isset($pluginsByWeight[$weight])) {
-          $pluginsByWeight[$weight] += $fallbackPlugins;
-        }
-        else {
-          $pluginsByWeight[$weight] = $fallbackPlugins;
-        }
-      }
-      $routePluginsSorted = static::flattenPluginsByWeight($pluginsByWeight);
-      $routePluginEngines[$route] = new ParentFinderEngine($routePluginsSorted, $router);
-    }
-
-    return new ParentFinder($routePluginEngines, $fallbackPluginEngine);
-  }
-
-  /**
-   * @param \Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection $pluginCollection
-   * @param \Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap $statusMap
-   *
-   * @return \Drupal\crumbs\TitleFinder\TitleFinder
-   * @throws \Exception
-   */
-  static function createTitleFinder(
-    RawPluginCollection $pluginCollection,
-    PluginStatusWeightMap $statusMap
-  ) {
-    $fallbackPluginsByWeight = static::groupTitlePluginsByWeight(
-      $pluginCollection->getRoutelessPlugins(),
-      $statusMap);
-
-    $fallbackPluginsSorted = static::flattenPluginsByWeight($fallbackPluginsByWeight);
-
-    $fallbackPluginEngine = new TitleFinderEngine($fallbackPluginsSorted);
-
-    $routePluginEngines = array();
-    foreach ($pluginCollection->getRoutePluginsByRoute() as $route => $plugins) {
-      $pluginsByWeight = static::groupTitlePluginsByWeight($plugins, $statusMap);
-      foreach ($fallbackPluginsByWeight as $weight => $fallbackPlugins) {
-        if (isset($pluginsByWeight[$weight])) {
-          $pluginsByWeight[$weight] += $fallbackPlugins;
-        }
-        else {
-          $pluginsByWeight[$weight] = $fallbackPlugins;
-        }
-      }
-      $routePluginsSorted = static::flattenPluginsByWeight($pluginsByWeight);
-      $routePluginEngines[$route] = new TitleFinderEngine($routePluginsSorted);
-    }
-
-    return new TitleFinder($routePluginEngines, $fallbackPluginEngine);
-  }
 
   /**
    * @param \crumbs_PluginInterface[][] $pluginsByWeight

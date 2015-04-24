@@ -40,19 +40,6 @@ class crumbs_MonoPlugin_LegacyWrapper implements crumbs_MonoPlugin_FindParentInt
   }
 
   /**
-   * @param crumbs_InjectedAPI_describeMonoPlugin $api
-   *   Injected API object, with methods that allows the plugin to further
-   *   describe itself.
-   *
-   * @return string|void
-   *   As an alternative to the API object's methods, the plugin can simply
-   *   return a string label.
-   */
-  function describe($api) {
-    return $this->wrappedPlugin->describe($api);
-  }
-
-  /**
    * Find candidates for the parent path.
    *
    * @param string $path

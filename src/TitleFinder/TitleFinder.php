@@ -2,7 +2,10 @@
 
 namespace Drupal\crumbs\TitleFinder;
 
+use Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection;
+use Drupal\crumbs\PluginSystem\Engine\FactoryUtil;
 use Drupal\crumbs\PluginSystem\Engine\TitleFinderEngine;
+use Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap;
 
 class TitleFinder implements TitleFinderInterface {
 
@@ -23,6 +26,43 @@ class TitleFinder implements TitleFinderInterface {
   function __construct(array $routePluginEngines, TitleFinderEngine $fallbackPluginEngine) {
     $this->routePluginEngines = $routePluginEngines;
     $this->fallbackPluginEngine = $fallbackPluginEngine;
+  }
+
+  /**
+   * @param \Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection $pluginCollection
+   * @param \Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap $statusMap
+   *
+   * @return static
+   */
+  public static function create(
+    RawPluginCollection $pluginCollection,
+    PluginStatusWeightMap $statusMap
+  ) {
+    $fallbackPluginsByWeight = FactoryUtil::groupTitlePluginsByWeight(
+      $pluginCollection->getRoutelessPlugins(),
+      $statusMap
+    );
+
+    $fallbackPluginsSorted = FactoryUtil::flattenPluginsByWeight($fallbackPluginsByWeight);
+
+    $fallbackPluginEngine = new TitleFinderEngine($fallbackPluginsSorted);
+
+    $routePluginEngines = array();
+    foreach ($pluginCollection->getRoutePluginsByRoute() as $route => $plugins) {
+      $pluginsByWeight = FactoryUtil::groupTitlePluginsByWeight($plugins, $statusMap);
+      foreach ($fallbackPluginsByWeight as $weight => $fallbackPlugins) {
+        if (isset($pluginsByWeight[$weight])) {
+          $pluginsByWeight[$weight] += $fallbackPlugins;
+        }
+        else {
+          $pluginsByWeight[$weight] = $fallbackPlugins;
+        }
+      }
+      $routePluginsSorted = FactoryUtil::flattenPluginsByWeight($pluginsByWeight);
+      $routePluginEngines[$route] = new TitleFinderEngine($routePluginsSorted);
+    }
+
+    return new static($routePluginEngines, $fallbackPluginEngine);
   }
 
   /**

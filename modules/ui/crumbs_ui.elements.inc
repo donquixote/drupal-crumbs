@@ -1,6 +1,6 @@
 <?php
-use Drupal\crumbs_ui\Element\ElementInterface;
-use Drupal\crumbs_ui\Element\Theme\ElementThemeInterface;
+use Drupal\crumbs_ui\FormElement\ElementInterface;
+use Drupal\crumbs_ui\FormElement\Theme\ElementThemeInterface;
 
 /**
  * Implements hook_element_info()
@@ -28,16 +28,13 @@ function crumbs_ui_element_info() {
  * Value callback for tabledrag element ($element['#value_callback']).
  *
  * @param array $element
- * @param array|bool $input
+ * @param array|bool|NULL $input
  * @param array $form_state
  *
  * @throws Exception
  * @return array|bool
  */
 function _crumbs_ui_element_value_callback(&$element, $input = FALSE, $form_state = array()) {
-  if (!isset($input)) {
-    throw new \InvalidArgumentException("Unexpected input NULL.");
-  }
   return _crumbs_ui_element_object($element)->value_callback($element, $input, $form_state);
 }
 
@@ -53,7 +50,7 @@ function _crumbs_ui_element_value_callback(&$element, $input = FALSE, $form_stat
  */
 function _crumbs_ui_element_process($element, $form_state) {
   $object = _crumbs_ui_element_object($element);
-  if ($object instanceof \Drupal\crumbs_ui\Element\PreRenderInterface) {
+  if ($object instanceof \Drupal\crumbs_ui\FormElement\PreRenderInterface) {
     /** @see _crumbs_ui_element_pre_render() */
     $element['#pre_render'][] = '_crumbs_ui_element_pre_render';
   }
@@ -90,7 +87,7 @@ function _crumbs_ui_element_object(&$element) {
  */
 function _crumbs_ui_element_pre_render($element) {
   $object = _crumbs_ui_element_object($element);
-  if (!$object instanceof \Drupal\crumbs_ui\Element\PreRenderInterface) {
+  if (!$object instanceof \Drupal\crumbs_ui\FormElement\PreRenderInterface) {
     throw new RuntimeException('Element object must implement PreRenderInterface.');
   }
   return $object->pre_render($element);

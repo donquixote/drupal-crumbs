@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\crumbs\PluginSystem\Discovery\DescribeMultiPluginArg;
+
 abstract class crumbs_MultiPlugin_EntityFindAbstract implements crumbs_MultiPlugin {
 
   /**
@@ -10,7 +12,7 @@ abstract class crumbs_MultiPlugin_EntityFindAbstract implements crumbs_MultiPlug
   /**
    * Helper method for describe()
    *
-   * @param crumbs_InjectedAPI_describeMultiPlugin $api
+   * @param DescribeMultiPluginArg $api
    * @param string $entity_type
    * @param string $label
    * @return array

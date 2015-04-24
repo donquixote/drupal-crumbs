@@ -1,12 +1,13 @@
 <?php
-
+use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
+use Drupal\crumbs\Util;
 
 /**
  * Implements hook_crumbs_plugins()
  *
- * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
+ * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
  */
-function taxonomy_crumbs_plugins($api) {
+function taxonomy_crumbs_plugins(ArgumentInterface $api) {
 
   $api->routeMultiPlugin('taxonomy/term/%', 'termParent');
 
@@ -48,7 +49,7 @@ class taxonomy_CrumbsMultiPlugin_termParent implements crumbs_MultiPlugin_FindPa
    *   Parent path candidates
    */
   function findParent($path, $item) {
-    if (FALSE === $term = crumbs_Util::itemExtractEntity($item, 'taxonomy_term', 2)) {
+    if (FALSE === $term = Util::itemExtractEntity($item, 'taxonomy_term', 2)) {
       return NULL;
     }
 

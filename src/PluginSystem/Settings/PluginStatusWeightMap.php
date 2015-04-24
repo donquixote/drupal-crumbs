@@ -22,8 +22,8 @@ class PluginStatusWeightMap {
       'statuses' => array(),
       'weights' => array(),
     );
-    $statuses = array('*' => TRUE) + $defaultStatuses + $settings['statuses'];
-    $weights = array('*' => 0) + $settings['weights'];
+    $statuses = $settings['statuses'] + $defaultStatuses + array('*' => TRUE);
+    $weights = $settings['weights'] + array('*' => 0);
     return static::create($statuses, $weights);
   }
 

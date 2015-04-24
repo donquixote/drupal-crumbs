@@ -2,6 +2,7 @@
 
 namespace Drupal\crumbs\ParentFinder;
 
+use Drupal\crumbs\ParentFinder\Approval\CheckerInterface;
 use Drupal\crumbs\Router\RouterInterface;
 
 class ParentFallback extends ParentFinderDecoratorBase {
@@ -21,15 +22,30 @@ class ParentFallback extends ParentFinderDecoratorBase {
   }
 
   /**
-   * @param string $path
-   * @param array $item
+   * @param array $routerItem
+   *   The router item to find a parent for..
+   * @param \Drupal\crumbs\ParentFinder\Approval\CheckerInterface $checker
    *
-   * @return string|NULL
+   * @return array|NULL
+   *   The parent router item, or NULL.
    */
-  function findParent($path, array $item) {
-    $parentPath = $this->decorated->findParent($path, $item);
-    return isset($parentPath)
-      ? $parentPath
-      : $this->router->reducePath($path);
+  function findParentRouterItem(array $routerItem, CheckerInterface $checker) {
+
+    $parentRouterItem = $this->decorated->findParentRouterItem($routerItem, $checker);
+    if (isset($parentRouterItem)) {
+      return $parentRouterItem;
+    }
+
+    // Chop off path fragments at the end, to find a valid parent.
+    $fragments = $routerItem['fragments'];
+    while (count($fragments) > 1) {
+      array_pop($fragments);
+      $parentRouterItem = $checker->checkParentPath(implode('/', $fragments), '.ParentFallback');
+      if (isset($parentRouterItem)) {
+        return $parentRouterItem;
+      }
+    }
+
+    return NULL;
   }
 }

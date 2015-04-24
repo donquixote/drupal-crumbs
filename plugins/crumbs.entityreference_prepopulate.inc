@@ -1,12 +1,12 @@
 <?php
-
+use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
 
 /**
  * Implements hook_crumbs_plugins().
  *
- * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
+ * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
  */
-function entityreference_prepopulate_crumbs_plugins($api) {
+function entityreference_prepopulate_crumbs_plugins(ArgumentInterface $api) {
   foreach (field_info_fields() as $field_name => $field_info) {
     if (0
       || $field_info['type'] !== 'entityreference'
@@ -32,6 +32,8 @@ function entityreference_prepopulate_crumbs_plugins($api) {
       $api->routeMonoPlugin($route, "node.$field_name.$node_type", $plugin);
     }
   }
+
+  $api->describeFindParent('node.*', t('Entityreference prepopulate'));
 }
 
 class entityreference_prepopulate_CrumbsMonoPlugin_node implements crumbs_MonoPlugin_FindParentInterface {
@@ -63,15 +65,6 @@ class entityreference_prepopulate_CrumbsMonoPlugin_node implements crumbs_MonoPl
     $this->nodeType = $node_type;
     $this->fieldName = $field_name;
     $this->targetType = $target_type;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  function describe($api) {
-    $api->titleWithLabel(t('!field_name from request', array(
-      '!field_name' => '<code>?' . $this->fieldName . '=*</code>',
-    )), t('Parent'));
   }
 
   /**
