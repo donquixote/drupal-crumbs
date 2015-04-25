@@ -2,18 +2,20 @@
 
 namespace Drupal\crumbs\ParentFinder\Approval;
 
-class CollectorChecker implements CheckerInterface {
+use Drupal\crumbs\Router\RouterInterface;
+
+class DebugCollectorChecker implements CheckerInterface {
 
   /**
-   * @var string[][]
+   * @var array[]
    */
-  private $collectedPaths = array();
+  private $collected = array();
 
   /**
-   * @return string[][]
+   * @return array[]
    */
-  public function getCollectedPaths() {
-    return $this->collectedPaths;
+  public function getCollected() {
+    return $this->collected;
   }
 
   /**
@@ -26,7 +28,7 @@ class CollectorChecker implements CheckerInterface {
    *   The router item for the given path, or NULL.
    */
   function checkParentPath($path, $key) {
-    $this->collectedPaths[] = array($path, $key);
+    $this->collected[] = array($path, $key);
   }
 
   /**
@@ -37,6 +39,6 @@ class CollectorChecker implements CheckerInterface {
    *   TRUE, if the router item is accepted in the breadcrumb trail.
    */
   function checkRouterItem(array $routerItem, $key) {
-    $this->collectedPaths[] = array($routerItem['link_path'], $key);
+    $this->collected[] = array($routerItem['link_path'], $key);
   }
 }

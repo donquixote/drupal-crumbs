@@ -15,4 +15,11 @@ abstract class TitleFinderDecoratorBase implements TitleFinderInterface {
   function __construct(TitleFinderInterface $decorated) {
     $this->decorated = $decorated;
   }
+
+  /**
+   * @return \Drupal\crumbs\TitleFinder\TitleFinderInterface
+   */
+  function getDecorated() {
+    return $this->decorated;
+  }
 }

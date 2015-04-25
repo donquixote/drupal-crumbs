@@ -15,4 +15,11 @@ abstract class TrailFinderDecoratorBase implements TrailFinderInterface {
   function __construct(TrailFinderInterface $decorated) {
     $this->decorated = $decorated;
   }
+
+  /**
+   * @return \Drupal\crumbs\TrailFinder\TrailFinderInterface
+   */
+  function getDecorated() {
+    return $this->decorated;
+  }
 }

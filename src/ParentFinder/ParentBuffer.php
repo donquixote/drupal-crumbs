@@ -2,6 +2,7 @@
 
 namespace Drupal\crumbs\ParentFinder;
 
+use Drupal\crumbs\ParentFinder\Approval\AccessChecker;
 use Drupal\crumbs\ParentFinder\Approval\CheckerInterface;
 
 /**
@@ -25,8 +26,17 @@ class ParentBuffer extends ParentFinderDecoratorBase {
    */
   function findParentRouterItem(array $routerItem, CheckerInterface $checker) {
     $path = $routerItem['link_path'];
-    return isset($this->cache[$path])
-      ? $this->cache[$path]
-      : $this->cache[$path] = $this->decorated->findParentRouterItem($routerItem, $checker);
+    if (isset($this->cache[$path])) {
+      if ($checker->checkRouterItem($this->cache[$path], '.Cache')) {
+        return TRUE;
+      }
+    }
+    if ($this->decorated->findParentRouterItem($routerItem, $checker)) {
+      if ($checker instanceof AccessChecker) {
+        $this->cache[$path] = $checker->getParentRouterItem();
+      }
+      return TRUE;
+    }
+    return FALSE;
   }
 }

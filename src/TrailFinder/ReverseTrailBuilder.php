@@ -39,11 +39,15 @@ class ReverseTrailBuilder implements TrailFinderInterface {
   function buildTrail($path) {
 
     $routerItem = $this->router->getRouterItem($path);
-    $reverseTrail = array();
+    if (!is_array($routerItem)) {
+      return array();
+    }
 
+    $reverseTrail = array();
     $checker = new AccessChecker($this->router);
 
     while (TRUE) {
+
       $path = $routerItem['link_path'];
 
       if (isset($reverseTrail[$path])) {
@@ -52,6 +56,7 @@ class ReverseTrailBuilder implements TrailFinderInterface {
         while (isset($reverseTrail[$path])) {
           array_pop($reverseTrail);
         }
+        \Drupal\krumong\dpm('BIG LOOP');
         break;
       }
 
@@ -61,6 +66,7 @@ class ReverseTrailBuilder implements TrailFinderInterface {
         $path = $routerItem['tab_parent_href'];
         $routerItem = $this->router->getRouterItem($routerItem['tab_parent_href']);
         if (!is_array($routerItem)) {
+          \Drupal\krumong\dpm('NO ROUTER ITEM FOR MENU_LINKS_TO_PARENT');
           break;
         }
       }
@@ -69,14 +75,19 @@ class ReverseTrailBuilder implements TrailFinderInterface {
       // Items with no access will be removed later.
       $reverseTrail[$path] = $routerItem;
 
-      $parentRouterItem = $this->parentFinder->findParentRouterItem($routerItem, $checker);
-      if (!isset($parentRouterItem)) {
+      if (!$this->parentFinder->findParentRouterItem($routerItem, $checker)) {
+        break;
+      }
+      $parentRouterItem = $checker->getParentRouterItem();
+      if (!is_array($parentRouterItem)) {
+        \Drupal\krumong\dpm("Parent router item is NULL.");
         break;
       }
 
       if ($parentRouterItem['link_path'] === $path) {
         // This is again a loop, but with just one step.
         // Not as evil as the other kind of loop.
+        \Drupal\krumong\dpm('SHORT LOOP');
         break;
       }
 

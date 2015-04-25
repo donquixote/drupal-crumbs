@@ -25,6 +25,7 @@ use Drupal\crumbs\TrailFinder\TrailFinderInterface;
  * @property array $breadcrumbItems
  * @property string $breadcrumbHtml
  * @property string $path
+ * @property array $routerItem
  *
  * @see crumbs_Container_AbstractLazyData::__get()
  * @see crumbs_Container_AbstractLazyData::__set()
@@ -158,6 +159,19 @@ class PageData extends DataContainerBase {
    */
   protected function path() {
     return $_GET['q'];
+  }
+
+  /**
+   * Router item for the current path.
+   *
+   * Only used on debug pages.
+   *
+   * @return array
+   *
+   * @see crumbs_CurrentPageInfo::$routerItem
+   */
+  protected function routerItem() {
+    return $this->router->getRouterItem($this->path);
   }
 
 }

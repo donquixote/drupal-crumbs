@@ -9,17 +9,17 @@ class PluginDiscoveryBuffer {
   /**
    * @var RawPluginCollection|NULL
    */
-  private $parentPluginCollection;
+  protected $parentPluginCollection;
 
   /**
    * @var RawPluginCollection|NULL
    */
-  private $titlePluginCollection;
+  protected $titlePluginCollection;
 
   /**
    * @var \Drupal\crumbs\PluginSystem\Discovery\PluginDiscovery
    */
-  private $pluginDiscovery;
+  protected $pluginDiscovery;
 
   /**
    * @return static
@@ -44,12 +44,15 @@ class PluginDiscoveryBuffer {
     return $this->parentPluginCollection;
   }
 
+  /**
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection
+   */
   function getTitlePluginCollection() {
     $this->load();
     return $this->titlePluginCollection;
   }
 
-  private function load() {
+  protected function load() {
     if (!isset($this->parentPluginCollection)) {
       $this->parentPluginCollection = new RawPluginCollection();
       $this->titlePluginCollection = new RawPluginCollection();

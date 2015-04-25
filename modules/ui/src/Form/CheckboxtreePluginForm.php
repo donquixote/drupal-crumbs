@@ -97,18 +97,12 @@ class CheckboxtreePluginForm implements FormBuilderInterface {
    */
   protected function loadLabeledPluginCollection() {
 
-    // Get the tree of plugin descriptions.
-    $discovery = PluginDiscovery::create();
-    $parentPluginCollection = new LabeledPluginCollection();
-    $titlePluginCollection = new LabeledPluginCollection();
-    $discovery->discoverPlugins($parentPluginCollection, $titlePluginCollection);
-
     if ($this->pluginType instanceof TitlePluginType) {
-      return $titlePluginCollection;
+      return crumbs()->labeledTitlePluginCollection;
     }
 
     if ($this->pluginType instanceof ParentPluginType) {
-      return $parentPluginCollection;
+      return crumbs()->labeledParentPluginCollection;
     }
 
     throw new \InvalidArgumentException("Unsupported plugin type.");

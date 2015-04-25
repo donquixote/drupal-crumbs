@@ -28,12 +28,18 @@ class AccessChecker implements CheckerInterface {
   /**
    * @param array $routerItem
    *   A router item.
+   * @param string $key
    *
    * @return bool
    *   TRUE, if the router item is accepted in the breadcrumb trail.
    */
-  function checkRouterItem(array $routerItem) {
-    return !empty($routerItem['access']);
+  function checkRouterItem(array $routerItem, $key) {
+    if (empty($routerItem['access'])) {
+      return FALSE;
+    }
+
+    $this->parentRouterItem = $routerItem;
+    return TRUE;
   }
 
   /**
@@ -58,5 +64,12 @@ class AccessChecker implements CheckerInterface {
 
     $this->parentRouterItem = $routerItem;
     return TRUE;
+  }
+
+  /**
+   * @return array|NULL
+   */
+  function getParentRouterItem() {
+    return $this->parentRouterItem;
   }
 }

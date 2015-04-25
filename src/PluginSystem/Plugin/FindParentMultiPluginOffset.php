@@ -56,14 +56,20 @@ class FindParentMultiPluginOffset implements ParentFinderInterface {
    */
   function findParentRouterItem(array $routerItem, CheckerInterface $checker) {
     $path = $routerItem['link_path'];
-    foreach ($this->multiPlugin->findParent($path, $routerItem) as $key => $parentPathCandidate) {
+    $candidates = $this->multiPlugin->findParent($path, $routerItem);
+    if (!is_array($candidates)) {
+      // Some plugins return NULL instead of an empty array, if they find nothing.
+      return FALSE;
+    }
+    foreach ($candidates as $key => $parentPathCandidate) {
       if (!isset($parentPathCandidate)) {
         continue;
       }
       if ($this->weight !== $this->localStatusMap->keyGetWeightOrFalse($key)) {
         continue;
       }
-      if ($checker->checkParentPath($parentPathCandidate, $key)) {
+      $absoluteKey = $this->pluginKey . '.' . $key;
+      if ($checker->checkParentPath($parentPathCandidate, $absoluteKey)) {
         return TRUE;
       }
     }

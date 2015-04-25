@@ -112,16 +112,6 @@ function crumbs_module_implements_alter(&$implementations, $hook) {
  */
 function crumbs_preprocess_page(&$vars) {
 
-  return;
-
-  $item = crumbs()->router->getRouterItem($_GET['q']);
-  \Drupal\krumong\dpm(crumbs()->parentCollector->findAllParentRouterItems($item));
-  \Drupal\krumong\dpm(crumbs()->trailFinder->buildTrail($_GET['q']));
-
-  \Drupal\krumong\dpm(crumbs()->page->breadcrumbItems);
-
-  \Drupal\krumong\dpm(crumbs()->titleFinder->findTitle('node', crumbs()->router->getRouterItem('node')));
-
   $vars['crumbs_trail'] = crumbs()->page->trail;
   $vars['breadcrumb'] = crumbs()->page->breadcrumbHtml;
 }

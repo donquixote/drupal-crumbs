@@ -3,6 +3,7 @@
 namespace Drupal\crumbs\DIC;
 
 use Drupal\crumbs\PageData;
+use Drupal\crumbs\PluginSystem\Discovery\LabeledDiscoveryBuffer;
 use Drupal\crumbs\Router\Router;
 use Drupal\crumbs\BreadcrumbBuilder\BreadcrumbBuilder;
 use Drupal\crumbs\BreadcrumbBuilder\BreadcrumbDebugHistory;
@@ -34,12 +35,16 @@ use Drupal\crumbs\TrailFinder\TrailUnreverse;
  * @property \Drupal\crumbs\ParentCollector\ParentCollector $parentCollector
  * @property \Drupal\crumbs\TitleFinder\TitleFinderInterface $titleFinder
  * @property \Drupal\crumbs\BreadcrumbFormatter\BreadcrumbFormatterInterface $breadcrumbFormatter
- * @property PageData $page
+ * @property \Drupal\crumbs\PageData $page
  * @property \Drupal\crumbs\Router\RouterInterface $router
- * @property PluginDiscoveryBuffer $pluginDiscoveryBuffer
- * @property PluginStatusWeightMap $parentStatusWeightMap
+ * @property \Drupal\crumbs\PluginSystem\Discovery\PluginDiscoveryBuffer $pluginDiscoveryBuffer
+ * @property \Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap $parentStatusWeightMap
  * @property \Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection $parentPluginCollection
- * @property PluginStatusWeightMap $titleStatusWeightMap
+ * @property \Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection $titlePluginCollection
+ * @property \Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap $titleStatusWeightMap
+ * @property \Drupal\crumbs\PluginSystem\Discovery\LabeledDiscoveryBuffer $labeledDiscoveryBuffer
+ * @property \Drupal\crumbs\PluginSystem\Discovery\Collection\LabeledPluginCollection $labeledParentPluginCollection
+ * @property \Drupal\crumbs\PluginSystem\Discovery\Collection\LabeledPluginCollection $labeledTitlePluginCollection
  */
 class ServiceContainer extends ServiceContainerBase {
 
@@ -48,7 +53,7 @@ class ServiceContainer extends ServiceContainerBase {
    *
    * @return \Drupal\crumbs\BreadcrumbBuilder\BreadcrumbBuilderInterface
    *
-   * @see ServiceContainer::$breadcrumbBuilder
+   * @see \Drupal\crumbs\DIC\ServiceContainer::$breadcrumbBuilder
    */
   protected function breadcrumbBuilder() {
     $breadcrumbBuilder = new BreadcrumbBuilder($this->titleFinder);
@@ -67,7 +72,7 @@ class ServiceContainer extends ServiceContainerBase {
   /**
    * @return \Drupal\crumbs\TitleFinder\TitleFinderInterface
    *
-   * @see ServiceContainer::$titleFinder
+   * @see \Drupal\crumbs\DIC\ServiceContainer::$titleFinder
    */
   protected function titleFinder() {
     $titleFinder = TitleFinder::create(
@@ -82,7 +87,7 @@ class ServiceContainer extends ServiceContainerBase {
    *
    * @return \Drupal\crumbs\TrailFinder\TrailFinderInterface
    *
-   * @see ServiceContainer::$trailFinder
+   * @see \Drupal\crumbs\DIC\ServiceContainer::$trailFinder
    */
   protected function trailFinder() {
     $trailFinder = new ReverseTrailBuilder($this->parentFinder, $this->router);
@@ -98,7 +103,7 @@ class ServiceContainer extends ServiceContainerBase {
    *
    * @return \Drupal\crumbs\ParentFinder\ParentFinderInterface
    *
-   * @see ServiceContainer::$parentFinder
+   * @see \Drupal\crumbs\DIC\ServiceContainer::$parentFinder
    */
   protected function parentFinder() {
     $parentFinder = ParentFinder::create(
@@ -116,7 +121,7 @@ class ServiceContainer extends ServiceContainerBase {
    *
    * @return \Drupal\crumbs\ParentFinder\ParentFinderInterface
    *
-   * @see ServiceContainer::$parentCollector
+   * @see \Drupal\crumbs\DIC\ServiceContainer::$parentCollector
    */
   protected function parentCollector() {
     return new ParentCollector($this->parentFinder);
@@ -125,7 +130,7 @@ class ServiceContainer extends ServiceContainerBase {
   /**
    * @return \Drupal\crumbs\BreadcrumbFormatter\BreadcrumbFormatterInterface
    *
-   * @see ServiceContainer::$breadcrumbFormatter
+   * @see \Drupal\crumbs\DIC\ServiceContainer::$breadcrumbFormatter
    */
   protected function breadcrumbFormatter() {
     return new BreadcrumbFormatter(
@@ -139,9 +144,9 @@ class ServiceContainer extends ServiceContainerBase {
   /**
    * Service that can provide information related to the current page.
    *
-   * @return PageData
+   * @return \Drupal\crumbs\PageData
    *
-   * @see ServiceContainer::$page
+   * @see \Drupal\crumbs\DIC\ServiceContainer::$page
    */
   protected function page() {
     return new PageData(
@@ -157,7 +162,7 @@ class ServiceContainer extends ServiceContainerBase {
    *
    * @return Router
    *
-   * @see ServiceContainer::$router
+   * @see \Drupal\crumbs\DIC\ServiceContainer::$router
    */
   protected function router() {
     return new Router();
@@ -166,7 +171,7 @@ class ServiceContainer extends ServiceContainerBase {
   /**
    * @return PluginDiscoveryBuffer
    *
-   * @see ServiceContainer::$pluginDiscoveryBuffer
+   * @see \Drupal\crumbs\DIC\ServiceContainer::$pluginDiscoveryBuffer
    */
   protected function pluginDiscoveryBuffer() {
     return PluginDiscoveryBuffer::create();
@@ -175,16 +180,25 @@ class ServiceContainer extends ServiceContainerBase {
   /**
    * @return \Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection
    *
-   * @see ServiceContainer::$parentPluginCollection
+   * @see \Drupal\crumbs\DIC\ServiceContainer::$parentPluginCollection
    */
   protected function parentPluginCollection() {
     return $this->pluginDiscoveryBuffer->getParentPluginCollection();
   }
 
   /**
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection
+   *
+   * @see \Drupal\crumbs\DIC\ServiceContainer::$titlePluginCollection
+   */
+  protected function titlePluginCollection() {
+    return $this->pluginDiscoveryBuffer->getTitlePluginCollection();
+  }
+
+  /**
    * @return \Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap
    *
-   * @see ServiceContainer::$parentStatusWeightMap
+   * @see \Drupal\crumbs\DIC\ServiceContainer::$parentStatusWeightMap
    */
   protected function parentStatusWeightMap() {
     return PluginStatusWeightMap::loadAndCreate(
@@ -197,7 +211,7 @@ class ServiceContainer extends ServiceContainerBase {
   /**
    * @return \Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap
    *
-   * @see ServiceContainer::$titleStatusWeightMap
+   * @see \Drupal\crumbs\DIC\ServiceContainer::$titleStatusWeightMap
    */
   protected function titleStatusWeightMap() {
     return PluginStatusWeightMap::loadAndCreate(
@@ -205,6 +219,33 @@ class ServiceContainer extends ServiceContainerBase {
         ->getDefaultStatuses(),
       new TitlePluginType()
     );
+  }
+
+  /**
+   * @return \Drupal\crumbs\PluginSystem\Discovery\LabeledDiscoveryBuffer
+   *
+   * @see \Drupal\crumbs\DIC\ServiceContainer::$labeledDiscoveryBuffer
+   */
+  protected function labeledDiscoveryBuffer() {
+    return LabeledDiscoveryBuffer::create();
+  }
+
+  /**
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Collection\LabeledPluginCollection
+   *
+   * @see \Drupal\crumbs\DIC\ServiceContainer::$labeledParentPluginCollection
+   */
+  protected function labeledParentPluginCollection() {
+    return $this->labeledDiscoveryBuffer->getParentPluginCollection();
+  }
+
+  /**
+   * @return \Drupal\crumbs\PluginSystem\Discovery\Collection\LabeledPluginCollection
+   *
+   * @see \Drupal\crumbs\DIC\ServiceContainer::$labeledTitlePluginCollection
+   */
+  protected function labeledTitlePluginCollection() {
+    return $this->labeledDiscoveryBuffer->getTitlePluginCollection();
   }
 
 }

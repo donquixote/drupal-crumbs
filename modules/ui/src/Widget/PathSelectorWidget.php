@@ -5,31 +5,25 @@ namespace Drupal\crumbs_ui\Widget;
 class PathSelectorWidget implements WidgetInterface {
 
   /**
+   * @var string
+   */
+  protected $pathToTest;
+
+  /**
+   * @param string $pathToTest
+   */
+  function __construct($pathToTest) {
+    $this->pathToTest = $pathToTest;
+  }
+
+  /**
    * @return array|string
    *   A render array, or a html snippet.
    */
   function build() {
 
-    // @todo Eliminate global dependencies $_GET and $_SESSION.
-    $path_to_test = '';
-    if (isset($_GET['path_to_test'])) {
-      $path_to_test = $_GET['path_to_test'];
-    }
-    elseif (!empty($_SESSION['crumbs.admin.debug.history'])) {
-      foreach ($_SESSION['crumbs.admin.debug.history'] as $path => $true) {
-        if ('admin' !== substr($path, 0, 5)) {
-          $path_to_test = $path;
-        }
-        elseif ('admin/structure/crumbs' !== substr($path, 0, 22)) {
-          $admin_path_to_test = $path;
-        }
-      }
-      if (empty($path_to_test) && !empty($admin_path_to_test)) {
-        $path_to_test = $admin_path_to_test;
-      }
-    }
 
-    $path_checked = check_plain($path_to_test);
+    $path_checked = check_plain($this->pathToTest);
     $form_action = url('admin/structure/crumbs/debug');
 
     $input_html = <<<EOT
@@ -64,11 +58,13 @@ EOT;
       $text .= '<p>' . t($paragraph, $placeholders) . '</p>' . "\n";
     }
 
-    return <<<EOT
+    $html = <<<EOT
       <form method="get" action="$form_action">
         $text
         <label for="path">$input_html</label>
       </form>
 EOT;
+
+    return array('#markup' => $html);
   }
 }
