@@ -1,6 +1,6 @@
 <?php
 
-use Drupal\crumbs\PluginSystem\Discovery\DescribeMultiPluginArg;
+use Drupal\crumbs\PluginApi\DescribeArgument\DescribeMultiPluginArg;
 
 abstract class crumbs_MultiPlugin_EntityFindAbstract implements crumbs_MultiPlugin {
 

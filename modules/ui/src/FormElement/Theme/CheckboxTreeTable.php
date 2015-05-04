@@ -2,7 +2,7 @@
 
 namespace Drupal\crumbs_ui\FormElement\Theme;
 
-use Drupal\crumbs\PluginSystem\Discovery\Collection\LabeledPluginCollection;
+use Drupal\crumbs\PluginSystem\Collection\PluginCollection\LabeledPluginCollection;
 use Drupal\crumbs_ui\PluginKey\RawHierarchy;
 use Drupal\crumbs_ui\PluginKey\RawHierarchyInterface;
 
@@ -14,7 +14,7 @@ class CheckboxTreeTable implements ElementThemeInterface {
   private $rawHierarchy;
 
   /**
-   * @var \Drupal\crumbs\PluginSystem\Discovery\Collection\LabeledPluginCollection
+   * @var \Drupal\crumbs\PluginSystem\Collection\PluginCollection\LabeledPluginCollection
    */
   private $pluginCollection;
 
@@ -30,7 +30,7 @@ class CheckboxTreeTable implements ElementThemeInterface {
 
   /**
    * @param \Drupal\crumbs_ui\PluginKey\RawHierarchyInterface $raw_hierarchy
-   * @param \Drupal\crumbs\PluginSystem\Discovery\Collection\LabeledPluginCollection $pluginCollection
+   * @param \Drupal\crumbs\PluginSystem\Collection\PluginCollection\LabeledPluginCollection $pluginCollection
    */
   function __construct(RawHierarchyInterface $raw_hierarchy, LabeledPluginCollection $pluginCollection) {
     $this->rawHierarchy = $raw_hierarchy;

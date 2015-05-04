@@ -1,20 +1,22 @@
 <?php
-use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
+use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
 
 /**
  * Implements hook_crumbs_plugins().
  *
- * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
+ * @param \Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface $api
  */
 function comment_crumbs_plugins(ArgumentInterface $api) {
 
-  $api->routeMonoPlugin('comment/reply/%', 'reply', new comment_CrumbsMonoPlugin_reply)
+  $api = $api->modulePluginFamily();
+
+  $api->route('comment/reply/%')->monoPlugin('reply', new comment_CrumbsMonoPlugin_reply)
     ->describe("<code>node/123</code> &raquo; <code>comment/reply/123</code>");
 
-  $api->routeMonoPlugin('comment/%', 'comment', new comment_CrumbsMonoPlugin_comment)
+  $api->route('comment/%')->monoPlugin('comment', new comment_CrumbsMonoPlugin_comment)
     ->describe("<code>node/%node</code> &raquo; <code>comment/reply/%comment</code>");
 
-  $api->routeSkipItem('comment/%', 'skip');
+  $api->route('comment/%')->skipItem('skip');
 }
 
 class comment_CrumbsMonoPlugin_reply implements crumbs_MonoPlugin_FindParentInterface {

@@ -1,5 +1,5 @@
 <?php
-use Drupal\crumbs\PluginSystem\Discovery\DescribeMultiPluginArg;
+use Drupal\crumbs\PluginApi\DescribeArgument\DescribeMultiPluginArg;
 
 /**
  * A wrapper for legacy plugins with suffixed methods like findTitle__node_x().

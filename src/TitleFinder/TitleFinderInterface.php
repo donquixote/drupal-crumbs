@@ -7,9 +7,10 @@ interface TitleFinderInterface {
   /**
    * @param string $path
    * @param array $item
+   * @param array[] $breadcrumb
    *
-   * @return string|NULL
+   * @return NULL|string
    */
-  function findTitle($path, array $item);
+  function findTitle($path, array $item, array $breadcrumb = array());
 
 }

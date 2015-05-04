@@ -2,8 +2,6 @@
 
 namespace Drupal\crumbs_ui\Form;
 
-use Drupal\crumbs\PluginSystem\Discovery\Collection\LabeledPluginCollection;
-use Drupal\crumbs\PluginSystem\Discovery\PluginDiscovery;
 use Drupal\crumbs\PluginSystem\PluginType\ParentPluginType;
 use Drupal\crumbs\PluginSystem\PluginType\PluginTypeInterface;
 use Drupal\crumbs\PluginSystem\PluginType\TitlePluginType;
@@ -64,6 +62,8 @@ class CheckboxtreePluginForm implements FormBuilderInterface {
    */
   public function buildForm($form, $form_state) {
 
+    $buffer = crumbs()->pluginDiscoveryBuffer;
+    $collector = $buffer->getCollector($this->pluginType);
     $labeledPluginCollection = $this->loadLabeledPluginCollection();
     $settings_key = $this->pluginType->getSettingsKey();
 
@@ -90,21 +90,5 @@ class CheckboxtreePluginForm implements FormBuilderInterface {
     $form = system_settings_form($form);
     $form['#submit'][] = '_crumbs_admin_flush_cache';
     return $form;
-  }
-
-  /**
-   * @return \Drupal\crumbs\PluginSystem\Discovery\Collection\LabeledPluginCollection
-   */
-  protected function loadLabeledPluginCollection() {
-
-    if ($this->pluginType instanceof TitlePluginType) {
-      return crumbs()->labeledTitlePluginCollection;
-    }
-
-    if ($this->pluginType instanceof ParentPluginType) {
-      return crumbs()->labeledParentPluginCollection;
-    }
-
-    throw new \InvalidArgumentException("Unsupported plugin type.");
   }
 }

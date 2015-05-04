@@ -2,9 +2,7 @@
 
 namespace Drupal\crumbs\PluginSystem\Discovery;
 
-use Drupal\crumbs\PluginSystem\Discovery\Collection\EntityPluginCollection;
-use Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection;
-use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\PluginCollectionArg;
+use Drupal\crumbs\PluginApi\Collector\PrimaryPluginCollectorInterface;
 use Drupal\crumbs\PluginSystem\Discovery\Hook\HookCrumbsPlugins;
 use Drupal\crumbs\PluginSystem\Discovery\Hook\HookInterface;
 
@@ -30,25 +28,16 @@ class PluginDiscovery {
   }
 
   /**
-   * @param \Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection $parentPluginCollection
-   * @param \Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection $titlePluginCollection
+   * @param \Drupal\crumbs\PluginApi\Collector\PrimaryPluginCollectorInterface $parentCollectionContainer
+   * @param \Drupal\crumbs\PluginApi\Collector\PrimaryPluginCollectorInterface $titleCollectionContainer
    */
   function discoverPlugins(
-    RawPluginCollection $parentPluginCollection,
-    RawPluginCollection $titlePluginCollection
+    PrimaryPluginCollectorInterface $parentCollectionContainer,
+    PrimaryPluginCollectorInterface $titleCollectionContainer
   ) {
-    $entityParentPluginCollection = new EntityPluginCollection();
-    $entityTitlePluginCollection = new EntityPluginCollection();
+    $this->hook->invokeAll($parentCollectionContainer, $titleCollectionContainer);
 
-    $api = new PluginCollectionArg(
-      $parentPluginCollection,
-      $titlePluginCollection,
-      $entityParentPluginCollection,
-      $entityTitlePluginCollection);
-
-    $this->hook->invokeAll($api);
-
-    $entityParentPluginCollection->finalize($parentPluginCollection, TRUE);
-    $entityTitlePluginCollection->finalize($titlePluginCollection, FALSE);
+    $parentCollectionContainer->finalize();
+    $titleCollectionContainer->finalize();
   }
 }

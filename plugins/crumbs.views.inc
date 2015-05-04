@@ -1,10 +1,9 @@
 <?php
 
-
 /**
  * Implements hook_crumbs_plugins().
  *
- * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
+ * @param \Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface $api
  */
 function views_crumbs_plugins($api) {
 
@@ -15,6 +14,9 @@ function views_crumbs_plugins($api) {
 
   $staticDisplays = array();
   $dynamicDisplays = array();
+
+  $family = $api->modulePluginFamily()
+    ->describeFindTitle('Views');
 
   foreach ($q->execute() as $row) {
 
@@ -67,7 +69,13 @@ function views_crumbs_plugins($api) {
     }
   }
 
+  $pageTitlePluginFamily = $family->pluginFamily('pageTitle')
+    ->describeFindTitle(t('Views page title'));
+
   foreach ($staticDisplays as $view_name => $displays) {
+    $viewPluginFamily = $pageTitlePluginFamily->pluginFamily($view_name)
+      ->describeFindTitle(t('View') . ': ' . check_plain($view_name));
+
     foreach ($displays as $view_display_id => $routes) {
       if (count($routes) > 1) {
         // More than one route for the same views display.
@@ -78,43 +86,29 @@ function views_crumbs_plugins($api) {
         // first of the router paths.
         sort($routes);
       }
-      $api->routeMonoPlugin(
-        $routes[0],
-        "pageTitle.$view_name.$view_display_id",
-        new views_CrumbsMonoPlugin_PageTitle($view_name, $view_display_id));
-
-      $api->describeFindTitle(
-        "pageTitle.$view_name.$view_display_id",
-        t('Display ID') . ': ' . check_plain($view_display_id));
+      $viewPluginFamily->route($routes[0])->monoPlugin(
+        $view_display_id,
+        new views_CrumbsMonoPlugin_PageTitle($view_name, $view_display_id))
+        ->describe(t('Display ID') . ': ' . check_plain($view_display_id));
     }
-
-    $api->describeFindTitle(
-      "pageTitle.$view_name.*",
-      t('View') . ': ' . check_plain($view_name));
   }
 
-  $api->describeFindTitle('pageTitle.*', t('Views page title'));
+  $argTitlePluginFamily = $family->pluginFamily('argTitle')
+    ->describeFindTitle(t('Views argument title'));
 
   foreach ($dynamicDisplays as $view_name => $displays) {
+    $viewPluginFamily = $argTitlePluginFamily->pluginFamily($view_name)
+      ->describeFindTitle(t('View') . ': ' . check_plain($view_name));
+
     foreach ($displays as $view_display_id => $routes) {
-      $api->routeMonoPlugin(
-        // There should be only one route.
-        // If there are more, we take the first.
-        $routes[0],
+      // There should be only one route.
+      // If there are more, we take the first.
+      $viewPluginFamily->route($routes[0])->monoPlugin(
         "argTitle.$view_name.$view_display_id",
-        new views_CrumbsMonoPlugin_PageTitle($view_name, $view_display_id));
-
-      $api->describeFindTitle(
-        "pageTitle.$view_name.$view_display_id",
-        t('Display ID') . ': ' . check_plain($view_display_id));
+        new views_CrumbsMonoPlugin_PageTitle($view_name, $view_display_id))
+        ->describe(t('Display ID') . ': ' . check_plain($view_display_id));
     }
-
-    $api->describeFindTitle(
-      "pageTitle.$view_name.*",
-      t('View') . ': ' . check_plain($view_name));
   }
-
-  $api->describeFindTitle('argTitle.*', t('Views argument title'));
 }
 
 /**

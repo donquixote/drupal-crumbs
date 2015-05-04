@@ -2,10 +2,10 @@
 
 namespace Drupal\crumbs\DIC;
 
+use Drupal\crumbs\BreadcrumbBuilder\BreadcrumbTitleFinder;
 use Drupal\crumbs\PageData;
-use Drupal\crumbs\PluginSystem\Discovery\LabeledDiscoveryBuffer;
 use Drupal\crumbs\Router\Router;
-use Drupal\crumbs\BreadcrumbBuilder\BreadcrumbBuilder;
+use Drupal\crumbs\BreadcrumbBuilder\TrailToBreadcrumb;
 use Drupal\crumbs\BreadcrumbBuilder\BreadcrumbDebugHistory;
 use Drupal\crumbs\BreadcrumbBuilder\BreadcrumbVisibilityFilter;
 use Drupal\crumbs\BreadcrumbFormatter\BreadcrumbFormatter;
@@ -14,15 +14,14 @@ use Drupal\crumbs\ParentFinder\ParentBuffer;
 use Drupal\crumbs\ParentFinder\ParentFallback;
 use Drupal\crumbs\ParentFinder\ParentFinder;
 use Drupal\crumbs\ParentFinder\ParentFront;
-use Drupal\crumbs\PluginSystem\Discovery\PluginDiscoveryBuffer;
+use Drupal\crumbs\PluginSystem\Discovery\Buffer\PluginDiscoveryBuffer;
 use Drupal\crumbs\PluginSystem\PluginType\ParentPluginType;
 use Drupal\crumbs\PluginSystem\PluginType\TitlePluginType;
 use Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap;
 use Drupal\crumbs\TitleFinder\FallbackTitleFinder;
 use Drupal\crumbs\TitleFinder\TitleFinder;
 use Drupal\crumbs\TrailFinder\ReverseTrailBuilder;
-use Drupal\crumbs\TrailFinder\TrailAccessFilter;
-use Drupal\crumbs\TrailFinder\TrailAppendFront;
+
 use Drupal\crumbs\TrailFinder\TrailBuffer;
 use Drupal\crumbs\TrailFinder\TrailUnreverse;
 
@@ -37,14 +36,11 @@ use Drupal\crumbs\TrailFinder\TrailUnreverse;
  * @property \Drupal\crumbs\BreadcrumbFormatter\BreadcrumbFormatterInterface $breadcrumbFormatter
  * @property \Drupal\crumbs\PageData $page
  * @property \Drupal\crumbs\Router\RouterInterface $router
- * @property \Drupal\crumbs\PluginSystem\Discovery\PluginDiscoveryBuffer $pluginDiscoveryBuffer
+ * @property \Drupal\crumbs\PluginSystem\Discovery\Buffer\PluginDiscoveryBuffer $pluginDiscoveryBuffer
  * @property \Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap $parentStatusWeightMap
- * @property \Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection $parentPluginCollection
- * @property \Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection $titlePluginCollection
+ * @property \Drupal\crumbs\PluginSystem\Collection\PluginCollection\RawPluginCollection $parentPluginCollection
+ * @property \Drupal\crumbs\PluginSystem\Collection\PluginCollection\RawPluginCollection $titlePluginCollection
  * @property \Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap $titleStatusWeightMap
- * @property \Drupal\crumbs\PluginSystem\Discovery\LabeledDiscoveryBuffer $labeledDiscoveryBuffer
- * @property \Drupal\crumbs\PluginSystem\Discovery\Collection\LabeledPluginCollection $labeledParentPluginCollection
- * @property \Drupal\crumbs\PluginSystem\Discovery\Collection\LabeledPluginCollection $labeledTitlePluginCollection
  */
 class ServiceContainer extends ServiceContainerBase {
 
@@ -56,13 +52,14 @@ class ServiceContainer extends ServiceContainerBase {
    * @see \Drupal\crumbs\DIC\ServiceContainer::$breadcrumbBuilder
    */
   protected function breadcrumbBuilder() {
-    $breadcrumbBuilder = new BreadcrumbBuilder($this->titleFinder);
+    $breadcrumbBuilder = new TrailToBreadcrumb();
     $breadcrumbBuilder = new BreadcrumbVisibilityFilter(
       $breadcrumbBuilder,
       variable_get('crumbs_minimum_trail_items', 2),
       variable_get('crumbs_show_front_page', TRUE),
       variable_get('crumbs_show_current_page', FALSE) & ~CRUMBS_TRAILING_SEPARATOR
     );
+    $breadcrumbBuilder = new BreadcrumbTitleFinder($breadcrumbBuilder, $this->titleFinder);
     if (user_access('administer crumbs')) {
       $breadcrumbBuilder = new BreadcrumbDebugHistory($breadcrumbBuilder);
     }
@@ -76,7 +73,7 @@ class ServiceContainer extends ServiceContainerBase {
    */
   protected function titleFinder() {
     $titleFinder = TitleFinder::create(
-      $this->pluginDiscoveryBuffer->getTitlePluginCollection(),
+      $this->pluginDiscoveryBuffer->getTitleCollector(),
       $this->titleStatusWeightMap);
     $titleFinder = new FallbackTitleFinder($titleFinder);
     return $titleFinder;
@@ -90,9 +87,10 @@ class ServiceContainer extends ServiceContainerBase {
    * @see \Drupal\crumbs\DIC\ServiceContainer::$trailFinder
    */
   protected function trailFinder() {
+    // This gives us access-checked items.
     $trailFinder = new ReverseTrailBuilder($this->parentFinder, $this->router);
-    $trailFinder = new TrailAccessFilter($trailFinder);
-    $trailFinder = new TrailAppendFront($trailFinder, $this->router);
+    # $trailFinder = new TrailAccessFilter($trailFinder);
+    # $trailFinder = new TrailAppendFront($trailFinder, $this->router);
     $trailFinder = new TrailUnreverse($trailFinder);
     $trailFinder = new TrailBuffer($trailFinder);
     return $trailFinder;
@@ -107,7 +105,7 @@ class ServiceContainer extends ServiceContainerBase {
    */
   protected function parentFinder() {
     $parentFinder = ParentFinder::create(
-      $this->pluginDiscoveryBuffer->getParentPluginCollection(),
+      $this->pluginDiscoveryBuffer->getParentCollector(),
       $this->parentStatusWeightMap,
       $this->router);
     $parentFinder = new ParentFallback($parentFinder, $this->router);
@@ -178,21 +176,21 @@ class ServiceContainer extends ServiceContainerBase {
   }
 
   /**
-   * @return \Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection
+   * @return \Drupal\crumbs\PluginSystem\Collection\PluginCollection\RawPluginCollection
    *
    * @see \Drupal\crumbs\DIC\ServiceContainer::$parentPluginCollection
    */
   protected function parentPluginCollection() {
-    return $this->pluginDiscoveryBuffer->getParentPluginCollection();
+    return $this->pluginDiscoveryBuffer->getParentCollector();
   }
 
   /**
-   * @return \Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection
+   * @return \Drupal\crumbs\PluginSystem\Collection\PluginCollection\RawPluginCollection
    *
    * @see \Drupal\crumbs\DIC\ServiceContainer::$titlePluginCollection
    */
   protected function titlePluginCollection() {
-    return $this->pluginDiscoveryBuffer->getTitlePluginCollection();
+    return $this->pluginDiscoveryBuffer->getTitleCollector();
   }
 
   /**
@@ -202,7 +200,7 @@ class ServiceContainer extends ServiceContainerBase {
    */
   protected function parentStatusWeightMap() {
     return PluginStatusWeightMap::loadAndCreate(
-      $this->pluginDiscoveryBuffer->getParentPluginCollection()
+      $this->pluginDiscoveryBuffer->getParentCollector()
         ->getDefaultStatuses(),
       new ParentPluginType()
     );
@@ -215,37 +213,10 @@ class ServiceContainer extends ServiceContainerBase {
    */
   protected function titleStatusWeightMap() {
     return PluginStatusWeightMap::loadAndCreate(
-      $this->pluginDiscoveryBuffer->getTitlePluginCollection()
+      $this->pluginDiscoveryBuffer->getTitleCollector()
         ->getDefaultStatuses(),
       new TitlePluginType()
     );
-  }
-
-  /**
-   * @return \Drupal\crumbs\PluginSystem\Discovery\LabeledDiscoveryBuffer
-   *
-   * @see \Drupal\crumbs\DIC\ServiceContainer::$labeledDiscoveryBuffer
-   */
-  protected function labeledDiscoveryBuffer() {
-    return LabeledDiscoveryBuffer::create();
-  }
-
-  /**
-   * @return \Drupal\crumbs\PluginSystem\Discovery\Collection\LabeledPluginCollection
-   *
-   * @see \Drupal\crumbs\DIC\ServiceContainer::$labeledParentPluginCollection
-   */
-  protected function labeledParentPluginCollection() {
-    return $this->labeledDiscoveryBuffer->getParentPluginCollection();
-  }
-
-  /**
-   * @return \Drupal\crumbs\PluginSystem\Discovery\Collection\LabeledPluginCollection
-   *
-   * @see \Drupal\crumbs\DIC\ServiceContainer::$labeledTitlePluginCollection
-   */
-  protected function labeledTitlePluginCollection() {
-    return $this->labeledDiscoveryBuffer->getTitlePluginCollection();
   }
 
 }

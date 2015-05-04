@@ -47,7 +47,7 @@ class TitleFinderDemo implements WidgetInterface {
       '#theme' => 'table',
       '#rows' => $rows,
       '#header' => array(
-        t('Plugin key'),
+        t('Title finder class'),
         t('Title'),
       ),
     );

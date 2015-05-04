@@ -2,12 +2,16 @@
 
 namespace Drupal\crumbs\PluginSystem\Discovery\Hook;
 
-use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
+use Drupal\crumbs\PluginApi\Collector\PrimaryPluginCollectorInterface;
 
 interface HookInterface {
 
   /**
-   * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
+   * @param \Drupal\crumbs\PluginApi\Collector\PrimaryPluginCollectorInterface $parentCollectionContainer
+   * @param \Drupal\crumbs\PluginApi\Collector\PrimaryPluginCollectorInterface $titleCollectionContainer
    */
-  function invokeAll(ArgumentInterface $api);
+  function invokeAll(
+    PrimaryPluginCollectorInterface $parentCollectionContainer,
+    PrimaryPluginCollectorInterface $titleCollectionContainer
+  );
 }

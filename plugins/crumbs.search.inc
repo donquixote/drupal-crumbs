@@ -1,13 +1,14 @@
 <?php
-use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
+use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
 
 /**
  * Implements hook_crumbs_plugins().
  *
- * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
+ * @param \Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface $api
  */
 function search_crumbs_plugins(ArgumentInterface $api) {
-  $api->describeFindParent('search.*', t('Search pages'));
-  $api->routeParentPath('search/node/%', 'search.node', 'search');
-  $api->routeParentPath('search/user/%', 'search.user', 'search');
+  $family = $api->modulePluginFamily()
+    ->describeFindParent(t('Search pages'));
+  $family->route('search/node/%')->fixedParentPath('search.node', 'search');
+  $family->route('search/user/%')->fixedParentPath('search.user', 'search');
 }

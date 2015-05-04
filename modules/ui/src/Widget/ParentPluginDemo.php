@@ -5,6 +5,8 @@ namespace Drupal\crumbs_ui\Widget;
 use Drupal\crumbs\ParentFinder\Approval\DebugCollectorChecker;
 use Drupal\crumbs\ParentFinder\ParentFinderDecoratorBase;
 
+use Drupal\crumbs_ui\PluginKey\RawHierarchyInterface;
+
 class ParentPluginDemo implements WidgetInterface {
 
   /**
@@ -39,32 +41,27 @@ class ParentPluginDemo implements WidgetInterface {
     $labeledPluginCollection = crumbs()->labeledParentPluginCollection;
     $descriptions = $labeledPluginCollection->getDescriptions();
 
-    $router = crumbs()->router;
+    $table = new PluginResultTable($collected, $descriptions, crumbs()->router);
 
+    return $table->build();
+  }
+
+  private function buildTableRows(
+    RawHierarchyInterface $hierarchy,
+    array $collected,
+    array $descriptions,
+    $key
+  ) {
     $rows = array();
-    foreach ($collected as list($parentPath, $key)) {
-      $row = array($key, $parentPath);
-      $parentRouterItem = $router->getRouterItem($parentPath);
-      if (!isset($parentRouterItem)) {
-        $row[] = t('Denied, no router item.');
-      }
-      elseif (empty($parentRouterItem['access'])) {
-        $row[] = t('Denied, no access.');
+    foreach ($hierarchy->keyGetChildren($key) as $childKey) {
+      if ($hierarchy->keyIsWildcard($childKey)) {
+        $rows[$childKey] = $this->buildParentRow($childKey);
+        $rows += $this->buildTableRows($hierarchy, $collected, $descriptions, $childKey);
       }
       else {
-        $row[] = t('Accepted.');
+        $rows[$childKey] = $this->buildLeafRow($childKey);
       }
-      $rows[] = $row;
     }
-
-    return array(
-      '#theme' => 'table',
-      '#rows' => $rows,
-      '#header' => array(
-        t('Plugin key'),
-        t('Parent path candidate'),
-        t('Accepted?'),
-      ),
-    );
+    return $rows;
   }
 }

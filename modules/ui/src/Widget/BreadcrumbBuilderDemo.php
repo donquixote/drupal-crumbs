@@ -58,7 +58,7 @@ class BreadcrumbBuilderDemo implements WidgetInterface {
     foreach ($breadcrumb as $item) {
       $rows[] = array(
         $item['link_path'],
-        $item['title'],
+        isset($item['title']) ? $item['title'] : '?',
       );
     }
     return theme('table', array('rows' => $rows));

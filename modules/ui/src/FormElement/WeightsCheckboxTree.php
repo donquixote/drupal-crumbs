@@ -2,7 +2,7 @@
 
 namespace Drupal\crumbs_ui\FormElement;
 
-use Drupal\crumbs\PluginSystem\Discovery\Collection\LabeledPluginCollection;
+use Drupal\crumbs\PluginSystem\Collection\PluginCollection\LabeledPluginCollection;
 use Drupal\crumbs_ui\PluginKey\RawHierarchyInterface;
 
 class WeightsCheckboxTree implements ElementInterface, PreRenderInterface {
@@ -13,7 +13,7 @@ class WeightsCheckboxTree implements ElementInterface, PreRenderInterface {
   private $rawHierarchy;
 
   /**
-   * @var \Drupal\crumbs\PluginSystem\Discovery\Collection\LabeledPluginCollection
+   * @var \Drupal\crumbs\PluginSystem\Collection\PluginCollection\LabeledPluginCollection
    */
   private $pluginCollection;
 
@@ -24,7 +24,7 @@ class WeightsCheckboxTree implements ElementInterface, PreRenderInterface {
 
   /**
    * @param \Drupal\crumbs_ui\PluginKey\RawHierarchyInterface $raw_hierarchy
-   * @param \Drupal\crumbs\PluginSystem\Discovery\Collection\LabeledPluginCollection $pluginCollection
+   * @param \Drupal\crumbs\PluginSystem\Collection\PluginCollection\LabeledPluginCollection $pluginCollection
    */
   function __construct(
     RawHierarchyInterface $raw_hierarchy,
@@ -71,7 +71,7 @@ class WeightsCheckboxTree implements ElementInterface, PreRenderInterface {
 
     return array(
       'statuses' => $this->collectStatuses('*', $input, TRUE),
-      'weights' => $this->collectWeights('*', $input, 0),
+      'weights' => $this->collectWeights('*', $input),
     );
   }
 

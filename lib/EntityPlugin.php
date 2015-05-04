@@ -1,5 +1,5 @@
 <?php
-use Drupal\crumbs\PluginSystem\Discovery\DescribeMultiPluginArg;
+use Drupal\crumbs\PluginApi\DescribeArgument\DescribeMultiPluginArg;
 
 /**
  * Interface for entity title plugins registered with hook_crumbs_plugins().

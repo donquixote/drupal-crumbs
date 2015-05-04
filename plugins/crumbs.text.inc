@@ -3,9 +3,11 @@
 /**
  * Implements hook_crumbs_plugins().
  *
- * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
+ * @param \Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface $api
  */
 function text_crumbs_plugins($api) {
+  $family = $api->modulePluginFamily()
+    ->describeFindTitle(t('Text fields'));
   foreach (field_info_fields() as $field_name => $field_info) {
     if (0
       || 'text' !== $field_info['type']
@@ -26,13 +28,10 @@ function text_crumbs_plugins($api) {
 
     if (!empty($instances)) {
       $plugin = new crumbs_EntityPlugin_Field_Text($field_name, $instances);
-      $api->entityTitlePlugin('field.' . $field_name, $plugin, array_keys($instances));
-      $api->describeFindTitle('field.' . $field_name . '.*', t('Field') . ': ' . check_plain($field_name));
+      $family->entityTitlePlugin($field_name, $plugin, array_keys($instances))
+        ->describe(t('Field') . ': ' . check_plain($field_name));
     }
   }
 
   # $api->fieldTypeTitlePlugin('field.*', 'text', new TextFieldTitlePlugin());
-
-  $api->disabledByDefault('field.*');
-  $api->describeFindTitle('field.*', t('Text fields'));
 }

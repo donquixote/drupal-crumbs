@@ -1,31 +1,32 @@
 <?php
-use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
+use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
 use Drupal\crumbs\Util;
 
 /**
  * Implements hook_crumbs_plugins().
  *
- * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
+ * @param \Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface $api
  */
 function forum_crumbs_plugins(ArgumentInterface $api) {
 
-  $api->routeMonoPlugin('forum/%', 'forum.term', new forum_CrumbsMonoPlugin_forumTerm)
+  $family = $api->modulePluginFamily()
+    ->describeFindParent(t('Forum'))
+    ->describeFindTitle(t('Forum'));
+
+  $family->route('forum/%')->monoPlugin('term', new forum_CrumbsMonoPlugin_forumTerm)
     ->translateDescription('Forum term hierarchy');
 
-  $api->routeMonoPlugin('forum/%', 'forum.termName', new forum_CrumbsMonoPlugin_forumTermName)
+  $family->route('forum/%')->monoPlugin('termName', new forum_CrumbsMonoPlugin_forumTermName)
     ->translateDescription('Forum term name');
 
-  $api->routeMonoPlugin('node/%', 'forum.thread', new forum_CrumbsMonoPlugin_forumThread)
+  $family->route('node/%')->monoPlugin('thread', new forum_CrumbsMonoPlugin_forumThread)
     ->describe('forum/% &raquo; node/%');
 
-  $api->monoPlugin('forum.threadCreate', new forum_CrumbsMonoPlugin_forumThreadCreate)
+  $family->monoPlugin('forumThreadCreate', new forum_CrumbsMonoPlugin_forumThreadCreate)
     ->describe('forum/% &raquo; node/add/*/*');
 
-  $api->monoPlugin('forum.threadCreateTitle', new forum_CrumbsMonoPlugin_forumThreadCreateTitle)
+  $family->monoPlugin('forumThreadCreateTitle', new forum_CrumbsMonoPlugin_forumThreadCreateTitle)
     ->translateDescription('Title "New topic" for node/add/*/* in a forum.');
-
-  $api->describeFindParent('forum.*', t('Forum'));
-  $api->describeFindParent('forum.*', t('Forum'));
 }
 
 

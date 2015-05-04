@@ -1,19 +1,21 @@
 <?php
-use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
+use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
 use Drupal\crumbs\Util;
 
 /**
  * Implements hook_crumbs_plugins().
  *
- * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
+ * @param \Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface $api
  */
 function blog_crumbs_plugins(ArgumentInterface $api) {
 
-  $api->routeMonoPlugin('node/%', 'authorPage', new blog_CrumbsMonoPlugin_authorPage);
-  $api->describeFindParent('authorPage', t("Author's blog page (blog/*) &raquo; Blog post (node/*)."));
+  $api = $api->modulePluginFamily();
 
-  $api->routeMonoPlugin('blog/%', 'authorName', new blog_CrumbsMonoPlugin_authorName);
-  $api->describeFindTitle('authorName', t('"!name\'s blog", where !name is the author\'s username.'));
+  $api->route('node/%')->monoPlugin('authorPage', new blog_CrumbsMonoPlugin_authorPage)
+    ->translateDescription("Author's blog page (blog/*) &raquo; Blog post (node/*).");
+
+  $api->route('blog/%')->monoPlugin('authorName', new blog_CrumbsMonoPlugin_authorName)
+    ->translateDescription('"!name\'s blog", where !name is the author\'s username.');
 }
 
 

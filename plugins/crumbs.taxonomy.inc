@@ -1,26 +1,28 @@
 <?php
-use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
+use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
 use Drupal\crumbs\Util;
 
 /**
  * Implements hook_crumbs_plugins()
  *
- * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
+ * @param \Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface $api
  */
 function taxonomy_crumbs_plugins(ArgumentInterface $api) {
 
-  $api->routeMultiPlugin('taxonomy/term/%', 'termParent');
+  $plugin = new taxonomy_CrumbsMultiPlugin_termParent;
+  $api->route('taxonomy/term/%')->multiPlugin('termParent', $plugin);
 
-  $api->describeFindParent('termReference.*', t('Term reference fields'));
+  $family = $api->modulePluginFamily()
+    ->describeFindParent(t('Term reference fields'))
+    ->disabledByDefault();
 
   foreach (field_info_fields() as $field_name => $field_info) {
     if ($field_info['type'] === 'taxonomy_term_reference') {
       $plugin = new crumbs_EntityPlugin_Field_TermReference($field_name, $field_info['bundles']);
-      $api->describeFindParent('termReference.' . $field_name . '.*', $field_name);
-      $api->entityParentPlugin('termReference.' . $field_name, $plugin, array_keys($field_info['bundles']));
+      $family->entityParentPlugin($field_name, $plugin, array_keys($field_info['bundles']))
+        ->describe($field_name);
     }
   }
-  $api->disabledByDefault('termReference.*');
 }
 
 

@@ -2,7 +2,7 @@
 
 namespace Drupal\crumbs\TitleFinder;
 
-use Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection;
+use Drupal\crumbs\PluginSystem\Collection\PluginCollection\RawPluginCollection;
 use Drupal\crumbs\PluginSystem\Engine\FactoryUtil;
 use Drupal\crumbs\PluginSystem\Engine\TitleFinderEngine;
 use Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap;
@@ -29,7 +29,7 @@ class TitleFinder implements TitleFinderInterface {
   }
 
   /**
-   * @param \Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection $pluginCollection
+   * @param \Drupal\crumbs\PluginSystem\Collection\PluginCollection\RawPluginCollection $pluginCollection
    * @param \Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap $statusMap
    *
    * @return static

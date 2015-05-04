@@ -1,13 +1,13 @@
 <?php
-use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
+use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
 
 /**
  * Implementation of hook_crumbs_plugins()
  *
- * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
+ * @param \Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface $api
  */
 function menu_crumbs_plugins(ArgumentInterface $api) {
-  $offset = $api->multiPlugin('hierarchy')
+  $api->multiPlugin('hierarchy')
     ->translateDescription('Menu hierarchy')
     ->disabledByDefault();
 

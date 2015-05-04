@@ -3,9 +3,9 @@
 namespace Drupal\crumbs\Tests;
 
 use Drupal\crumbs\ParentCollector\ParentCollector;
-use Drupal\crumbs\PluginSystem\Discovery\Collection\LabeledPluginCollection;
-use Drupal\crumbs\PluginSystem\Discovery\Collection\RawPluginCollection;
-use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
+use Drupal\crumbs\PluginSystem\Collection\PluginCollection\LabeledPluginCollection;
+use Drupal\crumbs\PluginSystem\Collection\PluginCollection\RawPluginCollection;
+use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
 use Drupal\crumbs\PluginSystem\Discovery\Hook\MockHookCrumbsPlugins;
 use Drupal\crumbs\PluginSystem\Discovery\PluginDiscovery;
 use Drupal\crumbs\PluginSystem\Engine\FactoryUtil;

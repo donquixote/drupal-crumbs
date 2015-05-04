@@ -29,6 +29,7 @@ class TitleFinderEngine {
    */
   function findTitle($path, array $item, array $breadcrumb) {
     foreach ($this->pluginsSorted as $key => $plugin) {
+      /** @noinspection PhpMethodParametersCountMismatchInspection */
       $candidate = $plugin->findTitle($path, $item, $breadcrumb);
       if (isset($candidate)) {
         return $candidate;

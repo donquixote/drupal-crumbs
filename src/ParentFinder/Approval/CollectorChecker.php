@@ -32,6 +32,8 @@ class CollectorChecker implements CheckerInterface {
   /**
    * @param array $routerItem
    *   A router item.
+   * @param string $key
+   *   The plugin key for this router item.
    *
    * @return bool
    *   TRUE, if the router item is accepted in the breadcrumb trail.

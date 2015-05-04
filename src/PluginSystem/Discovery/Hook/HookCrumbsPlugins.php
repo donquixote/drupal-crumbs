@@ -2,18 +2,23 @@
 
 namespace Drupal\crumbs\PluginSystem\Discovery\Hook;
 
-use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
+use Drupal\crumbs\PluginApi\Collector\PrimaryPluginCollectorInterface;
+use Drupal\crumbs\PluginApi\HookArgument\PluginCollectionArg;
 
 class HookCrumbsPlugins implements HookInterface {
 
   /**
-   * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
+   * @param \Drupal\crumbs\PluginApi\Collector\PrimaryPluginCollectorInterface $parentCollectionContainer
+   * @param \Drupal\crumbs\PluginApi\Collector\PrimaryPluginCollectorInterface $titleCollectionContainer
    */
-  function invokeAll(ArgumentInterface $api) {
+  function invokeAll(
+    PrimaryPluginCollectorInterface $parentCollectionContainer,
+    PrimaryPluginCollectorInterface $titleCollectionContainer
+  ) {
     $this->includePluginFiles();
 
     foreach (module_implements('crumbs_plugins') as $module) {
-      $api->setModule($module);
+      $api = new PluginCollectionArg($parentCollectionContainer, $titleCollectionContainer, $module);
       $f = $module . '_crumbs_plugins';
       $f($api);
     }

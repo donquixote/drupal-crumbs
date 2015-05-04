@@ -1,5 +1,5 @@
 <?php
-use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
+use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
 use Drupal\crumbs\Util;
 
 /**
@@ -7,7 +7,7 @@ use Drupal\crumbs\Util;
  *
  * This is the version for the og-7.x-1.x branch.
  *
- * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
+ * @param \Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface $api
  */
 function og_crumbs_plugins(ArgumentInterface $api) {
 
@@ -15,31 +15,32 @@ function og_crumbs_plugins(ArgumentInterface $api) {
   // because 7.x-2.x behaves different from 7.x-1.x.
   if (!function_exists('og_get_group')) {
     // The site uses the og-7.x-1.x branch.
+    $family = $api->modulePluginFamily()
+      ->describeFindParent(t('Organic groups 7.x-1.x'))
+      ->describeFindTitle(t('Organic groups 7.x-1.x'));
 
     $plugin = new og_v1_CrumbsMultiPlugin_group_post;
-    $api->routeMultiPlugin('node/%', 'og1.group_post', $plugin)
+    $family->route('node/%')->multiPlugin('group_post', $plugin)
       ->describe(t('Group node') . ' &raquo; ' . t('Group post'));
 
-    $api->routeTranslateTitle('group-list', 'og1.groups_overview_title', 'Groups');
-
     $plugin = new og_v1_CrumbsMultiPlugin_groups_overview('group-list');
-    $api->routeMultiPlugin('node/%', 'og1.groups_overview', $plugin)
+    $family->route('node/%')->multiPlugin('groups_overview', $plugin)
       ->describe('group-list &raquo; node/%');
 
     $plugin = new og_v1_CrumbsMultiPlugin_my_groups_overview('user-groups');
-    $api->routeMultiPlugin('node/%', 'og1.my_groups_overview', $plugin)
+    $family->route('node/%')->multiPlugin('my_groups_overview', $plugin)
       ->describe('user-groups &raquo; node/%, for user\'s own groups');
 
-    $api->describeFindParent('og1.*', 'Organic groups 7.x-1.x');
-    $api->describeFindTitle('og1.*', 'Organic groups 7.x-1.x');
+    $family->route('group-list')->translateTitle('groups_overview_title', 'Groups');
   }
   else {
     // The site uses the og-7.x-2.x branch.
-    $plugin = new og_v2_CrumbsMultiPlugin_group_post;
-    $api->routeMultiPlugin('node/%', 'og2.group_post', $plugin)
-      ->describe(t('Group node') . ' &raquo; ' . t('Group post'));
+    $family = $api->modulePluginFamily()
+      ->describeFindParent(t('Organic groups 7.x-2.x'));
 
-    $api->describeFindParent('og2.*', 'Organic groups 7.x-2.x');
+    $plugin = new og_v2_CrumbsMultiPlugin_group_post;
+    $family->route('node/%')->multiPlugin('og2.group_post', $plugin)
+      ->describe(t('Group node') . ' &raquo; ' . t('Group post'));
 
     // There are no default paths for group overview pages in og-7.x-2.x anymore.
     // We leave it to custom module developers to instantiate or override those

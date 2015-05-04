@@ -30,7 +30,7 @@ class TrailFinderDemo implements WidgetInterface {
       $trail = $trailFinder->buildTrail($this->path);
       $rows[] = array(
         '<code>' . $class . '</code>',
-        '<code>' . implode(' &raquo; ', array_keys($trail)) . '</code>',
+        $this->renderTrail($trail),
       );
       if (!$trailFinder instanceof TrailFinderDecoratorBase) {
         break;
@@ -45,5 +45,25 @@ class TrailFinderDemo implements WidgetInterface {
         t('Trail paths'),
       ),
     );
+  }
+
+  /**
+   * @param array[] $trail
+   *
+   * @return string
+   */
+  private function renderTrail(array $trail) {
+    $rows = array();
+    foreach ($trail as $path => $trailItem) {
+      $rows[] = array(
+        $path,
+        isset($trailItem['title'])
+          ? check_plain($trailItem['title'])
+          : '',
+      );
+    }
+    return theme('table', array(
+      'rows' => $rows,
+    ));
   }
 }

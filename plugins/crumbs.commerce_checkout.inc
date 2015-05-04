@@ -1,23 +1,23 @@
 <?php
-use Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface;
+use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
 
 /**
  * Implementation of hook_crumbs_plugins()
  *
- * @param \Drupal\crumbs\PluginSystem\Discovery\Hook\Arg\ArgumentInterface $api
+ * @param \Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface $api
  */
 function commerce_checkout_crumbs_plugins(ArgumentInterface $api) {
 
+  $family = $api->modulePluginFamily()
+    ->disabledByDefault();
+
   // The parent path and title for checkout/%/% will be determined by the
   // commerce_checkout_CrumbsMonoPlugin_checkoutPages plugin.
-  $api->routeMonoPlugin('checkout/%/%', 'checkout.checkoutPages', new commerce_checkout_CrumbsMonoPlugin_checkoutPages);
-  $api->describeFindParent('checkoutPages', t('Commerce checkout pages'));
-  $api->describeFindTitle('checkoutPages', t('Commerce checkout pages'));
+  $family->route('checkout/%/%')->monoPlugin('checkoutPages', new commerce_checkout_CrumbsMonoPlugin_checkoutPages)
+    ->translateDescription('Commerce checkout pages');
 
   // The parent path for 'checkout/%' should always be 'cart'.
-  $api->routeParentPath('checkout/%', 'checkout.cartToCheckout', 'cart');
-
-  $api->disabledByDefault('checkout.*');
+  $family->route('checkout/%')->fixedParentPath('cartToCheckout', 'cart');
 }
 
 class commerce_checkout_CrumbsMonoPlugin_checkoutPages implements crumbs_MonoPlugin_FindParentInterface, crumbs_MonoPlugin_FindTitleInterface {

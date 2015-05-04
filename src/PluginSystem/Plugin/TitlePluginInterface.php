@@ -16,7 +16,7 @@ interface TitlePluginInterface extends \crumbs_PluginInterface {
    * @param array $item
    *   Item as returned from crumbs_get_router_item()
    *
-   * @return string[]|string|NULL
+   * @return NULL|string|\string[]
    *   Title candidates, or one title candidate, depending whether this is a
    *   mono plugin or a multi plugin.
    */

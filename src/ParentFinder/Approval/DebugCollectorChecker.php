@@ -2,7 +2,7 @@
 
 namespace Drupal\crumbs\ParentFinder\Approval;
 
-use Drupal\crumbs\Router\RouterInterface;
+
 
 class DebugCollectorChecker implements CheckerInterface {
 
@@ -34,6 +34,8 @@ class DebugCollectorChecker implements CheckerInterface {
   /**
    * @param array $routerItem
    *   A router item.
+   * @param string $key
+   *   The plugin key for this router item.
    *
    * @return bool
    *   TRUE, if the router item is accepted in the breadcrumb trail.

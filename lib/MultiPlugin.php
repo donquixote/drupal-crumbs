@@ -1,5 +1,5 @@
 <?php
-use Drupal\crumbs\PluginSystem\Discovery\DescribeMultiPluginArg;
+use Drupal\crumbs\PluginApi\DescribeArgument\DescribeMultiPluginArg;
 
 /**
  * Interface for plugin objects registered with hook_crumbs_plugins().

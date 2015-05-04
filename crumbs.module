@@ -88,10 +88,6 @@ function crumbs_module_implements_alter(&$implementations, $hook) {
       $implementations['crumbs'] = 'help';
       break;
 
-    case 'element_info':
-      $implementations['crumbs'] = 'form';
-      break;
-
     default:
       // Implementation of other hooks is either in the *.module file, or in a
       // file that is already included, such as crumbs.block.inc.

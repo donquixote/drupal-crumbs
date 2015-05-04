@@ -57,7 +57,12 @@ class FindTitleMultiPluginOffset implements \crumbs_MonoPlugin_FindTitleInterfac
    * Title candidate.
    */
   function findTitle($path, $item, $breadcrumb = array()) {
-    foreach ($this->multiPlugin->findTitle($path, $item, $breadcrumb) as $candidateKey => $candidate) {
+    /** @noinspection PhpMethodParametersCountMismatchInspection */
+    $candidates = $this->multiPlugin->findTitle($path, $item, $breadcrumb);
+    if (!is_array($candidates)) {
+      return NULL;
+    }
+    foreach ($candidates as $candidateKey => $candidate) {
       if (!isset($candidate)) {
         continue;
       }
