@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\Mapper\DefaultImplementation;
+namespace Drupal\crumbs\PluginApi\Family\DefaultImplementation;
 
 use Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface;
 use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
@@ -40,7 +40,7 @@ class HookArgument extends RoutelessPluginMapper implements ArgumentInterface {
   }
 
   /**
-   * @return \Drupal\crumbs\PluginApi\Mapper\PluginFamilyInterface
+   * @return \Drupal\crumbs\PluginApi\Family\FamilyLoreInterface
    */
   function modulePluginFamily() {
     return new PluginFamilyMapper(

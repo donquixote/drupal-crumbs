@@ -1,8 +1,8 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\Mapper;
+namespace Drupal\crumbs\PluginApi\Family;
 
-interface EntityPluginMapperInterface {
+interface EntityFamilyInterface {
 
   /**
    * Register an entity parent plugin.

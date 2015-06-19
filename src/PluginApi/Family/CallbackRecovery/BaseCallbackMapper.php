@@ -1,12 +1,12 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\Mapper\CallbackRecovery;
+namespace Drupal\crumbs\PluginApi\Family\CallbackRecovery;
 
 use Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface;
-use Drupal\crumbs\PluginApi\Mapper\BasePluginMapperInterface;
+use Drupal\crumbs\PluginApi\Family\BaseFamilyInterface;
 use Drupal\crumbs\PluginApi\PluginOffset\DummyOffset;
 
-class BaseCallbackMapper implements BasePluginMapperInterface {
+class BaseCallbackMapper implements BaseFamilyInterface {
 
   /**
    * @var \Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface

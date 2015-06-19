@@ -1,12 +1,12 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\Mapper\CallbackRecovery;
+namespace Drupal\crumbs\PluginApi\Family\CallbackRecovery;
 
 use Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface;
-use Drupal\crumbs\PluginApi\Mapper\RoutelessPluginMapperInterface;
+use Drupal\crumbs\PluginApi\Family\FamilyInterface;
 use Drupal\crumbs\PluginApi\PluginOffset\DummyOffset;
 
-class RoutelessCallbackMapper extends BaseCallbackMapper implements RoutelessPluginMapperInterface {
+class RoutelessCallbackMapper extends BaseCallbackMapper implements FamilyInterface {
 
   /**
    * @var \Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface
@@ -32,7 +32,7 @@ class RoutelessCallbackMapper extends BaseCallbackMapper implements RoutelessPlu
   /**
    * @param string $route
    *
-   * @return \Drupal\crumbs\PluginApi\Mapper\RoutePluginMapperInterface
+   * @return \Drupal\crumbs\PluginApi\Family\RouteInterface
    */
   function route($route) {
     return new RouteCallbackMapper(
@@ -44,7 +44,7 @@ class RoutelessCallbackMapper extends BaseCallbackMapper implements RoutelessPlu
   /**
    * @param string $key
    *
-   * @return \Drupal\crumbs\PluginApi\Mapper\PluginFamilyInterface
+   * @return \Drupal\crumbs\PluginApi\Family\FamilyLoreInterface
    */
   function pluginFamily($key) {
     return new CallbackFamilyMapper(

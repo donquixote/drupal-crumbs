@@ -3,7 +3,7 @@
 namespace Drupal\crumbs\PluginSystem\Discovery\Hook;
 
 use Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface;
-use Drupal\crumbs\PluginApi\Mapper\DefaultImplementation\HookArgument;
+use Drupal\crumbs\PluginApi\Family\DefaultImplementation\HookArgument;
 
 class MockHookCrumbsPlugins implements HookInterface {
 

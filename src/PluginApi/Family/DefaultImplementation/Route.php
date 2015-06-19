@@ -1,10 +1,10 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\Mapper\DefaultImplementation;
+namespace Drupal\crumbs\PluginApi\Family\DefaultImplementation;
 
-use Drupal\crumbs\PluginApi\Mapper\RoutePluginMapperInterface;
+use Drupal\crumbs\PluginApi\Family\RouteInterface;
 
-class RoutePluginMapper extends BasePluginMapper implements RoutePluginMapperInterface {
+class Route extends BasePluginFamily implements RouteInterface {
 
   /**
    * @param string $key

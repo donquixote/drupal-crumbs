@@ -1,8 +1,8 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\Mapper;
+namespace Drupal\crumbs\PluginApi\Family;
 
-interface MetaMapperInterface {
+interface LoreInterface {
 
   /**
    * @param string $description

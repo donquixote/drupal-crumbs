@@ -3,8 +3,8 @@
 namespace Drupal\crumbs\PluginSystem\Discovery;
 
 use Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface;
-use Drupal\crumbs\PluginApi\Mapper\CallbackRecovery\CallbackHookArgument;
-use Drupal\crumbs\PluginApi\Mapper\DefaultImplementation\HookArgument;
+use Drupal\crumbs\PluginApi\Family\CallbackRecovery\CallbackHookArgument;
+use Drupal\crumbs\PluginApi\Family\DefaultImplementation\HookArgument;
 use Drupal\crumbs\PluginSystem\Discovery\Hook\HookCrumbsPlugins;
 use Drupal\crumbs\PluginSystem\Discovery\Hook\HookInterface;
 

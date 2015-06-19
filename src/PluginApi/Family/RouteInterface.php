@@ -1,8 +1,8 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\Mapper;
+namespace Drupal\crumbs\PluginApi\Family;
 
-interface RoutePluginMapperInterface extends BasePluginMapperInterface {
+interface RouteInterface extends BaseFamilyInterface {
 
   /**
    * @param string $key

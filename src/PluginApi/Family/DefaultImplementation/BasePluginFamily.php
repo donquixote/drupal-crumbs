@@ -1,13 +1,13 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\Mapper\DefaultImplementation;
+namespace Drupal\crumbs\PluginApi\Family\DefaultImplementation;
 
 use Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface;
-use Drupal\crumbs\PluginApi\Mapper\BasePluginMapperInterface;
+use Drupal\crumbs\PluginApi\Family\BaseFamilyInterface;
 use Drupal\crumbs\PluginSystem\Plugin\ParentPluginInterface;
 use Drupal\crumbs\PluginSystem\Plugin\TitlePluginInterface;
 
-class BasePluginMapper implements BasePluginMapperInterface {
+class BasePluginFamily implements BaseFamilyInterface {
 
   /**
    * @var \Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface

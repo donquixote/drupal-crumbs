@@ -1,11 +1,11 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\Mapper;
+namespace Drupal\crumbs\PluginApi\Family;
 
 /**
  * Declaration bucket for plugins for a specific route.
  */
-interface BasePluginMapperInterface {
+interface BaseFamilyInterface {
 
   /**
    * Register a "Multi" plugin.

@@ -1,10 +1,10 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\Mapper\DefaultImplementation;
+namespace Drupal\crumbs\PluginApi\Family\DefaultImplementation;
 
-use Drupal\crumbs\PluginApi\Mapper\PluginFamilyInterface;
+use Drupal\crumbs\PluginApi\Family\FamilyLoreInterface;
 
-class PluginFamilyMapper extends RoutelessPluginMapper implements PluginFamilyInterface {
+class PluginFamilyMapper extends RoutelessPluginMapper implements FamilyLoreInterface {
 
   /**
    * Set specific rules as disabled by default.

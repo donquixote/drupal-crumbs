@@ -1,11 +1,11 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\Mapper\DefaultImplementation;
+namespace Drupal\crumbs\PluginApi\Family\DefaultImplementation;
 
 use Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface;
-use Drupal\crumbs\PluginApi\Mapper\RoutelessPluginMapperInterface;
+use Drupal\crumbs\PluginApi\Family\FamilyInterface;
 
-class RoutelessPluginMapper extends BasePluginMapper implements RoutelessPluginMapperInterface {
+class RoutelessPluginMapper extends BasePluginFamily implements FamilyInterface {
 
   /**
    * @var \Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface
@@ -42,10 +42,10 @@ class RoutelessPluginMapper extends BasePluginMapper implements RoutelessPluginM
   /**
    * @param string $route
    *
-   * @return \Drupal\crumbs\PluginApi\Mapper\RoutePluginMapperInterface
+   * @return \Drupal\crumbs\PluginApi\Family\RouteInterface
    */
   function route($route) {
-    return new RoutePluginMapper(
+    return new Route(
       $this->parentPluginCollector->route($route),
       $this->titlePluginCollector->route($route),
       $this->hasUncachablePlugins,
@@ -55,7 +55,7 @@ class RoutelessPluginMapper extends BasePluginMapper implements RoutelessPluginM
   /**
    * @param string $key
    *
-   * @return \Drupal\crumbs\PluginApi\Mapper\PluginFamilyInterface
+   * @return \Drupal\crumbs\PluginApi\Family\FamilyLoreInterface
    */
   function pluginFamily($key) {
     return new PluginFamilyMapper(

@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\Mapper\CallbackRecovery;
+namespace Drupal\crumbs\PluginApi\Family\CallbackRecovery;
 
 use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
 use Drupal\crumbs\PluginApi\PluginOffset\DummyOffset;
@@ -13,7 +13,7 @@ class CallbackHookArgument extends RoutelessCallbackMapper implements ArgumentIn
   private $module;
 
   /**
-   * @return \Drupal\crumbs\PluginApi\Mapper\PluginFamilyInterface
+   * @return \Drupal\crumbs\PluginApi\Family\FamilyLoreInterface
    */
   function modulePluginFamily() {
     return new CallbackFamilyMapper(

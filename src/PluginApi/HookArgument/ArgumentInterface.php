@@ -1,15 +1,15 @@
 <?php
 namespace Drupal\crumbs\PluginApi\HookArgument;
 
-use Drupal\crumbs\PluginApi\Mapper\RoutelessPluginMapperInterface;
+use Drupal\crumbs\PluginApi\Family\FamilyInterface;
 
 /**
  * Interface for the argument passed to hook_crumbs_plugins().
  */
-interface ArgumentInterface extends RoutelessPluginMapperInterface, \crumbs_InjectedAPI_hookCrumbsPlugins {
+interface ArgumentInterface extends FamilyInterface {
 
   /**
-   * @return \Drupal\crumbs\PluginApi\Mapper\PluginFamilyInterface
+   * @return \Drupal\crumbs\PluginApi\Family\FamilyLoreInterface
    */
   function modulePluginFamily();
 

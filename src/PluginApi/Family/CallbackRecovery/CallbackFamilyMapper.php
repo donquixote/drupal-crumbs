@@ -1,10 +1,10 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\Mapper\CallbackRecovery;
+namespace Drupal\crumbs\PluginApi\Family\CallbackRecovery;
 
-use Drupal\crumbs\PluginApi\Mapper\PluginFamilyInterface;
+use Drupal\crumbs\PluginApi\Family\FamilyLoreInterface;
 
-class CallbackFamilyMapper extends RoutelessCallbackMapper implements PluginFamilyInterface {
+class CallbackFamilyMapper extends RoutelessCallbackMapper implements FamilyLoreInterface {
 
   /**
    * @param string $description
