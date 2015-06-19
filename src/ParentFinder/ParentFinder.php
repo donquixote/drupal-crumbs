@@ -3,7 +3,7 @@
 namespace Drupal\crumbs\ParentFinder;
 
 use Drupal\crumbs\ParentFinder\Approval\CheckerInterface;
-use Drupal\crumbs\PluginSystem\Collection\PluginCollection\RawPluginCollection;
+use Drupal\crumbs\PluginSystem\Collection\PluginCollection\PluginCollection;
 use Drupal\crumbs\PluginSystem\Engine\FactoryUtil;
 use Drupal\crumbs\PluginSystem\Engine\ParentFinderEngine;
 use Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap;
@@ -31,14 +31,14 @@ class ParentFinder implements ParentFinderInterface {
   }
 
   /**
-   * @param \Drupal\crumbs\PluginSystem\Collection\PluginCollection\RawPluginCollection $pluginCollection
+   * @param \Drupal\crumbs\PluginSystem\Collection\PluginCollection\PluginCollection $pluginCollection
    * @param \Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap $statusMap
    * @param \Drupal\crumbs\Router\RouterInterface $router
    *
    * @return static
    */
   public static function create(
-    RawPluginCollection $pluginCollection,
+    PluginCollection $pluginCollection,
     PluginStatusWeightMap $statusMap,
     RouterInterface $router
   ) {

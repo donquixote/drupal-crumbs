@@ -1,10 +1,9 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\Mapper\Implementation;
+namespace Drupal\crumbs\PluginApi\Mapper\DefaultImplementation;
 
 use Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface;
 use Drupal\crumbs\PluginApi\Mapper\BasePluginMapperInterface;
-use Drupal\crumbs\PluginSystem\Callback\CallbackWrapperInterface;
 use Drupal\crumbs\PluginSystem\Plugin\ParentPluginInterface;
 use Drupal\crumbs\PluginSystem\Plugin\TitlePluginInterface;
 
@@ -13,17 +12,17 @@ class BasePluginMapper implements BasePluginMapperInterface {
   /**
    * @var \Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface
    */
-  protected $parentCollectionContainer;
+  protected $parentPluginCollector;
 
   /**
    * @var \Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface
    */
-  protected $titleCollectionContainer;
+  protected $titlePluginCollector;
 
   /**
-   * @var \Drupal\crumbs\PluginSystem\Callback\CallbackWrapperInterface
+   * @var bool
    */
-  protected $callbackWrapper;
+  protected $hasUncachablePlugins;
 
   /**
    * @var string
@@ -31,20 +30,21 @@ class BasePluginMapper implements BasePluginMapperInterface {
   protected $prefix;
 
   /**
-   * @param \Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface $parentCollectionContainer
-   * @param \Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface $titleCollectionContainer
-   * @param \Drupal\crumbs\PluginSystem\Callback\CallbackWrapperInterface $callbackWrapper
+   * @param \Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface $parentPluginCollector
+   * @param \Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface $titlePluginCollector
+   * @param bool $hasUncachablePlugins
+   *   By-reference flag.
    * @param string $prefix
    */
   function __construct(
-    PluginCollectorInterface $parentCollectionContainer,
-    PluginCollectorInterface $titleCollectionContainer,
-    CallbackWrapperInterface $callbackWrapper,
+    PluginCollectorInterface $parentPluginCollector,
+    PluginCollectorInterface $titlePluginCollector,
+    &$hasUncachablePlugins,
     $prefix
   ) {
-    $this->parentCollectionContainer = $parentCollectionContainer;
-    $this->titleCollectionContainer = $titleCollectionContainer;
-    $this->callbackWrapper = $callbackWrapper;
+    $this->parentPluginCollector = $parentPluginCollector;
+    $this->titlePluginCollector = $titlePluginCollector;
+    $this->hasUncachablePlugins =& $hasUncachablePlugins;
     $this->prefix = $prefix;
   }
 
@@ -55,10 +55,10 @@ class BasePluginMapper implements BasePluginMapperInterface {
    */
   protected function pluginGetCollectionContainer(\crumbs_PluginInterface $plugin) {
     if ($plugin instanceof ParentPluginInterface) {
-      return $this->parentCollectionContainer;
+      return $this->parentPluginCollector;
     }
     elseif ($plugin instanceof TitlePluginInterface) {
-      return $this->titleCollectionContainer;
+      return $this->titlePluginCollector;
     }
     else {
       throw new \InvalidArgumentException("Invalid plugin type.");
@@ -108,8 +108,9 @@ class BasePluginMapper implements BasePluginMapperInterface {
    */
   function parentCallback($key, $callback) {
     $key = $this->prefix . $key;
-    $plugin = $this->callbackWrapper->wrapParentCallback($callback, $key);
-    return $this->monoPlugin($key, $plugin);
+    $this->hasUncachablePlugins = TRUE;
+    // Ignore this plugin, since it is uncachable.
+    return $this->parentPluginCollector->pluginOffset($key);
   }
 
   /**
@@ -120,7 +121,8 @@ class BasePluginMapper implements BasePluginMapperInterface {
    */
   function titleCallback($key, $callback) {
     $key = $this->prefix . $key;
-    $plugin = $this->callbackWrapper->wrapTitleCallback($callback, $key);
-    return $this->monoPlugin($key, $plugin);
+    $this->hasUncachablePlugins = TRUE;
+    // Ignore this plugin, since it is uncachable.
+    return $this->titlePluginCollector->pluginOffset($key);
   }
 }

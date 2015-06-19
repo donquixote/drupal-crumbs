@@ -2,12 +2,19 @@
 
 namespace Drupal\crumbs\PluginSystem\Callback;
 
-class CallbackWrapper implements CallbackWrapperInterface {
+class CallbackPluginBuilder implements CallbackPluginBuilderInterface {
 
   /**
    * @var string
    */
   private $module;
+
+  /**
+   * @param string $module
+   */
+  function __construct($module) {
+    $this->module = $module;
+  }
 
   /**
    * @param callable $callback

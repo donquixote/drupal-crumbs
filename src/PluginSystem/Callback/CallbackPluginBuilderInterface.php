@@ -2,7 +2,7 @@
 
 namespace Drupal\crumbs\PluginSystem\Callback;
 
-interface CallbackWrapperInterface {
+interface CallbackPluginBuilderInterface {
 
   /**
    * @param callable $callback
@@ -10,7 +10,7 @@ interface CallbackWrapperInterface {
    *
    * @return \crumbs_MonoPlugin_FindParentInterface
    */
-  public function wrapParentCallback($callback, $key);
+  public function wrapParentCallback($callback);
 
   /**
    * @param callable $callback
@@ -18,7 +18,7 @@ interface CallbackWrapperInterface {
    *
    * @return \crumbs_MonoPlugin_FindTitleInterface
    */
-  public function wrapTitleCallback($callback, $key);
+  public function wrapTitleCallback($callback);
 
   /**
    * @param callable $callback

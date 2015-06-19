@@ -37,4 +37,11 @@ interface PluginCollectorInterface extends TreeCollectionInterface {
    */
   function monoPlugin($key, \crumbs_MonoPlugin $plugin);
 
+  /**
+   * @param string $key
+   *
+   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   */
+  function pluginOffset($key);
+
 }

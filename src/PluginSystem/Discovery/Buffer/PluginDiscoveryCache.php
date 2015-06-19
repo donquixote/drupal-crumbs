@@ -8,7 +8,7 @@ use Drupal\crumbs\PluginSystem\PluginType\ParentPluginType;
 use Drupal\crumbs\PluginSystem\PluginType\PluginTypeInterface;
 use Drupal\crumbs\PluginSystem\PluginType\TitlePluginType;
 
-class PluginDiscoveryBuffer {
+class PluginDiscoveryCache {
 
   /**
    * @var \Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface|NULL
@@ -24,11 +24,6 @@ class PluginDiscoveryBuffer {
    * @var \Drupal\crumbs\PluginSystem\Discovery\PluginDiscovery
    */
   protected $pluginDiscovery;
-
-  /**
-   * @var bool[]
-   */
-  protected $uncacheableModules = array();
 
   /**
    * @return static
@@ -62,15 +57,21 @@ class PluginDiscoveryBuffer {
   }
 
   protected function load() {
-    if (!isset($this->parentCollector)) {
-      $uncachablePlugins = array();
-      $this->parentCollector = new RoutelessPluginCollector(TRUE);
-      $this->titleCollector = new RoutelessPluginCollector(FALSE);
-      $this->pluginDiscovery->discoverPlugins(
-        $this->parentCollector,
-        $this->titleCollector,
-        $this->uncacheableModules);
+    if (isset($this->parentCollector)) {
+      // Do nothing.
+    }
+    $uncachableModules = array();
+    $this->parentCollector = new RoutelessPluginCollector(TRUE);
+    $this->titleCollector = new RoutelessPluginCollector(FALSE);
+    $this->pluginDiscovery->discoverPlugins(
+      $this->parentCollector,
+      $this->titleCollector,
+      $uncacheableModules);
 
+    if (!empty($uncachableModules)) {
+      $this->pluginDiscovery->discoverUncacheablePlugins(
+        $this->parentCollector,
+        $this->titleCollector);
     }
   }
 
@@ -95,4 +96,5 @@ class PluginDiscoveryBuffer {
 
     throw new \InvalidArgumentException("Invalid plugin type.");
   }
+
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\Collector\Implementation;
+namespace Drupal\crumbs\PluginApi\Collector\DefaultImplementation;
 
 use Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface;
 use Drupal\crumbs\PluginSystem\Collection\PluginCollection\PluginCollectionInterface;
@@ -123,18 +123,9 @@ class PluginCollector implements PluginCollectorInterface {
   /**
    * @param string $key
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\PluginOffset
+   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
    */
-  protected function monoPluginOffset($key) {
+  function pluginOffset($key) {
     return new PluginOffset($this->treeCollection, $key);
-  }
-
-  /**
-   * @param string $key
-   *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\PluginOffset
-   */
-  protected function multiPluginOffset($key) {
-    return new PluginOffset($this->treeCollection, $key . '.*');
   }
 }

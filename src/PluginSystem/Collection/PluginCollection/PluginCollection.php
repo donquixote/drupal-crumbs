@@ -6,12 +6,7 @@ namespace Drupal\crumbs\PluginSystem\Collection\PluginCollection;
  * Collection object that collects plugins of a specific type, that is, either
  * parent-finding or title-finding plugins.
  */
-class RawPluginCollection implements PluginCollectionInterface {
-
-  /**
-   * @var bool[]
-   */
-  private $defaultStatuses = array();
+class PluginCollection implements PluginCollectionInterface {
 
   /**
    * @var \crumbs_PluginInterface[]
@@ -52,22 +47,6 @@ class RawPluginCollection implements PluginCollectionInterface {
     else {
       $this->routelessPlugins[$key] = $plugin;
     }
-  }
-
-  /**
-   * @param string $key
-   * @param bool $status
-   */
-  function setDefaultStatus($key, $status) {
-    $this->defaultStatuses[$key] = $status;
-  }
-
-  /**
-   * @param string $key
-   * @param string $description
-   */
-  public function addDescription($key, $description) {
-    // Do nothing.
   }
 
   /**

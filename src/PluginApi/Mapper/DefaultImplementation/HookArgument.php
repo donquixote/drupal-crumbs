@@ -1,15 +1,16 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\HookArgument;
+namespace Drupal\crumbs\PluginApi\Mapper\DefaultImplementation;
 
-use Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface;
-use Drupal\crumbs\PluginSystem\Callback\CallbackWrapper;
-use Drupal\crumbs\PluginApi\Mapper\Implementation\PrimaryPluginMapper;
+use Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface;
+use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
+use Drupal\crumbs\PluginApi\HookArgument\Helper;
 
-class PluginCollectionArg extends PrimaryPluginMapper implements ArgumentInterface {
+
+class HookArgument extends RoutelessPluginMapper implements ArgumentInterface {
 
   /**
-   * @var string|NULL
+   * @var string
    */
   private $module;
 
@@ -19,19 +20,21 @@ class PluginCollectionArg extends PrimaryPluginMapper implements ArgumentInterfa
   private $helper;
 
   /**
-   * @param \Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface $parentCollectionContainer
-   * @param \Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface $titleCollectionContainer
+   * @param \Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface $parentPluginCollector
+   * @param \Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface $titlePluginCollector
+   * @param bool $hasUncachablePlugins
    * @param string $module
    */
   function __construct(
-    PluginCollectorInterface $parentCollectionContainer,
-    PluginCollectorInterface $titleCollectionContainer,
+    RoutelessPluginCollectorInterface $parentPluginCollector,
+    RoutelessPluginCollectorInterface $titlePluginCollector,
+    &$hasUncachablePlugins,
     $module
   ) {
     parent::__construct(
-      $parentCollectionContainer,
-      $titleCollectionContainer,
-      new CallbackWrapper($module),
+      $parentPluginCollector,
+      $titlePluginCollector,
+      $callbackPluginBuilder,
       $module . '-');
     $this->helper = new Helper($module);
   }
@@ -40,10 +43,11 @@ class PluginCollectionArg extends PrimaryPluginMapper implements ArgumentInterfa
    * @return \Drupal\crumbs\PluginApi\Mapper\PluginFamilyInterface
    */
   function modulePluginFamily() {
-    if (!isset($this->module)) {
-      throw new \RuntimeException('Module not initialized.');
-    }
-    return $this->pluginFamily($this->module);
+    return new PluginFamilyMapper(
+      $this->parentPluginCollector,
+      $this->titlePluginCollector,
+      $this->hasUncachablePlugins,
+      $this->module . '.');
   }
 
   /**
@@ -56,8 +60,8 @@ class PluginCollectionArg extends PrimaryPluginMapper implements ArgumentInterfa
    * @param string $bundle_name
    */
   function entityRoute($entity_type, $route, $bundle_key, $bundle_name) {
-    $this->parentCollectionContainer->entityRoute($entity_type, $route, $bundle_key, $bundle_name);
-    $this->titleCollectionContainer->entityRoute($entity_type, $route, $bundle_key, $bundle_name);
+    $this->parentPluginCollector->entityRoute($entity_type, $route, $bundle_key, $bundle_name);
+    $this->titlePluginCollector->entityRoute($entity_type, $route, $bundle_key, $bundle_name);
   }
 
   /**
@@ -80,6 +84,7 @@ class PluginCollectionArg extends PrimaryPluginMapper implements ArgumentInterfa
     if (!isset($plugin)) {
       $plugin = $this->helper->monoPluginFromKey($key);
     }
+    // @todo What if $key is empty?
     return parent::monoPlugin($key, $plugin);
   }
 
@@ -96,6 +101,7 @@ class PluginCollectionArg extends PrimaryPluginMapper implements ArgumentInterfa
     if (!isset($plugin)) {
       $plugin = $this->helper->monoPluginFromKey($key);
     }
+    // @todo What if $key is empty?
     return $this->route($route)->monoPlugin($key, $plugin);
   }
 
@@ -118,6 +124,7 @@ class PluginCollectionArg extends PrimaryPluginMapper implements ArgumentInterfa
     if (!isset($plugin)) {
       $plugin = $this->helper->multiPluginFromKey($key);
     }
+    // @todo What if the key is empty?
     return parent::multiPlugin($key, $plugin);
   }
 
@@ -132,6 +139,7 @@ class PluginCollectionArg extends PrimaryPluginMapper implements ArgumentInterfa
     if (!isset($plugin)) {
       $plugin = $this->helper->multiPluginFromKey($key);
     }
+    // @todo What if the key is empty?
     return $this->route($route)->multiPlugin($key, $plugin);
   }
 
@@ -143,10 +151,7 @@ class PluginCollectionArg extends PrimaryPluginMapper implements ArgumentInterfa
    * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
    */
   function routeParentPath($route, $key, $parent_path) {
-    $plugin = new \crumbs_MonoPlugin_FixedParentPath($parent_path);
-    return $this->routeMonoPlugin($route, $key, $plugin)
-      ->describe('<code>' . check_plain($parent_path) . '</code>' . ' &raquo; '
-        . '<code>' . check_plain($route) . '</code>');
+    return $this->route($route)->fixedParentPath($key, $parent_path);
   }
 
   /**
@@ -176,12 +181,7 @@ class PluginCollectionArg extends PrimaryPluginMapper implements ArgumentInterfa
    * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
    */
   function routeTranslateTitle($route, $key, $title) {
-    $plugin = new \crumbs_MonoPlugin_TranslateTitle($title);
-    return $this->routeMonoPlugin($route, $key, $plugin)
-      ->translateDescription("Title t('@title') for route '@route'", array(
-        '@title' => $title,
-        '@route' => $route,
-      ));
+    return $this->route($route)->translateTitle($key, $title);
   }
 
   /**
@@ -200,13 +200,7 @@ class PluginCollectionArg extends PrimaryPluginMapper implements ArgumentInterfa
    * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
    */
   function routeTitleCallback($route, $key, $callback) {
-    return $this->routeMonoPlugin(
-      $route,
-      $key,
-      new \crumbs_MonoPlugin_TitleCallback(
-        $callback,
-        $this->helper->getModule(),
-        $key));
+    return $this->route($route)->titleCallback($key, $callback);
   }
 
   /**
@@ -216,10 +210,7 @@ class PluginCollectionArg extends PrimaryPluginMapper implements ArgumentInterfa
    * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
    */
   function routeSkipItem($route, $key) {
-    return $this->routeMonoPlugin($route, $key, new \crumbs_MonoPlugin_SkipItem())
-      ->translateDescription('Skip links with route !route', array(
-        '!route' => '<code>' . check_plain($route) . '</code>',
-      ));
+    return $this->route($route)->skipItem($key);
   }
 
   /**

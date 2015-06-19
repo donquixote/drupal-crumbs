@@ -2,16 +2,18 @@
 
 namespace Drupal\crumbs\PluginSystem\Discovery\Hook;
 
-use Drupal\crumbs\PluginApi\Collector\PrimaryPluginCollectorInterface;
+use Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface;
 
 interface HookInterface {
 
   /**
-   * @param \Drupal\crumbs\PluginApi\Collector\PrimaryPluginCollectorInterface $parentCollectionContainer
-   * @param \Drupal\crumbs\PluginApi\Collector\PrimaryPluginCollectorInterface $titleCollectionContainer
+   * @param \Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface $parentCollectionContainer
+   * @param \Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface $titleCollectionContainer
+   * @param bool[] $uncachableModules
    */
   function invokeAll(
-    PrimaryPluginCollectorInterface $parentCollectionContainer,
-    PrimaryPluginCollectorInterface $titleCollectionContainer
+    RoutelessPluginCollectorInterface $parentCollectionContainer,
+    RoutelessPluginCollectorInterface $titleCollectionContainer,
+    array &$uncachableModules
   );
 }

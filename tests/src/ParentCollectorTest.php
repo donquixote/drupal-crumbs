@@ -4,7 +4,7 @@ namespace Drupal\crumbs\Tests;
 
 use Drupal\crumbs\ParentCollector\ParentCollector;
 use Drupal\crumbs\PluginSystem\Collection\PluginCollection\LabeledPluginCollection;
-use Drupal\crumbs\PluginSystem\Collection\PluginCollection\RawPluginCollection;
+use Drupal\crumbs\PluginSystem\Collection\PluginCollection\PluginCollection;
 use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
 use Drupal\crumbs\PluginSystem\Discovery\Hook\MockHookCrumbsPlugins;
 use Drupal\crumbs\PluginSystem\Discovery\PluginDiscovery;
@@ -48,7 +48,7 @@ class ParentCollectorTest extends \PHPUnit_Framework_TestCase {
   }
 
   function testParentFinder() {
-    $parentPluginCollection = new RawPluginCollection();
+    $parentPluginCollection = new PluginCollection();
     $parentPluginCollection->addMonoPlugin('foo1.bar1', new \crumbs_MonoPlugin_FixedParentPath('foo1.bar1'));
     $parentPluginCollection->addMonoPlugin('foo1.bar2', new \crumbs_MonoPlugin_FixedParentPath('foo1.bar2'), 'node/%');
     $merged = array(

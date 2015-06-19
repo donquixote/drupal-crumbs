@@ -1,56 +1,44 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\Mapper\Implementation;
+namespace Drupal\crumbs\PluginApi\Mapper\CallbackRecovery;
 
-use Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface;
-use Drupal\crumbs\PluginApi\Mapper\PrimaryPluginMapperInterface;
-use Drupal\crumbs\PluginSystem\Callback\CallbackWrapperInterface;
+use Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface;
+use Drupal\crumbs\PluginApi\Mapper\RoutelessPluginMapperInterface;
+use Drupal\crumbs\PluginApi\PluginOffset\DummyOffset;
 
-class PrimaryPluginMapper extends BasePluginMapper implements PrimaryPluginMapperInterface {
-
-  /**
-   * @var \Drupal\crumbs\PluginApi\Collector\PrimaryPluginCollectorInterface
-   */
-  protected $parentCollectionContainer;
+class RoutelessCallbackMapper extends BaseCallbackMapper implements RoutelessPluginMapperInterface {
 
   /**
-   * @var \Drupal\crumbs\PluginApi\Collector\PrimaryPluginCollectorInterface
+   * @var \Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface
    */
-  protected $titleCollectionContainer;
+  protected $parentPluginCollector;
 
   /**
-   * Constructor.
-   * Overrides parent constructor signature, narrowing down the types.
-   *
-   * @param \Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface $parentCollectionContainer
-   * @param \Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface $titleCollectionContainer
-   * @param \Drupal\crumbs\PluginSystem\Callback\CallbackWrapperInterface $callbackWrapper
-   * @param string $prefix
+   * @var \Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface
    */
+  protected $titlePluginCollector;
+
   function __construct(
-    PluginCollectorInterface $parentCollectionContainer,
-    PluginCollectorInterface $titleCollectionContainer,
-    CallbackWrapperInterface $callbackWrapper,
+    RoutelessPluginCollectorInterface $parentPluginCollector,
+    RoutelessPluginCollectorInterface $titlePluginCollector,
     $prefix
   ) {
     parent::__construct(
-      $parentCollectionContainer,
-      $titleCollectionContainer,
-      $callbackWrapper,
+      $parentPluginCollector,
+      $titlePluginCollector,
       $prefix);
   }
 
   /**
    * @param string $route
    *
-   * @return \Drupal\crumbs\PluginApi\Mapper\BasePluginMapperInterface
+   * @return \Drupal\crumbs\PluginApi\Mapper\RoutePluginMapperInterface
    */
   function route($route) {
-    return (new RoutePluginMapper(
-      $this->parentCollectionContainer->route($route),
-      $this->titleCollectionContainer->route($route),
-      $this->callbackWrapper,
-      $this->prefix));
+    return new RouteCallbackMapper(
+      $this->parentPluginCollector->route($route),
+      $this->titlePluginCollector->route($route),
+      $this->prefix);
   }
 
   /**
@@ -59,18 +47,17 @@ class PrimaryPluginMapper extends BasePluginMapper implements PrimaryPluginMappe
    * @return \Drupal\crumbs\PluginApi\Mapper\PluginFamilyInterface
    */
   function pluginFamily($key) {
-    return (new PluginFamilyMapper(
-      $this->parentCollectionContainer,
-      $this->titleCollectionContainer,
-      $this->callbackWrapper,
-      $this->prefix . $key . '.'));
+    return new CallbackFamilyMapper(
+      $this->parentPluginCollector,
+      $this->titlePluginCollector,
+      $this->prefix . $key . '.');
   }
 
   /**
    * Register an entity parent plugin.
    *
    * @param string $key
-   * @param \crumbs_EntityPlugin|NULL $entity_plugin
+   * @param \crumbs_EntityPlugin|string|NULL $entity_plugin
    * @param string[]|string|NULL $types
    *   An array of entity types, or a single entity type, or NULL to allow all
    *   entity types.
@@ -78,8 +65,8 @@ class PrimaryPluginMapper extends BasePluginMapper implements PrimaryPluginMappe
    * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
    */
   function entityParentPlugin($key, $entity_plugin, $types = NULL) {
-    $key = $this->prefix . $key;
-    return $this->parentCollectionContainer->entityPlugin($key, $entity_plugin, $types);
+    // Ignore this plugin, knowing that it is already cached.
+    return new DummyOffset();
   }
 
   /**
@@ -97,15 +84,16 @@ class PrimaryPluginMapper extends BasePluginMapper implements PrimaryPluginMappe
    */
   function entityParentCallback($key, $callback, $types = NULL) {
     $key = $this->prefix . $key;
-    $entity_plugin = $this->callbackWrapper->wrapEntityParentCallback($callback, $key);
-    return $this->parentCollectionContainer->entityPlugin($key, $entity_plugin, $types);
+    $entity_plugin = new \crumbs_EntityPlugin_Callback($callback);
+    $this->parentPluginCollector->entityPlugin($key, $entity_plugin, $types);
+    return new DummyOffset();
   }
 
   /**
    * Register an entity title plugin.
    *
    * @param string $key
-   * @param \crumbs_EntityPlugin|NULL $entity_plugin
+   * @param \crumbs_EntityPlugin|string|NULL $entity_plugin
    * @param string[]|string|NULL $types
    *   An array of entity types, or a single entity type, or NULL to allow all
    *   entity types.
@@ -113,8 +101,8 @@ class PrimaryPluginMapper extends BasePluginMapper implements PrimaryPluginMappe
    * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
    */
   function entityTitlePlugin($key, $entity_plugin = NULL, $types = NULL) {
-    $key = $this->prefix . $key;
-    $this->titleCollectionContainer->entityPlugin($key, $entity_plugin, $types);
+    // Ignore this plugin, knowing that it is already cached.
+    return new DummyOffset();
   }
 
   /**
@@ -138,7 +126,8 @@ class PrimaryPluginMapper extends BasePluginMapper implements PrimaryPluginMappe
    */
   function entityTitleCallback($key, $callback, $types = NULL) {
     $key = $this->prefix . $key;
-    $entity_plugin = $this->callbackWrapper->wrapEntityTitleCallback($callback, $key);
-    return $this->titleCollectionContainer->entityPlugin($key, $entity_plugin, $types);
+    $entity_plugin = new \crumbs_EntityPlugin_Callback($callback);
+    $this->titlePluginCollector->entityPlugin($key, $entity_plugin, $types);
+    return new DummyOffset();
   }
 }

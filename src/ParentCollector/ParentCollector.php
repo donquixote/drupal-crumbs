@@ -6,7 +6,7 @@ use Drupal\crumbs\ParentFinder\Approval\AccessChecker;
 use Drupal\crumbs\ParentFinder\Approval\CollectorChecker;
 use Drupal\crumbs\ParentFinder\ParentFinder;
 use Drupal\crumbs\ParentFinder\ParentFinderInterface;
-use Drupal\crumbs\PluginSystem\Collection\PluginCollection\RawPluginCollection;
+use Drupal\crumbs\PluginSystem\Collection\PluginCollection\PluginCollection;
 use Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap;
 use Drupal\crumbs\Router\RouterInterface;
 
@@ -18,14 +18,14 @@ class ParentCollector {
   private $parentFinder;
 
   /**
-   * @param \Drupal\crumbs\PluginSystem\Collection\PluginCollection\RawPluginCollection $pluginCollection
+   * @param \Drupal\crumbs\PluginSystem\Collection\PluginCollection\PluginCollection $pluginCollection
    * @param \Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap $statusMap
    * @param \Drupal\crumbs\Router\RouterInterface $router
    *
    * @return static
    */
   static function create(
-    RawPluginCollection $pluginCollection,
+    PluginCollection $pluginCollection,
     PluginStatusWeightMap $statusMap,
     RouterInterface $router
   ) {

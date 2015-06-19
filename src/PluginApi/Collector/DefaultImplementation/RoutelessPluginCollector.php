@@ -1,17 +1,18 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\Collector\Implementation;
+namespace Drupal\crumbs\PluginApi\Collector\DefaultImplementation;
 
-use Drupal\crumbs\PluginApi\Collector\PrimaryPluginCollectorInterface;
+use Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface;
+use Drupal\crumbs\PluginApi\PluginOffset\PluginOffset;
 use Drupal\crumbs\PluginSystem\Collection\PluginCollection\EntityPluginCollection;
 use Drupal\crumbs\PluginSystem\Collection\PluginCollection\PluginCollectionInterface;
-use Drupal\crumbs\PluginSystem\Collection\PluginCollection\RawPluginCollection;
+use Drupal\crumbs\PluginSystem\Collection\PluginCollection\PluginCollection;
 use Drupal\crumbs\PluginSystem\Collection\PluginCollection\TreeCollection;
 
 /**
  * Plugin collections by route.
  */
-class PrimaryPluginCollector extends PluginCollector implements PrimaryPluginCollectorInterface {
+class RoutelessPluginCollector extends PluginCollector implements RoutelessPluginCollectorInterface {
 
   /**
    * @var PluginCollectionInterface[]
@@ -44,7 +45,7 @@ class PrimaryPluginCollector extends PluginCollector implements PrimaryPluginCol
   /**
    * @param string $route
    *
-   * @return PrimaryPluginCollectorInterface
+   * @return RoutelessPluginCollectorInterface
    */
   function route($route) {
     return new PluginCollector(
@@ -67,7 +68,7 @@ class PrimaryPluginCollector extends PluginCollector implements PrimaryPluginCol
    * @return \Drupal\crumbs\PluginSystem\Collection\PluginCollection\PluginCollectionInterface
    */
   protected function createPluginCollection() {
-    return new RawPluginCollection();
+    return new PluginCollection();
   }
 
   /**
@@ -96,7 +97,7 @@ class PrimaryPluginCollector extends PluginCollector implements PrimaryPluginCol
    */
   function entityPlugin($key, \crumbs_EntityPlugin $entity_plugin, $types) {
     $this->entityPluginCollection->entityPlugin($key, $entity_plugin, $types);
-    return $this->multiPluginOffset($key);
+    return new PluginOffset($this->treeCollection, $key . '.*');
   }
 
   /**

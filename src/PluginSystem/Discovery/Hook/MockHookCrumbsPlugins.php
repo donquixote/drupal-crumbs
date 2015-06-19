@@ -2,8 +2,8 @@
 
 namespace Drupal\crumbs\PluginSystem\Discovery\Hook;
 
-use Drupal\crumbs\PluginApi\Collector\PrimaryPluginCollectorInterface;
-use Drupal\crumbs\PluginApi\HookArgument\PluginCollectionArg;
+use Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface;
+use Drupal\crumbs\PluginApi\Mapper\DefaultImplementation\HookArgument;
 
 class MockHookCrumbsPlugins implements HookInterface {
 
@@ -25,16 +25,26 @@ class MockHookCrumbsPlugins implements HookInterface {
   }
 
   /**
-   * @param \Drupal\crumbs\PluginApi\Collector\PrimaryPluginCollectorInterface $parentCollectionContainer
-   * @param \Drupal\crumbs\PluginApi\Collector\PrimaryPluginCollectorInterface $titleCollectionContainer
+   * @param \Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface $parentCollectionContainer
+   * @param \Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface $titleCollectionContainer
+   * @param bool[] $uncachableModules
    */
   function invokeAll(
-    PrimaryPluginCollectorInterface $parentCollectionContainer,
-    PrimaryPluginCollectorInterface $titleCollectionContainer
+    RoutelessPluginCollectorInterface $parentCollectionContainer,
+    RoutelessPluginCollectorInterface $titleCollectionContainer,
+    array &$uncachableModules
   ) {
     foreach ($this->implementations as $module => $callback) {
-      $api = new PluginCollectionArg($parentCollectionContainer, $titleCollectionContainer, $module);
+      $hasUncacheablePlugins = FALSE;
+      $api = new HookArgument(
+        $parentCollectionContainer,
+        $titleCollectionContainer,
+        $hasUncacheablePlugins,
+        $module);
       $callback($api);
+      if ($hasUncacheablePlugins) {
+        $uncachableModules[$module] = TRUE;
+      }
     }
   }
 }

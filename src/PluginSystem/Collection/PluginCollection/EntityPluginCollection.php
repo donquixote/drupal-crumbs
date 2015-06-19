@@ -2,7 +2,7 @@
 
 namespace Drupal\crumbs\PluginSystem\Collection\PluginCollection;
 
-use Drupal\crumbs\PluginApi\Collector\PrimaryPluginCollectorInterface;
+use Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface;
 
 class EntityPluginCollection {
 
@@ -27,12 +27,12 @@ class EntityPluginCollection {
   protected $fieldTypePlugins = array();
 
   /**
-   * @param \Drupal\crumbs\PluginApi\Collector\PrimaryPluginCollectorInterface $collector
+   * @param \Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface $collector
    * @param bool $isFindParent
    *   TRUE, if this is an entity plugin collection for parent-finding.
    *   FALSE, if it is for title-finding.
    */
-  function finalize(PrimaryPluginCollectorInterface $collector, $isFindParent) {
+  function finalize(RoutelessPluginCollectorInterface $collector, $isFindParent) {
     $build = array();
     foreach ($this->entityPlugins as $key => $y) {
       list($entity_plugin, $types) = $y;

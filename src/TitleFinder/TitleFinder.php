@@ -2,7 +2,7 @@
 
 namespace Drupal\crumbs\TitleFinder;
 
-use Drupal\crumbs\PluginSystem\Collection\PluginCollection\RawPluginCollection;
+use Drupal\crumbs\PluginSystem\Collection\PluginCollection\PluginCollection;
 use Drupal\crumbs\PluginSystem\Engine\FactoryUtil;
 use Drupal\crumbs\PluginSystem\Engine\TitleFinderEngine;
 use Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap;
@@ -29,13 +29,13 @@ class TitleFinder implements TitleFinderInterface {
   }
 
   /**
-   * @param \Drupal\crumbs\PluginSystem\Collection\PluginCollection\RawPluginCollection $pluginCollection
+   * @param \Drupal\crumbs\PluginSystem\Collection\PluginCollection\PluginCollection $pluginCollection
    * @param \Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap $statusMap
    *
    * @return static
    */
   public static function create(
-    RawPluginCollection $pluginCollection,
+    PluginCollection $pluginCollection,
     PluginStatusWeightMap $statusMap
   ) {
     $fallbackPluginsByWeight = FactoryUtil::groupTitlePluginsByWeight(

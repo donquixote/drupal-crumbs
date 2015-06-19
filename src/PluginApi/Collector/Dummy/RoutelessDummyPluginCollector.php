@@ -1,15 +1,21 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\Collector;
+namespace Drupal\crumbs\PluginApi\Collector\Dummy;
 
-interface PrimaryPluginCollectorInterface extends PluginCollectorInterface {
+use Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface;
+use Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface;
+use Drupal\crumbs\PluginApi\PluginOffset\DummyOffset;
+
+class RoutelessDummyPluginCollector extends DummyPluginCollector implements RoutelessPluginCollectorInterface {
 
   /**
    * @param string $key
    *
    * @return PluginCollectorInterface
    */
-  function route($key);
+  function route($key) {
+    return $this;
+  }
 
   /**
    * Register an entity parent plugin.
@@ -22,7 +28,9 @@ interface PrimaryPluginCollectorInterface extends PluginCollectorInterface {
    *
    * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
    */
-  function entityPlugin($key, \crumbs_EntityPlugin $entity_plugin, $types);
+  function entityPlugin($key, \crumbs_EntityPlugin $entity_plugin, $types) {
+    return new DummyOffset();
+  }
 
   /**
    * Register an entity route.
@@ -33,11 +41,14 @@ interface PrimaryPluginCollectorInterface extends PluginCollectorInterface {
    * @param string $bundle_key
    * @param string $bundle_name
    */
-  function entityRoute($entity_type, $route, $bundle_key, $bundle_name);
+  function entityRoute($entity_type, $route, $bundle_key, $bundle_name) {
+    // Ignore.
+  }
 
   /**
    * Finalize.
    */
-  function finalize();
-
+  function finalize() {
+    // Ignore.
+  }
 }

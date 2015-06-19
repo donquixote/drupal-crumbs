@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\Mapper\Implementation;
+namespace Drupal\crumbs\PluginApi\Mapper\DefaultImplementation;
 
 use Drupal\crumbs\PluginApi\Mapper\RoutePluginMapperInterface;
 

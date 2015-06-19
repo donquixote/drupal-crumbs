@@ -38,8 +38,8 @@ use Drupal\crumbs\TrailFinder\TrailUnreverse;
  * @property \Drupal\crumbs\Router\RouterInterface $router
  * @property \Drupal\crumbs\PluginSystem\Discovery\Buffer\PluginDiscoveryBuffer $pluginDiscoveryBuffer
  * @property \Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap $parentStatusWeightMap
- * @property \Drupal\crumbs\PluginSystem\Collection\PluginCollection\RawPluginCollection $parentPluginCollection
- * @property \Drupal\crumbs\PluginSystem\Collection\PluginCollection\RawPluginCollection $titlePluginCollection
+ * @property \Drupal\crumbs\PluginSystem\Collection\PluginCollection\PluginCollection $parentPluginCollection
+ * @property \Drupal\crumbs\PluginSystem\Collection\PluginCollection\PluginCollection $titlePluginCollection
  * @property \Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap $titleStatusWeightMap
  */
 class ServiceContainer extends ServiceContainerBase {
@@ -176,7 +176,7 @@ class ServiceContainer extends ServiceContainerBase {
   }
 
   /**
-   * @return \Drupal\crumbs\PluginSystem\Collection\PluginCollection\RawPluginCollection
+   * @return \Drupal\crumbs\PluginSystem\Collection\PluginCollection\PluginCollection
    *
    * @see \Drupal\crumbs\DIC\ServiceContainer::$parentPluginCollection
    */
@@ -185,7 +185,7 @@ class ServiceContainer extends ServiceContainerBase {
   }
 
   /**
-   * @return \Drupal\crumbs\PluginSystem\Collection\PluginCollection\RawPluginCollection
+   * @return \Drupal\crumbs\PluginSystem\Collection\PluginCollection\PluginCollection
    *
    * @see \Drupal\crumbs\DIC\ServiceContainer::$titlePluginCollection
    */

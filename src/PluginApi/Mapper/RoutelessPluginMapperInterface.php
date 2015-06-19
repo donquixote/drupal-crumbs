@@ -2,7 +2,7 @@
 
 namespace Drupal\crumbs\PluginApi\Mapper;
 
-interface PrimaryPluginMapperInterface extends BasePluginMapperInterface, EntityPluginMapperInterface {
+interface RoutelessPluginMapperInterface extends BasePluginMapperInterface, EntityPluginMapperInterface {
 
   /**
    * @param string $route
