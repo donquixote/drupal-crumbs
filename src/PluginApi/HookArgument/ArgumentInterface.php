@@ -20,6 +20,20 @@ interface ArgumentInterface extends LoreFamilyInterface {
   function entityRoute($entity_type, $route, $bundle_key, $bundle_name);
 
   /**
+   * @param string $key
+   *
+   * @return \Drupal\crumbs\PluginApi\SpecFamily\Parent\FamilyInterface
+   */
+  function parentPluginFamily($key);
+
+  /**
+   * @param string $route
+   *
+   * @return \Drupal\crumbs\PluginApi\SpecFamily\Parent\RouteInterface
+   */
+  function routeFindParent($route);
+
+  /**
    * Register a "Mono" plugin.
    * That is, a plugin that defines exactly one rule.
    *
