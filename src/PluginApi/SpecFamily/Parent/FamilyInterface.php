@@ -3,7 +3,8 @@
 namespace Drupal\crumbs\PluginApi\SpecFamily\Parent;
 
 /**
- * @see LoreFamily
+ * @see \Drupal\crumbs\PluginApi\SpecFamily\Title\DefaultImplementation\Family
+ * @see \Drupal\crumbs\PluginApi\SpecFamily\Title\RouteInterface
  */
 interface FamilyInterface extends BaseFamilyInterface {
 

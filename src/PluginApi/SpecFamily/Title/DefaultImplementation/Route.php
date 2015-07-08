@@ -5,6 +5,9 @@ namespace Drupal\crumbs\PluginApi\SpecFamily\Title\DefaultImplementation;
 use Drupal\crumbs\PluginApi\SpecFamily\Title\RouteInterface;
 use Drupal\crumbs\PluginSystem\Tree\TreeNode;
 
+/**
+ * @see \Drupal\crumbs\PluginApi\SpecFamily\Parent\DefaultImplementation\Route
+ */
 class Route extends BaseFamily implements RouteInterface {
 
   /**

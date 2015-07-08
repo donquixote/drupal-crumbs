@@ -3,7 +3,8 @@
 namespace Drupal\crumbs\PluginApi\SpecFamily\Title;
 
 /**
- * @see Route
+ * @see \Drupal\crumbs\PluginApi\SpecFamily\Title\DefaultImplementation\Route
+ * @see \Drupal\crumbs\PluginApi\SpecFamily\Parent\RouteInterface
  */
 interface RouteInterface extends BaseFamilyInterface {
 

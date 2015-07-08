@@ -29,6 +29,8 @@ function generate($dir_0, array $exceptions) {
     'Parent path' => 'Title',
     'parent' => 'title',
     'Parent' => 'Title',
+    '\\Title' => '\\Parent',
+    'Title\\' => 'Parent\\',
   );
   $dir_1 = strtr($dir_0, $replace);
   if (!is_dir($dir_1)) {

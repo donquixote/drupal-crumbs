@@ -4,11 +4,14 @@ namespace Drupal\crumbs\PluginApi\SpecFamily\Parent;
 
 /**
  * Base interface for:
- * @see FamilyInterface
- * @see RouteInterface
+ * @see \Drupal\crumbs\PluginApi\SpecFamily\Parent\FamilyInterface
+ * @see \Drupal\crumbs\PluginApi\SpecFamily\Parent\RouteInterface
  *
  * Implemented by
  * @see \Drupal\crumbs\PluginApi\SpecFamily\Parent\DefaultImplementation\BasePluginFamily
+ *
+ * Generates / generated from
+ * @see \Drupal\crumbs\PluginApi\SpecFamily\Title\BaseFamilyInterface
  */
 interface BaseFamilyInterface {
 
