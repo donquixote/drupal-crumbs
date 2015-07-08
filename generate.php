@@ -19,16 +19,19 @@ generate(__DIR__, $exceptions_map);
 
 function generate($dir_0, array $exceptions) {
   static $replace = array(
-    '/* TITLE ONLY * /' => '/* TITLE ONLY */',
-    '/* PARENT ONLY */' => '/* PARENT ONLY * /',
-    'parent::' => 'parent::',
     'parentPath' => 'title',
     'ParentPath' => 'Title',
     'parent_path' => 'title',
-    'parent path' => 'title',
-    'Parent path' => 'Title',
     'parent' => 'title',
     'Parent' => 'Title',
+  );
+  $content_replace = array(
+    '/* TITLE ONLY * /' => '/* TITLE ONLY */',
+    '/* PARENT ONLY */' => '/* PARENT ONLY * /',
+    'parent::' => 'parent::',
+    'parent path' => 'title',
+    'Parent path' => 'Title',
+  ) + $replace + array(
     '\\Title' => '\\Parent',
     'Title\\' => 'Parent\\',
   );
@@ -58,7 +61,7 @@ function generate($dir_0, array $exceptions) {
       $extension = pathinfo($path_0, PATHINFO_EXTENSION);
       if (in_array($extension, array('php', 'txt', 'md', 'inc'))) {
         $contents = file_get_contents($path_0);
-        $contents = strtr($contents, $replace);
+        $contents = strtr($contents, $content_replace);
         file_put_contents($path_1, $contents);
       }
     }
