@@ -81,15 +81,13 @@ class WeightsCheckboxTree implements ElementInterface, PreRenderInterface {
       $statuses[$key] = $status;
     }
 
-    if (isset($prefix)) {
-      /** @var TreePositionInterface $childTreePosition */
-      foreach ($treePosition->getChildren() as $childTreePosition) {
-        $child_default_status = $childTreePosition->requireTreeNode()->getStatus();
-        if (!isset($child_default_status)) {
-          $child_default_status = $status;
-        }
-        $statuses += $this->collectStatuses($childTreePosition, $input, $child_default_status);
+    /** @var TreePositionInterface $childTreePosition */
+    foreach ($treePosition->getChildren() as $childTreePosition) {
+      $child_default_status = $childTreePosition->requireTreeNode()->getStatus();
+      if (!isset($child_default_status)) {
+        $child_default_status = $status;
       }
+      $statuses += $this->collectStatuses($childTreePosition, $input, $child_default_status);
     }
 
     return $statuses;
