@@ -66,6 +66,10 @@ class CheckboxtreePluginForm implements FormBuilderInterface {
     $tree = $buffer->getQualifiedTree($this->pluginType);
 
     $settings_key = $this->pluginType->getSettingsKey();
+    $settings = variable_get($settings_key, array()) + array(
+      'statuses' => array(),
+      'weights' => array(),
+    );
 
     $form[$settings_key] = array(
       '#title' => $this->isParentForm
@@ -75,9 +79,9 @@ class CheckboxtreePluginForm implements FormBuilderInterface {
       '#crumbs_ui_element_object' => new WeightsCheckboxTree($tree),
       '#crumbs_ui_theme_object' => new CheckboxTreeTable($tree),
       // Fetching the default value is not automated by system_settings_form().
-      '#default_value' => variable_get($settings_key, array()) + array(
-        'statuses' => array(),
-        'weights' => array(),
+      '#default_value' => array(
+        'statuses' => $settings['statuses'],
+        'weights' => $settings['weights'],
       ),
     );
 
