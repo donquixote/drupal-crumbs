@@ -88,4 +88,10 @@ class TreePosition extends TreePositionBase implements TreePositionInterface {
     return $this->treeNode->isLeaf();
   }
 
+  /**
+   * @return bool
+   */
+  function hasDistinctWeight() {
+    return NULL !== $this->treeNode->getWeight();
+  }
 }

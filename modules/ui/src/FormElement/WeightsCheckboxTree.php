@@ -136,69 +136,49 @@ class WeightsCheckboxTree implements ElementInterface, PreRenderInterface {
    */
   public function process($element, $form_state) {
     $value_all = $element['#value'];
-    $rootPosition = new TreePosition($this->tree);
-    $element += $this->buildTree($value_all, $rootPosition, TRUE, 0);
+    $tree = $this->tree->cloneTree();
+    $tree->setStatuses($value_all['statuses']);
+    $tree->setWeights($value_all['weights']);
+    $rootPosition = new TreePosition($tree);
+    $element += $this->buildTree($rootPosition);
     return $element;
   }
 
   /**
    * Recursively builds form elements for a plugin key and its children.
    *
-   * @param array $value_all
-   *   All statuses and weights currently stored in the database.
    * @param \Drupal\crumbs\PluginSystem\TreePosition\TreePositionInterface $treePosition
-   * @param bool $inherited_status
-   *   The status that applies to $parent_key, if it is not overridden. This is
-   *   either the status inherited from the parent, or a default status defined
-   *   for this key via hook_crumbs_plugins().
-   * @param int $inherited_weight
-   *   The weight that applies to $parent_key, if it is not overridden. This is
-   *   either the weight inherited from the parent, or a default weight defined
-   *   for this key via hook_crumbs_plugins().
    *
    * @return array
    *   An array of form elements.
    */
-  protected function buildTree(array $value_all, TreePositionInterface $treePosition, $inherited_status, $inherited_weight) {
+  protected function buildTree(TreePositionInterface $treePosition) {
 
     $key = $treePosition->getKey();
 
-    if (isset($value_all['statuses'][$key])) {
-      $status = $value_all['statuses'][$key];
-    }
-    else {
-      $status = $treePosition->requireTreeNode()->getStatus();
-      if (!isset($status)) {
-        $status = $inherited_status;
-      }
-    }
-
-    $distinct_weight = isset($value_all['weights'][$key]);
-
-    $weight = isset($value_all['weights'][$key])
-      ? $value_all['weights'][$key]
-      : $inherited_weight;
-
     $elements = array();
 
-    $elements[$key] = $this->buildChildElement($key, $status, $distinct_weight, $weight);
+    $elements[$key] = $this->buildChildElement($treePosition);
 
     foreach ($treePosition->getChildren() as $childTreePosition) {
-      $elements += $this->buildTree($value_all, $childTreePosition, $status, $weight);
+      $elements += $this->buildTree($childTreePosition);
     }
 
     return $elements;
   }
 
   /**
-   * @param string $plugin_key
-   * @param bool $status
-   * @param bool $distinct_weight
-   * @param int $weight
+   * @param \Drupal\crumbs\PluginSystem\TreePosition\TreePositionInterface $treePosition
    *
    * @return array
    */
-  protected function buildChildElement($plugin_key, $status, $distinct_weight, $weight) {
+  protected function buildChildElement(TreePositionInterface $treePosition) {
+
+    $plugin_key = $treePosition->getKey();
+    $status = $treePosition->getStatus();
+    $weight = $treePosition->getWeight();
+    $distinct_weight = $treePosition->hasDistinctWeight();
+
     $elements = array(
       '#type' => 'fieldset',
       '#title' => $plugin_key,

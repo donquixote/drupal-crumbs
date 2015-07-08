@@ -77,4 +77,9 @@ interface TreePositionInterface {
    */
   function isPluginPosition();
 
+  /**
+   * @return bool
+   */
+  function hasDistinctWeight();
+
 }

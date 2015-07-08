@@ -69,4 +69,11 @@ class ResultTreeAnonymousPosition extends TreePositionBase implements ResultTree
   function isLeaf() {
     return !is_array($this->results);
   }
+
+  /**
+   * @return bool
+   */
+  function hasDistinctWeight() {
+    return FALSE;
+  }
 }
