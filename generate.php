@@ -1,25 +1,21 @@
 <?php
 
-$directories = array(
-  'src',
-  'lib',
-);
-
 $exceptions = array(
   'src/ParentFinder',
   'src/PluginSystem/Engine',
   'src/PluginSystem/Wrapper',
   'lib/MonoPlugin/FixedParentPath.php',
-  # 'src/PluginApi/SpecFamily/Title/DefaultImplementation/Route.php',
-  # 'lib/MonoPlugin/ParentPathCallback.php',
+  'modules/ui/src/Widget/ParentFinderDemo.php',
+  'modules/ui/src/Widget/ParentPluginDemo.php',
+  'modules/ui/src/Form/EntityParentForm.php',
 );
 
-foreach ($directories as $directory) {
-  if (!is_dir($directory)) {
-    continue;
-  }
-  generate($directory, array_fill_keys($exceptions, TRUE));
+$exceptions_map = array();
+foreach ($exceptions as $exception) {
+  $exceptions_map[__DIR__ . '/' . $exception] = TRUE;
 }
+
+generate(__DIR__, $exceptions_map);
 
 function generate($dir_0, array $exceptions) {
   static $replace = array(
@@ -39,7 +35,7 @@ function generate($dir_0, array $exceptions) {
     mkdir($dir_1);
   }
   foreach (scandir($dir_0) as $x_0) {
-    if ('.' === $x_0 || '..' === $x_0) {
+    if ('.' === $x_0{0}) {
       continue;
     }
     $x_1 = strtr($x_0, $replace);
@@ -58,7 +54,7 @@ function generate($dir_0, array $exceptions) {
     }
     elseif (is_file($path_0)) {
       $extension = pathinfo($path_0, PATHINFO_EXTENSION);
-      if ('php' === $extension) {
+      if (in_array($extension, array('php', 'txt', 'md', 'inc'))) {
         $contents = file_get_contents($path_0);
         $contents = strtr($contents, $replace);
         file_put_contents($path_1, $contents);
