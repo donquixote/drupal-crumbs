@@ -24,7 +24,7 @@ class MonoTitlePluginLegacyWrapper implements \crumbs_MonoPlugin_FindTitleInterf
   }
 
   /**
-   * Find candidates for the title path.
+   * Find candidates for the title.
    *
    * @param string $path
    *   The path that we want to find a title for.
@@ -32,7 +32,7 @@ class MonoTitlePluginLegacyWrapper implements \crumbs_MonoPlugin_FindTitleInterf
    *   Item as returned from crumbs_get_router_item()
    *
    * @return string|null
-   *   Title path candidate, or NULL if none found.
+   *   Title candidate, or NULL if none found.
    */
   function findTitle($path, $item) {
     return $this->wrappedPlugin->{$this->method}($path, $item);

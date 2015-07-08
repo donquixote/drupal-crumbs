@@ -40,7 +40,7 @@ class MultiTitlePluginLegacyWrapper implements \crumbs_MultiPlugin_FindTitleInte
   }
 
   /**
-   * Find candidates for the title path.
+   * Find candidates for the title.
    *
    * @param string $path
    *   The path that we want to find a title for.
@@ -48,7 +48,7 @@ class MultiTitlePluginLegacyWrapper implements \crumbs_MultiPlugin_FindTitleInte
    *   Item as returned from crumbs_get_router_item()
    *
    * @return string[]
-   *   Title path candidates
+   *   Title candidates
    */
   function findTitle($path, $item) {
     return $this->wrappedPlugin->{$this->method}($path, $item);

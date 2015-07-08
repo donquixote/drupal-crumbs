@@ -40,4 +40,5 @@ class ParentPluginType implements PluginTypeInterface {
   public function validateMultiPlugin(\crumbs_MultiPlugin $plugin) {
     return $plugin instanceof \crumbs_MultiPlugin_FindParentInterface;
   }
+
 }
