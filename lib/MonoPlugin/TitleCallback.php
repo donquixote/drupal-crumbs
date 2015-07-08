@@ -1,8 +1,6 @@
 <?php
 
-use Drupal\crumbs\PluginSystem\Plugin\CallbackPluginInterface;
-
-class crumbs_MonoPlugin_TitleCallback implements crumbs_MonoPlugin_FindTitleInterface, CallbackPluginInterface {
+class crumbs_MonoPlugin_TitleCallback implements crumbs_MonoPlugin_FindTitleInterface {
 
   /**
    * @var callback
