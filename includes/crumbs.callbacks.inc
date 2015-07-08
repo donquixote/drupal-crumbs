@@ -1,8 +1,9 @@
 <?php
 
+use Drupal\crumbs\Exception\UnserializeException;
+
 // Menu system callbacks
 // -----------------------------------------------------------------------------
-use Drupal\crumbs\Exception\UnserializeException;
 
 /**
  * Page callback for 'crumbs/special-menu-item/%menu_link'
