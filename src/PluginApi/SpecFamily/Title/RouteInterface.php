@@ -12,7 +12,22 @@ interface RouteInterface extends BaseFamilyInterface {
    * @param string $title
    *
    * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
-   */
-  function fixedTitle($key, $title);
+   */ /* PARENT ONLY * /
+  function fixedTitle($key, $title); /* */
+
+  /**
+   * @param string $key
+   * @param string $title
+   *
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
+   */ /* TITLE ONLY */
+  function translateTitle($key, $title); /* */
+
+  /**
+   * @param $string
+   *
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
+   */ /* TITLE ONLY */
+  function skipItem($string); /* */
 
 }

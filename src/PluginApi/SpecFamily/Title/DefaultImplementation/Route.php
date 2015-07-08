@@ -18,7 +18,7 @@ class Route extends BaseFamily implements RouteInterface {
    * @param string $route
    */
   function __construct(TreeNode $findTitleTreeNode, $route) {
-    title::__construct($findTitleTreeNode);
+    parent::__construct($findTitleTreeNode);
     $this->route = $route;
   }
 
@@ -27,11 +27,31 @@ class Route extends BaseFamily implements RouteInterface {
    * @param string $title
    *
    * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
-   */
+   */ /* PARENT ONLY * /
   public function fixedTitle($key, $title) {
     // @todo Automatic description.
     return $this->monoPlugin($key, new \crumbs_MonoPlugin_FixedTitle($title));
-  }
+  } /* */
+
+  /**
+   * @param string $key
+   * @param string $title
+   *
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
+   */ /* TITLE ONLY */
+  function translateTitle($key, $title) {
+    return $this->monoPlugin($key, new \crumbs_MonoPlugin_TranslateTitle($title));
+  } /* */
+
+  /**
+   * @param $key
+   *
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
+   */ /* TITLE ONLY */
+  function skipItem($key) {
+    // @todo Automatic description.
+    return $this->monoPlugin($key, new \crumbs_MonoPlugin_SkipItem());
+  } /* */
 
   /**
    * Register a "Multi" plugin.
