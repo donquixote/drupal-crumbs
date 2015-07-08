@@ -4,6 +4,9 @@ namespace Drupal\crumbs_ui\Widget;
 
 class TabsWidget implements WidgetInterface {
 
+  /**
+   * @var array
+   */
   private $build = array();
 
   /**
