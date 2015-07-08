@@ -2,11 +2,13 @@
 
 namespace Drupal\crumbs\PluginApi\Family\DefaultImplementation;
 
-use Drupal\crumbs\PluginApi\Aggregate\EntityRoute;
 use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
 use Drupal\crumbs\PluginApi\HookArgument\Helper;
 use Drupal\crumbs\PluginApi\HookArgument\LegacyArgumentInterface;
 use Drupal\crumbs\PluginApi\Offset\IllegalTreeOffset;
+use Drupal\crumbs\PluginApi\SpecFamily\Parent\DefaultImplementation\Family;
+use Drupal\crumbs\PluginApi\SpecFamily\Parent\DefaultImplementation\Route;
+use Drupal\crumbs\PluginSystem\Tree\EntityRoute\EntityRoute;
 use Drupal\crumbs\PluginSystem\Tree\TreeNode;
 use Drupal\crumbs\PluginSystem\Plugin\LegacyWrapper\MonoParentPluginLegacyWrapper;
 use Drupal\crumbs\PluginSystem\Plugin\LegacyWrapper\MonoTitlePluginLegacyWrapper;
@@ -34,7 +36,7 @@ class HookArgument extends LoreFamily implements ArgumentInterface, LegacyArgume
   /**
    * Known routes for entity types.
    *
-   * @var \Drupal\crumbs\PluginApi\Aggregate\EntityRouteInterface[]
+   * @var \Drupal\crumbs\PluginSystem\Tree\EntityRoute\EntityRouteInterface[]
    *   Format: $[$route] = new EntityRoute();
    */
   protected $entityRoutes = array();
@@ -311,5 +313,23 @@ class HookArgument extends LoreFamily implements ArgumentInterface, LegacyArgume
       $this->getFindParentTreeNode()->disabledByDefault();
     }
     return $this;
+  }
+
+  /**
+   * @param string $key
+   *
+   * @return \Drupal\crumbs\PluginApi\SpecFamily\Parent\FamilyInterface
+   */
+  function parentPluginFamily($key) {
+    return new Family($this->getFindParentTreeNode());
+  }
+
+  /**
+   * @param string $route
+   *
+   * @return \Drupal\crumbs\PluginApi\SpecFamily\Parent\RouteInterface
+   */
+  function routeFindParent($route) {
+    return new Route($this->getFindParentTreeNode(), $route);
   }
 }
