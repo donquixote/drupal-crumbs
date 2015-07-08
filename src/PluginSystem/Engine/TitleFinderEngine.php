@@ -38,13 +38,13 @@ class TitleFinderEngine implements TitleFinderInterface {
     foreach ($this->pluginWrappersGrouped as $wrapperBestWeight => $wrappers) {
       foreach ($wrappers as $wrapper) {
         if (isset($bestWeight) && $wrapperBestWeight >= $bestWeight) {
-          return TRUE;
+          return $bestCandidate;
         }
-        $wrapper->findBestTitle($checker, $bestWeight, $path, $routerItem);
+        $wrapper->findBestTitle($bestCandidate, $bestWeight, $path, $routerItem);
       }
     }
 
-    return isset($bestWeight);
+    return $bestCandidate;
   }
 
 }
