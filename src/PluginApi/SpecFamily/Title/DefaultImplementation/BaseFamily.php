@@ -77,7 +77,7 @@ class BaseFamily implements BaseFamilyInterface {
    * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    */
   function titleCallback($key, $callback) {
-    $plugin = new \crumbs_MonoPlugin_TitlePathCallback($callback);
+    $plugin = new \crumbs_MonoPlugin_TitleCallback($callback);
     return $this->treeNode
       ->child($key, TRUE)
       ->setMonoPlugin($plugin)

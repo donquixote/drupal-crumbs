@@ -24,13 +24,13 @@ class Route extends BaseFamily implements RouteInterface {
 
   /**
    * @param string $key
-   * @param string $titlePath
+   * @param string $title
    *
    * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    */
-  public function fixedTitlePath($key, $titlePath) {
+  public function fixedTitle($key, $title) {
     // @todo Automatic description.
-    return $this->monoPlugin($key, new \crumbs_MonoPlugin_FixedTitlePath($titlePath));
+    return $this->monoPlugin($key, new \crumbs_MonoPlugin_FixedTitle($title));
   }
 
   /**
@@ -79,7 +79,7 @@ class Route extends BaseFamily implements RouteInterface {
    * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    */
   function titleCallback($key, $callback) {
-    $plugin = new \crumbs_MonoPlugin_TitlePathCallback($callback);
+    $plugin = new \crumbs_MonoPlugin_TitleCallback($callback);
     return $this->getTreeNode()
       ->child($key, TRUE)
       ->setRouteMonoPlugin($this->route, $plugin)

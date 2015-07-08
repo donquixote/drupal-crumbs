@@ -9,10 +9,10 @@ interface RouteInterface extends BaseFamilyInterface {
 
   /**
    * @param string $key
-   * @param string $titlePath
+   * @param string $title
    *
    * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    */
-  function fixedTitlePath($key, $titlePath);
+  function fixedTitle($key, $title);
 
 }
