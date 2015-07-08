@@ -9,7 +9,7 @@ use Drupal\crumbs_ui\Widget\ParentFinderDemo;
 use Drupal\crumbs_ui\Widget\ParentPluginDemo;
 use Drupal\crumbs_ui\Widget\PathSelectorWidget;
 use Drupal\crumbs_ui\Widget\RouterItemDemo;
-use Drupal\crumbs_ui\Widget\TabsWidget;
+use Drupal\crumbs_ui\Widget\VerticalTabsWidget;
 use Drupal\crumbs_ui\Widget\TitleFinderDemo;
 use Drupal\crumbs_ui\Widget\TitlePluginDemo;
 use Drupal\crumbs_ui\Widget\TrailFinderDemo;
@@ -33,7 +33,7 @@ class DebugController implements ControllerInterface {
     $pathSelectorWidget = new PathSelectorWidget($path_to_test);
     $build['path_selector'] = $pathSelectorWidget->build();
 
-    $tabs = new TabsWidget();
+    $tabs = new VerticalTabsWidget();
 
     $routerItem = crumbs()->router->getRouterItem($path_to_test);
 

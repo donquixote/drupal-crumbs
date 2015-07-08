@@ -2,7 +2,7 @@
 
 namespace Drupal\crumbs_ui\Widget;
 
-class TabsWidget implements WidgetInterface {
+class VerticalTabsWidget implements WidgetInterface {
 
   /**
    * @var array
