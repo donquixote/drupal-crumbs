@@ -4,24 +4,21 @@ namespace Drupal\crumbs\DIC;
 
 use Drupal\crumbs\BreadcrumbBuilder\BreadcrumbTitleFinder;
 use Drupal\crumbs\PageData;
+use Drupal\crumbs\ParentFinder\ParentFinderUtil;
 use Drupal\crumbs\Router\Router;
 use Drupal\crumbs\BreadcrumbBuilder\TrailToBreadcrumb;
 use Drupal\crumbs\BreadcrumbBuilder\BreadcrumbDebugHistory;
 use Drupal\crumbs\BreadcrumbBuilder\BreadcrumbVisibilityFilter;
 use Drupal\crumbs\BreadcrumbFormatter\BreadcrumbFormatter;
-use Drupal\crumbs\ParentCollector\ParentCollector;
 use Drupal\crumbs\ParentFinder\ParentBuffer;
 use Drupal\crumbs\ParentFinder\ParentFallback;
-use Drupal\crumbs\ParentFinder\ParentFinder;
 use Drupal\crumbs\ParentFinder\ParentFront;
 use Drupal\crumbs\PluginSystem\Discovery\Buffer\PluginDiscoveryBuffer;
 use Drupal\crumbs\PluginSystem\PluginType\ParentPluginType;
 use Drupal\crumbs\PluginSystem\PluginType\TitlePluginType;
-use Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap;
 use Drupal\crumbs\TitleFinder\FallbackTitleFinder;
-use Drupal\crumbs\TitleFinder\TitleFinder;
+use Drupal\crumbs\TitleFinder\TitleFinderUtil;
 use Drupal\crumbs\TrailFinder\ReverseTrailBuilder;
-
 use Drupal\crumbs\TrailFinder\TrailBuffer;
 use Drupal\crumbs\TrailFinder\TrailUnreverse;
 
@@ -31,16 +28,15 @@ use Drupal\crumbs\TrailFinder\TrailUnreverse;
  * @property \Drupal\crumbs\BreadcrumbBuilder\BreadcrumbBuilderInterface $breadcrumbBuilder
  * @property \Drupal\crumbs\TrailFinder\TrailFinderInterface $trailFinder
  * @property \Drupal\crumbs\ParentFinder\ParentFinderInterface $parentFinder
- * @property \Drupal\crumbs\ParentCollector\ParentCollector $parentCollector
  * @property \Drupal\crumbs\TitleFinder\TitleFinderInterface $titleFinder
  * @property \Drupal\crumbs\BreadcrumbFormatter\BreadcrumbFormatterInterface $breadcrumbFormatter
  * @property \Drupal\crumbs\PageData $page
  * @property \Drupal\crumbs\Router\RouterInterface $router
  * @property \Drupal\crumbs\PluginSystem\Discovery\Buffer\PluginDiscoveryBuffer $pluginDiscoveryBuffer
- * @property \Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap $parentStatusWeightMap
- * @property \Drupal\crumbs\PluginSystem\Collection\PluginCollection\PluginCollection $parentPluginCollection
- * @property \Drupal\crumbs\PluginSystem\Collection\PluginCollection\PluginCollection $titlePluginCollection
- * @property \Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap $titleStatusWeightMap
+ * @property \Drupal\crumbs\PluginSystem\Tree\TreeNode $findParentPluginTree
+ * @property \Drupal\crumbs\PluginSystem\Tree\TreeNode $findTitlePluginTree
+ * @property \Drupal\crumbs\PluginSystem\Tree\TreeNode qualifiedParentTree
+ * @property \Drupal\crumbs\PluginSystem\Tree\TreeNode qualifiedTitleTree
  */
 class ServiceContainer extends ServiceContainerBase {
 
@@ -72,9 +68,7 @@ class ServiceContainer extends ServiceContainerBase {
    * @see \Drupal\crumbs\DIC\ServiceContainer::$titleFinder
    */
   protected function titleFinder() {
-    $titleFinder = TitleFinder::create(
-      $this->pluginDiscoveryBuffer->getTitleCollector(),
-      $this->titleStatusWeightMap);
+    $titleFinder = TitleFinderUtil::createTitleFinder($this->qualifiedTitleTree);
     $titleFinder = new FallbackTitleFinder($titleFinder);
     return $titleFinder;
   }
@@ -104,25 +98,11 @@ class ServiceContainer extends ServiceContainerBase {
    * @see \Drupal\crumbs\DIC\ServiceContainer::$parentFinder
    */
   protected function parentFinder() {
-    $parentFinder = ParentFinder::create(
-      $this->pluginDiscoveryBuffer->getParentCollector(),
-      $this->parentStatusWeightMap,
-      $this->router);
+    $parentFinder = ParentFinderUtil::createParentFinder($this->qualifiedParentTree);
     $parentFinder = new ParentFallback($parentFinder, $this->router);
     $parentFinder = ParentFront::createFromRouter($parentFinder, $this->router);
     $parentFinder = new ParentBuffer($parentFinder);
     return $parentFinder;
-  }
-
-  /**
-   * A service that attempts to find a parent path for a given path.
-   *
-   * @return \Drupal\crumbs\ParentFinder\ParentFinderInterface
-   *
-   * @see \Drupal\crumbs\DIC\ServiceContainer::$parentCollector
-   */
-  protected function parentCollector() {
-    return new ParentCollector($this->parentFinder);
   }
 
   /**
@@ -176,47 +156,39 @@ class ServiceContainer extends ServiceContainerBase {
   }
 
   /**
-   * @return \Drupal\crumbs\PluginSystem\Collection\PluginCollection\PluginCollection
+   * @return \Drupal\crumbs\PluginSystem\Tree\TreeNode
    *
-   * @see \Drupal\crumbs\DIC\ServiceContainer::$parentPluginCollection
+   * @see \Drupal\crumbs\DIC\ServiceContainer::$findTitlePluginTree
    */
-  protected function parentPluginCollection() {
-    return $this->pluginDiscoveryBuffer->getParentCollector();
+  protected function findParentPluginTree() {
+    return $this->pluginDiscoveryBuffer->getParentTree();
   }
 
   /**
-   * @return \Drupal\crumbs\PluginSystem\Collection\PluginCollection\PluginCollection
+   * @return \Drupal\crumbs\PluginSystem\Tree\TreeNode
    *
-   * @see \Drupal\crumbs\DIC\ServiceContainer::$titlePluginCollection
+   * @see \Drupal\crumbs\DIC\ServiceContainer::$findTitlePluginTree
    */
-  protected function titlePluginCollection() {
-    return $this->pluginDiscoveryBuffer->getTitleCollector();
+  protected function findTitlePluginTree() {
+    return $this->pluginDiscoveryBuffer->getTitleTree();
   }
 
   /**
-   * @return \Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap
+   * @return \Drupal\crumbs\PluginSystem\Tree\TreeNode
    *
-   * @see \Drupal\crumbs\DIC\ServiceContainer::$parentStatusWeightMap
+   * @see \Drupal\crumbs\DIC\ServiceContainer::$qualifiedParentTree
    */
-  protected function parentStatusWeightMap() {
-    return PluginStatusWeightMap::loadAndCreate(
-      $this->pluginDiscoveryBuffer->getParentCollector()
-        ->getDefaultStatuses(),
-      new ParentPluginType()
-    );
+  protected function qualifiedParentTree() {
+    return $this->pluginDiscoveryBuffer->getQualifiedTree(new ParentPluginType());
   }
 
   /**
-   * @return \Drupal\crumbs\PluginSystem\Settings\PluginStatusWeightMap
+   * @return \Drupal\crumbs\PluginSystem\Tree\TreeNode
    *
-   * @see \Drupal\crumbs\DIC\ServiceContainer::$titleStatusWeightMap
+   * @see \Drupal\crumbs\DIC\ServiceContainer::$qualifiedTitleTree
    */
-  protected function titleStatusWeightMap() {
-    return PluginStatusWeightMap::loadAndCreate(
-      $this->pluginDiscoveryBuffer->getTitleCollector()
-        ->getDefaultStatuses(),
-      new TitlePluginType()
-    );
+  protected function qualifiedTitleTree() {
+    return $this->pluginDiscoveryBuffer->getQualifiedTree(new TitlePluginType());
   }
 
 }

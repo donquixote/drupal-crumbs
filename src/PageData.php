@@ -26,9 +26,6 @@ use Drupal\crumbs\TrailFinder\TrailFinderInterface;
  * @property string $breadcrumbHtml
  * @property string $path
  * @property array $routerItem
- *
- * @see crumbs_Container_AbstractLazyData::__get()
- * @see crumbs_Container_AbstractLazyData::__set()
  */
 class PageData extends DataContainerBase {
 

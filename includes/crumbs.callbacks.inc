@@ -1,6 +1,5 @@
 <?php
 
-
 // Menu system callbacks
 // -----------------------------------------------------------------------------
 use Drupal\crumbs\Exception\UnserializeException;
@@ -47,6 +46,8 @@ function _crumbs_ui_not_installed_warning_page() {
  * @param object|null $account
  *
  * @return bool
+ *
+ * @todo This seems to be no longer used.
  */
 function _crumbs_user_access_and(array $permissions, $account = NULL) {
   foreach ($permissions as $permission) {
@@ -71,6 +72,8 @@ function _crumbs_user_access_and(array $permissions, $account = NULL) {
  * @param object|null $account
  *
  * @return bool
+ *
+ * @todo This seems to be no longer used.
  */
 function _crumbs_user_access_or(array $permissions, $account = NULL) {
   foreach ($permissions as $permission) {
@@ -128,7 +131,7 @@ function _crumbs_admin_flush_cache() {
  *
  * @param string $class
  *
-*@throws UnserializeException
+ * @throws \Drupal\crumbs\Exception\UnserializeException
  */
 function _crumbs_unserialize_failure($class) {
   throw new UnserializeException();

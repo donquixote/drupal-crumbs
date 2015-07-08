@@ -2,41 +2,22 @@
 
 namespace Drupal\crumbs_ui\FormElement\Theme;
 
-use Drupal\crumbs\PluginSystem\Collection\PluginCollection\LabeledPluginCollection;
-use Drupal\crumbs_ui\PluginKey\RawHierarchy;
-use Drupal\crumbs_ui\PluginKey\RawHierarchyInterface;
+use Drupal\crumbs\PluginSystem\Tree\TreeNode;
+use Drupal\crumbs\PluginSystem\TreePosition\TreePosition;
+use Drupal\crumbs\PluginSystem\TreePosition\TreePositionInterface;
 
 class CheckboxTreeTable implements ElementThemeInterface {
 
   /**
-   * @var \Drupal\crumbs_ui\PluginKey\RawHierarchyInterface
+   * @var \Drupal\crumbs\PluginSystem\Tree\TreeNode
    */
-  private $rawHierarchy;
+  private $tree;
 
   /**
-   * @var \Drupal\crumbs\PluginSystem\Collection\PluginCollection\LabeledPluginCollection
+   * @param \Drupal\crumbs\PluginSystem\Tree\TreeNode $tree
    */
-  private $pluginCollection;
-
-  /**
-   * @var string[]
-   */
-  private $descriptions;
-
-  /**
-   * @var \Drupal\crumbs_ui\PluginKey\RawHierarchyInterface
-   */
-  private $leavesHierarchy;
-
-  /**
-   * @param \Drupal\crumbs_ui\PluginKey\RawHierarchyInterface $raw_hierarchy
-   * @param \Drupal\crumbs\PluginSystem\Collection\PluginCollection\LabeledPluginCollection $pluginCollection
-   */
-  function __construct(RawHierarchyInterface $raw_hierarchy, LabeledPluginCollection $pluginCollection) {
-    $this->rawHierarchy = $raw_hierarchy;
-    $this->pluginCollection = $pluginCollection;
-    $this->descriptions = $pluginCollection->getDescriptions();
-    $this->leavesHierarchy = RawHierarchy::createFromKeys($pluginCollection->getLeaves());
+  function __construct(TreeNode $tree) {
+    $this->tree = $tree;
   }
 
   /**
@@ -48,6 +29,7 @@ class CheckboxTreeTable implements ElementThemeInterface {
    */
   public function theme($element) {
     $module_path = drupal_get_path('module', 'crumbs_ui');
+    $rootPosition = new TreePosition($this->tree);
     $tree_table = array(
       /** @see theme_table() */
       '#theme' => 'table',
@@ -56,7 +38,7 @@ class CheckboxTreeTable implements ElementThemeInterface {
         t('Distinct weight'),
         t('Weight'),
       ),
-      '#rows' => $this->buildTreeRows($element, '*', NULL, 0),
+      '#rows' => $this->buildTreeRows($element, $rootPosition),
 
       '#attributes' => array('class' => array(
         'crumbs_ui-checkboxtree',
@@ -80,88 +62,87 @@ class CheckboxTreeTable implements ElementThemeInterface {
 
   /**
    * @param array $element
-   * @param string $row_key
-   * @param string|null $parent_key
-   * @param int $tree_depth
+   * @param \Drupal\crumbs\PluginSystem\TreePosition\TreePositionInterface $treePosition
    *
    * @return array[]
    */
-  protected function buildTreeRows($element, $row_key, $parent_key, $tree_depth) {
-    $description = isset($this->descriptions[$row_key])
-      ? $this->descriptions[$row_key]
-      : $row_key;
+  protected function buildTreeRows($element, TreePositionInterface $treePosition) {
+    $row_key = $treePosition->getKey();
+    $description = $treePosition->getDescription();
     $element[$row_key]['status']['#title'] = $description;
     $rows = array();
-    if (!$this->rawHierarchy->keyIsWildcard($row_key)) {
-      $element[$row_key]['status']['#attributes']['data-crumbs_ui-tree_depth'] = $tree_depth;
-      $cells = $this->buildLeafRowCells($element[$row_key], $row_key);
-      $rows[$row_key . ' LEAF'] = $this->buildRow($cells, NULL, $parent_key, $tree_depth, FALSE);
+    if ($treePosition->isLeaf()) {
+      $element[$row_key]['status']['#attributes']['data-crumbs_ui-tree_depth'] = $treePosition->getDepth();
+      $cells = $this->buildLeafRowCells($element[$row_key]);
+      $rows[$row_key . ' LEAF'] = $this->buildRow($cells, $treePosition);
     }
     else {
       // Build the parent row.
-      $cells = $this->buildParentRowCells($element[$row_key], $row_key, $description, $tree_depth);
-      $rows[$row_key . ' PARENT'] = $this->buildRow($cells, $row_key, $parent_key, $tree_depth, TRUE);
+      $cells = $this->buildParentRowCells($element[$row_key], $treePosition);
+      $rows[$row_key . ' PARENT'] = $this->buildRow($cells, $treePosition);
 
       // Recursively build the child rows.
-      foreach ($this->rawHierarchy->keyGetChildren($row_key) as $child_key) {
-        $rows += $this->buildTreeRows($element, $child_key, $row_key, $tree_depth + 1);
+      foreach ($treePosition->getChildren() as $childPosition) {
+        $rows += $this->buildTreeRows($element, $childPosition);
       }
 
       // Build the "other" row, which is added alongside the children.
-      $element[$row_key]['status']['#attributes']['data-crumbs_ui-tree_depth'] = $tree_depth + 1;
-      $cells = $this->buildOtherRowCells($element[$row_key]);
-      $rows[$row_key . ' OTHER'] = $this->buildRow($cells, NULL, $row_key, $tree_depth + 1, FALSE);
+      $element[$row_key]['status']['#attributes']['data-crumbs_ui-tree_depth'] = $treePosition->getDepth() + 1;
+      $cells = $this->buildOtherRowCells($element[$row_key], $treePosition);
+      $rows[$row_key . ' OTHER'] = $this->buildRow($cells, $treePosition, TRUE);
     }
     return $rows;
   }
 
   /**
    * @param string[] $cells
-   * @param string $row_key
-   * @param string $parent_key
-   * @param int $tree_depth
-   * @param bool $is_parent
+   * @param \Drupal\crumbs\PluginSystem\TreePosition\TreePositionInterface $treePosition
+   * @param bool $is_other
    *
    * @return array
+   * @throws \Exception
    */
-  protected function buildRow($cells, $row_key, $parent_key, $tree_depth, $is_parent) {
+  protected function buildRow($cells, TreePositionInterface $treePosition, $is_other = FALSE) {
     $row = array(
-      'id' => sha1($row_key),
+      'id' => sha1($treePosition->getKey()),
       'data' => $cells,
       'no_striping' => TRUE,
     );
-    $row['class'][] = ($tree_depth === 1) ? 'even' : 'odd';
-    $row['data-crumbs_ui-tree_depth'] = $tree_depth;
-    if ($is_parent) {
+    $depth = $treePosition->getDepth();
+    if ($is_other) {
+      ++$depth;
+    }
+    $row['class'][] = ($depth === 1) ? 'even' : 'odd';
+    $row['data-crumbs_ui-tree_depth'] = $depth;
+    if (!$is_other && !$treePosition->isLeaf()) {
       $row['data-crumbs_ui-is_parent'] = TRUE;
     }
-    if (isset($parent_key)) {
-      $row['parent'] = sha1($parent_key);
+    if ($parentPosition = $treePosition->getParent()) {
+      $row['parent'] = sha1($parentPosition->getKey());
     }
     return $row;
   }
 
   /**
    * @param array $row_elements
-   * @param string $row_key
-   * @param string $description
-   * @param int $tree_depth
+   * @param \Drupal\crumbs\PluginSystem\TreePosition\TreePositionInterface $treePosition
    *
    * @return array
    */
-  protected function buildParentRowCells(array $row_elements, $row_key, $description, $tree_depth) {
-    $name = 'crumbs_ui-checkboxtree-' . $row_key;
+  protected function buildParentRowCells(array $row_elements, TreePositionInterface $treePosition) {
+    $name = 'crumbs_ui-checkboxtree-' . $treePosition->getKey();
     $attributes = array(
       'type' => 'checkbox',
       'class' => array('crumbs_ui-checkboxtree_item'),
-      'data-crumbs_ui-tree_depth' => $tree_depth,
+      'data-crumbs_ui-tree_depth' => $treePosition->getDepth(),
       'data-crumbs_ui-is_parent' => TRUE,
       'name' => $name,
       'id' => $name,
     );
     $input = '<input ' . drupal_attributes($attributes) . '/>';
     $cells = array();
-    if (!$this->leavesHierarchy->keyExists($row_key)) {
+    $description = $treePosition->getDescription();
+    if (!$treePosition->hasChildren()) {
       $description = '<em>' . $description . '</em>';
     }
     $cells[] = $input . ' <label class="option" for="' . check_plain($name) . '">' . $description . '</label>';
@@ -177,15 +158,17 @@ class CheckboxTreeTable implements ElementThemeInterface {
   }
 
   /**
-   * @param $row_elements
+   * @param array $row_elements
+   * @param \Drupal\crumbs\PluginSystem\TreePosition\TreePositionInterface $treePosition
    *
    * @return array
    */
-  protected function buildOtherRowCells($row_elements) {
+  protected function buildOtherRowCells($row_elements, TreePositionInterface $treePosition) {
     # dpm($row_elements, $row_key);
     $cells = array();
     $row_elements['status']['#attributes']['class'][] = 'crumbs_ui-checkboxtree_item';
-    $row_elements['status']['#title'] = '<em>' . t('other') . '</em>';
+    # $row_elements['status']['#title'] = '<em>' . t('other') . '</em>';
+    $row_elements['status']['#title'] = '<em>' . $treePosition->getKey() . '</em>';
     # $row_elements['status']['#crumbs_ui_container_attributes']['class'][] = 'container-inline';
 
     // @see theme_crumbs_ui_inline_element()
@@ -201,11 +184,10 @@ class CheckboxTreeTable implements ElementThemeInterface {
 
   /**
    * @param array $row_elements
-   * @param string|NULL $row_key
    *
    * @return array
    */
-  protected function buildLeafRowCells($row_elements, $row_key) {
+  protected function buildLeafRowCells($row_elements) {
     # dpm($row_elements, $row_key);
     $cells = array();
     $row_elements['status']['#attributes']['class'][] = 'crumbs_ui-checkboxtree_item';

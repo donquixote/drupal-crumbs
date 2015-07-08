@@ -8,16 +8,17 @@ use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
  */
 function commerce_checkout_crumbs_plugins(ArgumentInterface $api) {
 
-  $family = $api->modulePluginFamily()
-    ->disabledByDefault();
+  $api->disabledByDefault();
 
   // The parent path and title for checkout/%/% will be determined by the
   // commerce_checkout_CrumbsMonoPlugin_checkoutPages plugin.
-  $family->route('checkout/%/%')->monoPlugin('checkoutPages', new commerce_checkout_CrumbsMonoPlugin_checkoutPages)
+  $api->route('checkout/%/%')
+    ->monoPlugin('checkoutPages', new commerce_checkout_CrumbsMonoPlugin_checkoutPages)
     ->translateDescription('Commerce checkout pages');
 
   // The parent path for 'checkout/%' should always be 'cart'.
-  $family->route('checkout/%')->fixedParentPath('cartToCheckout', 'cart');
+  $api->route('checkout/%')
+    ->fixedParentPath('cartToCheckout', 'cart');
 }
 
 class commerce_checkout_CrumbsMonoPlugin_checkoutPages implements crumbs_MonoPlugin_FindParentInterface, crumbs_MonoPlugin_FindTitleInterface {
@@ -54,6 +55,7 @@ class commerce_checkout_CrumbsMonoPlugin_checkoutPages implements crumbs_MonoPlu
     if (!is_object($item['map'][1])) {
       return NULL;
     }
+    /** @noinspection PhpUnusedLocalVariableInspection */
     list(, $order, $page) = $item['map'];
     return t($page['name']);
   }

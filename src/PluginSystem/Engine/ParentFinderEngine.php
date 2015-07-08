@@ -4,28 +4,26 @@ namespace Drupal\crumbs\PluginSystem\Engine;
 
 use Drupal\crumbs\ParentFinder\Approval\CheckerInterface;
 use Drupal\crumbs\ParentFinder\ParentFinderInterface;
-use Drupal\crumbs\Router\RouterInterface;
 
 class ParentFinderEngine implements ParentFinderInterface {
 
   /**
-   * @var \crumbs_MonoPlugin_FindParentInterface[]
-   *   Format: $[$pluginKey] = $plugin
+   * @var \Drupal\crumbs\PluginSystem\Wrapper\Parent\ParentPluginWrapperInterface[][]
+   *   Format: $[$bestWeight][] = $wrapper
    */
-  private $pluginsSorted;
+  private $pluginWrappersGrouped = array();
 
   /**
-   * @var RouterInterface
+   * @param \Drupal\crumbs\PluginSystem\Wrapper\Parent\ParentPluginWrapperInterface[] $pluginWrappers
    */
-  protected $router;
-
-  /**
-   * @param \crumbs_MonoPlugin_FindParentInterface[] $pluginsSorted
-   * @param \Drupal\crumbs\Router\RouterInterface $router
-   */
-  function __construct(array $pluginsSorted, RouterInterface $router) {
-    $this->pluginsSorted = $pluginsSorted;
-    $this->router = $router;
+  function __construct(array $pluginWrappers) {
+    foreach ($pluginWrappers as $wrapper) {
+      $wrapperBestWeight = $wrapper->getBestWeight();
+      if ($wrapperBestWeight !== FALSE) {
+        $this->pluginWrappersGrouped[$wrapperBestWeight][] = $wrapper;
+      }
+    }
+    ksort($this->pluginWrappersGrouped);
   }
 
   /**
@@ -33,31 +31,22 @@ class ParentFinderEngine implements ParentFinderInterface {
    *   The router item to find a parent for..
    * @param \Drupal\crumbs\ParentFinder\Approval\CheckerInterface $checker
    *
-   * @return array|NULL
-   *   The parent router item, or NULL.
+   * @return bool
+   *   TRUE, if something was found.
    */
   function findParentRouterItem(array $routerItem, CheckerInterface $checker) {
     $path = $routerItem['link_path'];
-    foreach ($this->pluginsSorted as $key => $pluginOrWrapper) {
-      if ($pluginOrWrapper instanceof ParentFinderInterface) {
-        if ($pluginOrWrapper->findParentRouterItem($routerItem, $checker)) {
+    $bestWeight = NULL;
+    foreach ($this->pluginWrappersGrouped as $wrapperBestWeight => $wrappers) {
+      foreach ($wrappers as $wrapper) {
+        if (isset($bestWeight) && $wrapperBestWeight >= $bestWeight) {
           return TRUE;
         }
-      }
-      elseif ($pluginOrWrapper instanceof \crumbs_MonoPlugin_FindParentInterface) {
-        $parentPathCandidate = $pluginOrWrapper->findParent($path, $routerItem);
-        if (isset($parentPathCandidate)) {
-          if ($checker->checkParentPath($parentPathCandidate, $key)) {
-            return TRUE;
-          }
-        }
-      }
-      else {
-        throw new \RuntimeException("Need either a mono plugin or a multi plugin offset.");
+        $wrapper->findBestParent($checker, $bestWeight, $path, $routerItem);
       }
     }
 
-    // If nothing was found, return NULL.
-    return NULL;
+    return isset($bestWeight);
   }
+
 }

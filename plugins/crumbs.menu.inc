@@ -7,15 +7,16 @@ use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
  * @param \Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface $api
  */
 function menu_crumbs_plugins(ArgumentInterface $api) {
-  $api->multiPlugin('hierarchy')
+  $api->multiPlugin('hierarchy', new menu_CrumbsMultiPlugin_hierarchy())
     ->translateDescription('Menu hierarchy')
     ->disabledByDefault();
 
-  $api->multiPlugin('link_title')
+  $api->multiPlugin('link_title', new menu_CrumbsMultiPlugin_link_title())
     ->translateDescription('Menu link title')
     ->disabledByDefault();
 
-  $api->routeMonoPlugin('crumbs/special-menu-item/%', 'specialItems')
+  $api->route('crumbs/special-menu-item/%')
+    ->monoPlugin('specialItems', new menu_CrumbsMonoPlugin_specialItems())
     ->translateDescription('Special menu items');
 }
 

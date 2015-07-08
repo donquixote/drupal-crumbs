@@ -9,8 +9,6 @@ use Drupal\crumbs\Util;
  */
 function blog_crumbs_plugins(ArgumentInterface $api) {
 
-  $api = $api->modulePluginFamily();
-
   $api->route('node/%')->monoPlugin('authorPage', new blog_CrumbsMonoPlugin_authorPage)
     ->translateDescription("Author's blog page (blog/*) &raquo; Blog post (node/*).");
 

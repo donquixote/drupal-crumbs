@@ -8,7 +8,7 @@ use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
  */
 function path_crumbs_plugins(ArgumentInterface $api) {
   // Just one plugin for the entire module.
-  $api->monoPlugin('alias')
+  $api->monoPlugin('alias', new path_CrumbsMonoPlugin_alias())
     ->translateDescription('Url alias')
     ->disabledByDefault();
 }

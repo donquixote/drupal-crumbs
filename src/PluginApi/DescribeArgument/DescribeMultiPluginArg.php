@@ -1,67 +1,55 @@
 <?php
 namespace Drupal\crumbs\PluginApi\DescribeArgument;
 
-use Drupal\crumbs\PluginSystem\Collection\PluginCollection\DescriptionCollectionInterface;
-use Drupal\crumbs\PluginSystem\Collection\PluginCollection\TreeCollectionInterface;
+use Drupal\crumbs\PluginSystem\Tree\TreeNode;
 
 /**
- * Injected API object for the describe() method of multi plugins.
+ * Argument to be passed into \crumbs_MultiPlugin::describe()
+ *
+ * @see \crumbs_MultiPlugin::describe().
  */
 class DescribeMultiPluginArg {
 
   /**
-   * @var string
-   *   The plugin key, without the '.*'.
+   * @var \Drupal\crumbs\PluginSystem\Tree\TreeNode
    */
-  private $pluginKey;
+  private $treeNode;
 
   /**
-   * @var DescriptionCollectionInterface
+   * @param \Drupal\crumbs\PluginSystem\Tree\TreeNode $treeNode
    */
-  private $descriptionCollection;
-
-  /**
-   * @param string $pluginKey
-   *   The plugin key, without the '.*'.
-   * @param \Drupal\crumbs\PluginSystem\Collection\PluginCollection\TreeCollectionInterface $treeCollection
-   */
-  function __construct($pluginKey, TreeCollectionInterface $treeCollection) {
-    $this->pluginKey = $pluginKey;
-    $this->descriptionCollection = $treeCollection;
+  function __construct(TreeNode $treeNode) {
+    $this->treeNode = $treeNode;
   }
 
   /**
-   * @param string $key_suffix
+   * @param string $key
    * @param bool $title
    */
-  function addRule($key_suffix, $title = TRUE) {
-    $key = $this->pluginKey . '.' . $key_suffix;
-    $this->descriptionCollection->addDescription($key, $title);
+  function addRule($key, $title = TRUE) {
+    $this->treeNode->child($key)->describe($title);
   }
 
   /**
-   * @param string $key_suffix
+   * @param string $key
    * @param string $title
-   * @param string $label
+   * @param string $description
    */
-  function ruleWithLabel($key_suffix, $title, $label) {
-    $this->addRule(
-      $key_suffix, t(
-        '!key: !value', array(
-          '!key' => $label,
-          '!value' => $title,
-        )
-      )
-    );
+  function ruleWithLabel($key, $title, $description) {
+    $this->treeNode->child($key)->translateDescription(
+      '!key: !value',
+      array(
+        '!key' => $description,
+        '!value' => $title,
+      ));
   }
 
   /**
    * @param string $description
-   * @param string $key_suffix
+   * @param string|null $key
    */
-  function addDescription($description, $key_suffix = '*') {
-    $key = $this->pluginKey . '.' . $key_suffix;
-    $this->descriptionCollection->addDescription($key, $description);
+  function addDescription($description, $key = NULL) {
+    $this->treeNode->child($key)->describe($description);
   }
 
   /**
@@ -69,44 +57,40 @@ class DescribeMultiPluginArg {
    * @param string[] $args
    */
   function translateDescription($untranslated, array $args = array()) {
-    $key = $this->pluginKey . '.*';
-    $this->descriptionCollection->translateDescription($key, $untranslated, $args);
+    $this->treeNode->translateDescription($untranslated, $args);
   }
 
   /**
-   * @param string $key_suffix
+   * @param string $key
    * @param string $untranslated
    * @param string[] $args
    */
-  function keyTranslateDescription($key_suffix, $untranslated, array $args = array()) {
-    $key = $this->pluginKey . '.' . $key_suffix;
-    $this->descriptionCollection->translateDescription($key, $untranslated, $args);
+  function keyTranslateDescription($key, $untranslated, array $args = array()) {
+    $this->treeNode->child($key)->translateDescription($untranslated, $args);
   }
 
   /**
    * @param array $paths
-   * @param string $key_suffix
+   * @param string $key
    *
    * @deprecated
    *   This method has no effect.
    */
-  function setRoutes(array $paths, $key_suffix = '*') {
+  function setRoutes(array $paths, $key = NULL) {
     // This method has no effect.
   }
 
   /**
    * @param string $description
    * @param string $label
-   * @param string $key_suffix
+   * @param string|null $key
    */
-  function descWithLabel($description, $label, $key_suffix = '*') {
-    $this->addDescription(
-      t(
-        '!key: !value', array(
-          '!key' => $label,
-          '!value' => $description,
-        )
-      ), $key_suffix
-    );
+  function descWithLabel($description, $label, $key = NULL) {
+    $this->treeNode->child($key)->translateDescription(
+      '!key: !value',
+      array(
+        '!key' => $label,
+        '!value' => $description,
+      ));
   }
 }

@@ -3,13 +3,6 @@
 class crumbs_example_CrumbsMonoPlugin_NewsByDate implements crumbs_MonoPlugin {
 
   /**
-   * {@inheritdoc}
-   */
-  function describe($api) {
-    $api->setTitle('Breadcrumbs for news/(year)/(month)/(day)');
-  }
-
-  /**
    * This one only makes sense if you created a view with path "news/%/%/%"
    *
    * @param string $path

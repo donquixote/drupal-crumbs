@@ -8,6 +8,11 @@ namespace Drupal\crumbs\PluginApi\Family;
 interface BaseFamilyInterface {
 
   /**
+   * @return $this
+   */
+  function validate();
+
+  /**
    * Register a "Multi" plugin.
    * That is, a plugin that defines more than one rule.
    *
@@ -17,7 +22,7 @@ interface BaseFamilyInterface {
    * @param \crumbs_MultiPlugin $plugin
    *   Plugin object.
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    *
    * @throws \Exception
    */
@@ -32,7 +37,7 @@ interface BaseFamilyInterface {
    * @param \crumbs_MonoPlugin $plugin
    *   Plugin object.
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    *
    * @throws \Exception
    */
@@ -42,7 +47,7 @@ interface BaseFamilyInterface {
    * @param string $key
    * @param callable $callback
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    */
   function parentCallback($key, $callback);
 
@@ -50,7 +55,7 @@ interface BaseFamilyInterface {
    * @param string $key
    * @param callable $callback
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    */
   function titleCallback($key, $callback);
 

@@ -19,10 +19,10 @@ function crumbs_crumbs_plugins(ArgumentInterface $api) {
   }
 
   $home_title = variable_get('crumbs_home_link_title', 'Home');
-  $api->monoPlugin('home_title')
-    ->translateDescription('Set t("@title") as the title for the root item.', array(
-      '@title' => $home_title,
-    ));
+  $api->monoPlugin('home_title', new crumbs_CrumbsMonoPlugin_home_title())
+    ->translateDescription(
+      'Set t("@title") as the title for the root item.',
+      array('@title' => $home_title));
 
   if (module_exists('token')) {
     $api->entityParentPlugin('entityParent', new crumbs_CrumbsEntityPlugin_TokenEnabled())
@@ -44,12 +44,6 @@ class crumbs_CrumbsMonoPlugin_home_title implements crumbs_MonoPlugin_FindTitleI
 
   function __construct() {
     $this->pathToFront = crumbs()->router->getFrontNormalPath();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  function describe($api) {
   }
 
   /**

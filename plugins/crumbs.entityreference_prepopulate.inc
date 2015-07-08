@@ -8,9 +8,6 @@ use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
  */
 function entityreference_prepopulate_crumbs_plugins(ArgumentInterface $api) {
 
-  $family = $api->modulePluginFamily()
-    ->describeFindParent(t('Entityreference prepopulate'));
-
   foreach (field_info_fields() as $field_name => $field_info) {
     if (0
       || $field_info['type'] !== 'entityreference'
@@ -33,7 +30,7 @@ function entityreference_prepopulate_crumbs_plugins(ArgumentInterface $api) {
 
       $route = 'node/add/' . str_replace('_', '-', $node_type);
       $plugin = new entityreference_prepopulate_CrumbsMonoPlugin_node($node_type, $field_name, $target_type);
-      $family->route($route)->monoPlugin("node.$field_name.$node_type", $plugin);
+      $api->route($route)->monoPlugin("node.$field_name.$node_type", $plugin);
     }
   }
 }

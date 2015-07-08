@@ -1,59 +1,27 @@
 <?php
-use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
-use Drupal\crumbs\Util;
 
 /**
  * Implements hook_crumbs_plugins().
  *
  * This is the version for the og-7.x-1.x branch.
  *
- * @param \Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface $api
+ * @param crumbs_InjectedAPI_hookCrumbsPlugins $api
  */
-function og_crumbs_plugins(ArgumentInterface $api) {
+function og_crumbs_plugins($api) {
+  $api->multiPlugin('group_post');
+  $api->monoPlugin('groups_overview_title');
 
-  // Organic groups is a special case,
-  // because 7.x-2.x behaves different from 7.x-1.x.
-  if (!function_exists('og_get_group')) {
-    // The site uses the og-7.x-1.x branch.
-    $family = $api->modulePluginFamily()
-      ->describeFindParent(t('Organic groups 7.x-1.x'))
-      ->describeFindTitle(t('Organic groups 7.x-1.x'));
-
-    $plugin = new og_v1_CrumbsMultiPlugin_group_post;
-    $family->route('node/%')->multiPlugin('group_post', $plugin)
-      ->describe(t('Group node') . ' &raquo; ' . t('Group post'));
-
-    $plugin = new og_v1_CrumbsMultiPlugin_groups_overview('group-list');
-    $family->route('node/%')->multiPlugin('groups_overview', $plugin)
-      ->describe('group-list &raquo; node/%');
-
-    $plugin = new og_v1_CrumbsMultiPlugin_my_groups_overview('user-groups');
-    $family->route('node/%')->multiPlugin('my_groups_overview', $plugin)
-      ->describe('user-groups &raquo; node/%, for user\'s own groups');
-
-    $family->route('group-list')->translateTitle('groups_overview_title', 'Groups');
-  }
-  else {
-    // The site uses the og-7.x-2.x branch.
-    $family = $api->modulePluginFamily()
-      ->describeFindParent(t('Organic groups 7.x-2.x'));
-
-    $plugin = new og_v2_CrumbsMultiPlugin_group_post;
-    $family->route('node/%')->multiPlugin('og2.group_post', $plugin)
-      ->describe(t('Group node') . ' &raquo; ' . t('Group post'));
-
-    // There are no default paths for group overview pages in og-7.x-2.x anymore.
-    // We leave it to custom module developers to instantiate or override those
-    // classes.
-  }
-
+  $api->multiPlugin('groups_overview',
+    new og_CrumbsMultiPlugin_groups_overview('group-list'));
+  $api->multiPlugin('my_groups_overview',
+    new og_CrumbsMultiPlugin_my_groups_overview('user-groups'));
 }
 
 /**
  * Use the group node as a parent for group posts.
  * The priorities can be configured per group content type.
  */
-class og_v1_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin_FindParentInterface {
+class og_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin {
 
   /**
    * {@inheritdoc}
@@ -67,8 +35,8 @@ class og_v1_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin_FindParen
     }
   }
 
-  function findParent($path, $item) {
-    if (FALSE === $node = Util::itemExtractEntity($item, 'node', 1)) {
+  function findParent__node_x($path, $item) {
+    if (FALSE === $node = \Drupal\crumbs\Util::itemExtractEntity($item, 'node', 1)) {
       return NULL;
     }
 
@@ -113,94 +81,10 @@ class og_v1_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin_FindParen
 }
 
 /**
- * Use the group node as a parent for group posts.
- * The priorities can be configured per group content type.
- */
-class og_v2_CrumbsMultiPlugin_group_post implements crumbs_MultiPlugin_FindParentInterface {
-
-  /**
-   * {@inheritdoc}
-   */
-  function describe($api) {
-    $types = node_type_get_types();
-    foreach ($types as $type) {
-      if (og_is_group_content_type('node', $type->type)) {
-        $api->ruleWithLabel($type->type, $type->name, t('Group content type'));
-      }
-    }
-  }
-
-  /**
-   * Attempts to find a breadcrumb parent path for node/%.
-   * If that node is in a group, it will return the group page as a parent.
-   *
-   * @param string $path
-   *   The path that we want to find a parent for, e.g. "node/123".
-   * @param array $item
-   *   Loaded router item, as returned from crumbs_get_router_item()
-   *
-   * @return array|null
-   *   Parent path candidates
-   */
-  function findParent($path, $item) {
-    if (FALSE === $node = Util::itemExtractEntity($item, 'node', 1)) {
-      return NULL;
-    }
-
-    // field_get_items() performs a lot faster than og_get_entity_groups().
-    // See http://drupal.org/node/1819300#comment-6633494
-    // TODO:
-    //   We cannot rely on the field name to always be og_group_ref.
-    //   Instead, we could provide a separate plugin for each such field.
-    //   This way, fields in disabled plugins get never triggered.
-    $items = field_get_items('node', $node, 'og_group_ref');
-    if (is_array($items)) {
-      foreach ($items as $item) {
-        $parent_path = $this->getParentPath($item['target_id'], $node);
-        return array($node->type => $parent_path);
-      }
-    }
-
-    return NULL;
-  }
-
-  /**
-   * This method can be overridden by custom plugins that inherit from this one,
-   * e.g. to set a different parent for group events than for group discussions.
-   *
-   * @param int $group_nid
-   *   Node id of the group that was found to be the parent.
-   * @param stdClass $group_post
-   *   The node that is in the group, and that we are trying to find a parent
-   *   path for.
-   *
-   * @return string
-   *   A parent path. The native implementation returns just node/$nid.
-   *   Custom module might subclass this class and override this method, to let
-   *   it return e.g. node/$nid/events, or node/$nid/forum, depending on the
-   *   $group_post argument.
-   */
-  protected function getParentPath($group_nid, $group_post) {
-    return 'node/' . $group_nid;
-    /*
-     * Example:
-     * switch ($group_post->type) {
-     *   case 'event':
-     *     return 'node/' . $group_nid . '/events';
-     *   case 'discussion':
-     *     return 'node/' . $group_nid . '/forum';
-     *   default:
-     *     return 'node/' . $group_nid;
-     * }
-     */
-  }
-}
-
-/**
  * Make $groups_overview_path the parent path for group nodes.
  * The priorities can be configured per group node type.
  */
-class og_v1_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin_FindParentInterface {
+class og_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin {
 
   protected $groupsOverviewPath;
 
@@ -230,8 +114,8 @@ class og_v1_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin_Find
    *
    * @return array|null
    */
-  function findParent($path, $item) {
-    if (FALSE === $node = Util::itemExtractEntity($item, 'node', 1)) {
+  function findParent__node_x($path, $item) {
+    if (FALSE === $node = \Drupal\crumbs\Util::itemExtractEntity($item, 'node', 1)) {
       return NULL;
     }
 
@@ -246,11 +130,37 @@ class og_v1_CrumbsMultiPlugin_groups_overview implements crumbs_MultiPlugin_Find
 }
 
 /**
+ * Make t('Groups') the title for '/group-list'.
+ */
+class og_CrumbsMonoPlugin_groups_overview_title implements crumbs_MonoPlugin_FindTitleInterface {
+
+  /**
+   * {@inheritdoc}
+   */
+  function describe($api) {
+    return t('Set "Group" as the title for item for "group-list".');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  function findTitle($path, $item) {
+    if ($item['route'] === 'group-list') {
+      return t('Groups');
+    }
+
+    return NULL;
+  }
+
+}
+
+/**
  * Make $my_groups_path the parent path for group nodes where the current user
  * is a member.
  * The priorities can be configured per group node type.
  */
-class og_v1_CrumbsMultiPlugin_my_groups_overview implements crumbs_MultiPlugin_FindParentInterface {
+/** @noinspection PhpUndefinedClassInspection */
+class og_CrumbsMultiPlugin_my_groups_overview implements crumbs_MultiPlugin {
 
   /**
    * @var string
@@ -287,8 +197,8 @@ class og_v1_CrumbsMultiPlugin_my_groups_overview implements crumbs_MultiPlugin_F
    * @return array
    *   Parent path candidates
    */
-  function findParent($path, $item) {
-    if (FALSE === $node = Util::itemExtractEntity($item, 'node', 1)) {
+  function findParent__node_x($path, $item) {
+    if (FALSE === $node = \Drupal\crumbs\Util::itemExtractEntity($item, 'node', 1)) {
       return NULL;
     }
 

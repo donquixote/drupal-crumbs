@@ -7,8 +7,12 @@ use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
  * @param \Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface $api
  */
 function search_crumbs_plugins(ArgumentInterface $api) {
-  $family = $api->modulePluginFamily()
-    ->describeFindParent(t('Search pages'));
-  $family->route('search/node/%')->fixedParentPath('search.node', 'search');
-  $family->route('search/user/%')->fixedParentPath('search.user', 'search');
+
+  $api->route('search/node/%')
+    ->fixedParentPath('node', 'search')
+    ->translateDescription('Node search page (search/node/%)');
+
+  $api->route('search/user/%')
+    ->fixedParentPath('user', 'search')
+    ->translateDescription('Use search page (search/user/%)');
 }

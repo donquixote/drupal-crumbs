@@ -14,7 +14,7 @@ interface FamilyInterface extends BaseFamilyInterface, EntityFamilyInterface {
   /**
    * @param string $key
    *
-   * @return \Drupal\crumbs\PluginApi\Family\FamilyLoreInterface
+   * @return \Drupal\crumbs\PluginApi\Family\LoreFamilyInterface
    */
   function pluginFamily($key);
 

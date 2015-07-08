@@ -8,15 +8,16 @@ use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
  */
 function comment_crumbs_plugins(ArgumentInterface $api) {
 
-  $api = $api->modulePluginFamily();
-
-  $api->route('comment/reply/%')->monoPlugin('reply', new comment_CrumbsMonoPlugin_reply)
+  $api->route('comment/reply/%')
+    ->monoPlugin('reply', new comment_CrumbsMonoPlugin_reply)
     ->describe("<code>node/123</code> &raquo; <code>comment/reply/123</code>");
 
-  $api->route('comment/%')->monoPlugin('comment', new comment_CrumbsMonoPlugin_comment)
+  $api->route('comment/%')
+    ->monoPlugin('comment', new comment_CrumbsMonoPlugin_comment)
     ->describe("<code>node/%node</code> &raquo; <code>comment/reply/%comment</code>");
 
-  $api->route('comment/%')->skipItem('skip');
+  $api->route('comment/%')
+    ->skipItem('skip');
 }
 
 class comment_CrumbsMonoPlugin_reply implements crumbs_MonoPlugin_FindParentInterface {

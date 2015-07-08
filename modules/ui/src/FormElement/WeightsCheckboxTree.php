@@ -2,37 +2,22 @@
 
 namespace Drupal\crumbs_ui\FormElement;
 
-use Drupal\crumbs\PluginSystem\Collection\PluginCollection\LabeledPluginCollection;
-use Drupal\crumbs_ui\PluginKey\RawHierarchyInterface;
+use Drupal\crumbs\PluginSystem\Tree\TreeNode;
+use Drupal\crumbs\PluginSystem\TreePosition\TreePosition;
+use Drupal\crumbs\PluginSystem\TreePosition\TreePositionInterface;
 
 class WeightsCheckboxTree implements ElementInterface, PreRenderInterface {
 
   /**
-   * @var \Drupal\crumbs_ui\PluginKey\RawHierarchyInterface
+   * @var \Drupal\crumbs\PluginSystem\Tree\TreeNode
    */
-  private $rawHierarchy;
+  private $tree;
 
   /**
-   * @var \Drupal\crumbs\PluginSystem\Collection\PluginCollection\LabeledPluginCollection
+   * @param \Drupal\crumbs\PluginSystem\Tree\TreeNode $tree
    */
-  private $pluginCollection;
-
-  /**
-   * @var bool[]
-   */
-  private $defaultStatuses;
-
-  /**
-   * @param \Drupal\crumbs_ui\PluginKey\RawHierarchyInterface $raw_hierarchy
-   * @param \Drupal\crumbs\PluginSystem\Collection\PluginCollection\LabeledPluginCollection $pluginCollection
-   */
-  function __construct(
-    RawHierarchyInterface $raw_hierarchy,
-    LabeledPluginCollection $pluginCollection
-  ) {
-    $this->rawHierarchy = $raw_hierarchy;
-    $this->pluginCollection = $pluginCollection;
-    $this->defaultStatuses = $pluginCollection->getDefaultStatuses();
+  function __construct(TreeNode $tree) {
+    $this->tree = $tree;
   }
 
   /**
@@ -68,16 +53,15 @@ class WeightsCheckboxTree implements ElementInterface, PreRenderInterface {
    * @return array
    */
   private function extractValue(array $input) {
-
+    $rootPosition = new TreePosition($this->tree);
     return array(
-      'statuses' => $this->collectStatuses('*', $input, TRUE),
-      'weights' => $this->collectWeights('*', $input),
+      'statuses' => $this->collectStatuses($rootPosition, $input, TRUE),
+      'weights' => $this->collectWeights($rootPosition, $input),
     );
   }
 
   /**
-   * @param string $key
-   *   Root key for this (sub)tree.
+   * @param \Drupal\crumbs\PluginSystem\TreePosition\TreePositionInterface $treePosition
    * @param array $input
    *   The complete input array.
    * @param bool $default_status
@@ -87,8 +71,9 @@ class WeightsCheckboxTree implements ElementInterface, PreRenderInterface {
    *
    * @return bool[]
    */
-  protected function collectStatuses($key, array $input, $default_status) {
+  protected function collectStatuses(TreePositionInterface $treePosition, array $input, $default_status) {
     $statuses = array();
+    $key = $treePosition->getKey();
 
     // Collect the status from the root key of this (sub)tree.
     $status = !empty($input[$key]['status']);
@@ -96,35 +81,39 @@ class WeightsCheckboxTree implements ElementInterface, PreRenderInterface {
       $statuses[$key] = $status;
     }
 
-    // Collect the statuses from the children.
-    foreach ($this->rawHierarchy->keyGetChildren($key) as $child_key) {
-      $child_default_status = isset($this->defaultStatuses[$child_key])
-        ? $this->defaultStatuses[$child_key]
-        : $status;
-      $statuses += $this->collectStatuses($child_key, $input, $child_default_status);
+    if (isset($prefix)) {
+      /** @var TreePositionInterface $childTreePosition */
+      foreach ($treePosition->getChildren() as $childTreePosition) {
+        $child_default_status = $childTreePosition->requireTreeNode()->getStatus();
+        if (!isset($child_default_status)) {
+          $child_default_status = $status;
+        }
+        $statuses += $this->collectStatuses($childTreePosition, $input, $child_default_status);
+      }
     }
 
     return $statuses;
   }
 
   /**
-   * @param string $parent_key
+   * @param \Drupal\crumbs\PluginSystem\TreePosition\TreePositionInterface $treePosition
    * @param array $input
    *
    * @return mixed[]
    */
-  protected function collectWeights($parent_key, array $input) {
+  protected function collectWeights(TreePositionInterface $treePosition, array $input) {
     $weights_all = array();
-    foreach ($this->rawHierarchy->keyGetChildren($parent_key) as $child_key) {
-      if (!empty($input[$child_key]['distinct_weight'])) {
-        if (isset($input[$child_key]['weight'])) {
-          $child_weight = $input[$child_key]['weight'];
+    foreach ($treePosition->getChildren() as $childTreeNode) {
+      $childKey = $childTreeNode->getKey();
+      if (!empty($input[$childKey]['distinct_weight'])) {
+        if (isset($input[$childKey]['weight'])) {
+          $child_weight = $input[$childKey]['weight'];
           if ((string)(int)$child_weight === (string)$child_weight) {
-            $weights_all[$child_key] = (int)$child_weight;
+            $weights_all[$childKey] = (int)$child_weight;
           }
         }
       }
-      $weights_all += $this->collectWeights($child_key, $input);
+      $weights_all += $this->collectWeights($childTreeNode, $input);
     }
     return $weights_all;
   }
@@ -149,7 +138,8 @@ class WeightsCheckboxTree implements ElementInterface, PreRenderInterface {
    */
   public function process($element, $form_state) {
     $value_all = $element['#value'];
-    $element += $this->buildTree($value_all, '*', TRUE, 0);
+    $rootPosition = new TreePosition($this->tree);
+    $element += $this->buildTree($value_all, $rootPosition, TRUE, 0);
     return $element;
   }
 
@@ -158,13 +148,12 @@ class WeightsCheckboxTree implements ElementInterface, PreRenderInterface {
    *
    * @param array $value_all
    *   All statuses and weights currently stored in the database.
-   * @param string $key
-   *   Root key for this (sub)tree.
-   * @param bool $default_status
+   * @param \Drupal\crumbs\PluginSystem\TreePosition\TreePositionInterface $treePosition
+   * @param bool $inherited_status
    *   The status that applies to $parent_key, if it is not overridden. This is
    *   either the status inherited from the parent, or a default status defined
    *   for this key via hook_crumbs_plugins().
-   * @param int $default_weight
+   * @param int $inherited_weight
    *   The weight that applies to $parent_key, if it is not overridden. This is
    *   either the weight inherited from the parent, or a default weight defined
    *   for this key via hook_crumbs_plugins().
@@ -172,32 +161,32 @@ class WeightsCheckboxTree implements ElementInterface, PreRenderInterface {
    * @return array
    *   An array of form elements.
    */
-  protected function buildTree(array $value_all, $key, $default_status, $default_weight) {
+  protected function buildTree(array $value_all, TreePositionInterface $treePosition, $inherited_status, $inherited_weight) {
 
-    $status = isset($value_all['statuses'][$key])
-      ? $value_all['statuses'][$key]
-      : $default_status;
+    $key = $treePosition->getKey();
+
+    if (isset($value_all['statuses'][$key])) {
+      $status = $value_all['statuses'][$key];
+    }
+    else {
+      $status = $treePosition->requireTreeNode()->getStatus();
+      if (!isset($status)) {
+        $status = $inherited_status;
+      }
+    }
 
     $distinct_weight = isset($value_all['weights'][$key]);
 
     $weight = isset($value_all['weights'][$key])
       ? $value_all['weights'][$key]
-      : $default_weight;
+      : $inherited_weight;
 
     $elements = array();
 
     $elements[$key] = $this->buildChildElement($key, $status, $distinct_weight, $weight);
 
-    foreach ($this->rawHierarchy->keyGetChildren($key) as $child_key) {
-      $child_default_status = isset($this->defaultStatuses[$child_key])
-        ? $this->defaultStatuses[$child_key]
-        : $status;
-      $child_default_weight = $weight;
-      $elements += $this->buildTree(
-        $value_all,
-        $child_key,
-        $child_default_status,
-        $child_default_weight);
+    foreach ($treePosition->getChildren() as $childTreePosition) {
+      $elements += $this->buildTree($value_all, $childTreePosition, $status, $weight);
     }
 
     return $elements;
@@ -245,7 +234,7 @@ class WeightsCheckboxTree implements ElementInterface, PreRenderInterface {
     foreach (element_children($element) as $plugin_key) {
       $name = $element[$plugin_key]['distinct_weight']['#name'];
       $element[$plugin_key]['weight']['#states'] = array(
-        'disabled' => array(
+        'enabled' => array(
           // @todo Sanitize the name.
           ':input[name="' . $name . '"]' => array('checked' => TRUE),
         ),

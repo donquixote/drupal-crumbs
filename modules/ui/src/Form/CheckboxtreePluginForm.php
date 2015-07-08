@@ -7,7 +7,6 @@ use Drupal\crumbs\PluginSystem\PluginType\PluginTypeInterface;
 use Drupal\crumbs\PluginSystem\PluginType\TitlePluginType;
 use Drupal\crumbs_ui\FormElement\Theme\CheckboxTreeTable;
 use Drupal\crumbs_ui\FormElement\WeightsCheckboxTree;
-use Drupal\crumbs_ui\PluginKey\RawHierarchy;
 
 class CheckboxtreePluginForm implements FormBuilderInterface {
 
@@ -63,21 +62,18 @@ class CheckboxtreePluginForm implements FormBuilderInterface {
   public function buildForm($form, $form_state) {
 
     $buffer = crumbs()->pluginDiscoveryBuffer;
-    $collector = $buffer->getCollector($this->pluginType);
-    $labeledPluginCollection = $this->loadLabeledPluginCollection();
-    $settings_key = $this->pluginType->getSettingsKey();
 
-    $descriptions = $labeledPluginCollection->getDescriptions();
-    $leaves = $labeledPluginCollection->getLeaves();
-    $raw_hierarchy = RawHierarchy::createFromKeys($descriptions + $leaves);
+    $tree = $buffer->getQualifiedTree($this->pluginType);
+
+    $settings_key = $this->pluginType->getSettingsKey();
 
     $form[$settings_key] = array(
       '#title' => $this->isParentForm
         ? t('Criteria for parent-finding')
         : t('Criteria for title-finding'),
       '#type' => 'crumbs_ui_element',
-      '#crumbs_ui_element_object' => new WeightsCheckboxTree($raw_hierarchy, $labeledPluginCollection),
-      '#crumbs_ui_theme_object' => new CheckboxTreeTable($raw_hierarchy, $labeledPluginCollection),
+      '#crumbs_ui_element_object' => new WeightsCheckboxTree($tree),
+      '#crumbs_ui_theme_object' => new CheckboxTreeTable($tree),
       // Fetching the default value is not automated by system_settings_form().
       '#default_value' => variable_get($settings_key, array()) + array(
         'statuses' => array(),
@@ -85,10 +81,9 @@ class CheckboxtreePluginForm implements FormBuilderInterface {
       ),
     );
 
-    $form[$settings_key]['#default_value']['statuses'] += $labeledPluginCollection->getDefaultStatuses();
-
     $form = system_settings_form($form);
     $form['#submit'][] = '_crumbs_admin_flush_cache';
+
     return $form;
   }
 }

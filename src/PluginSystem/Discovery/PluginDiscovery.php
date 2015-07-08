@@ -2,11 +2,8 @@
 
 namespace Drupal\crumbs\PluginSystem\Discovery;
 
-use Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface;
-use Drupal\crumbs\PluginApi\Family\CallbackRecovery\CallbackHookArgument;
 use Drupal\crumbs\PluginApi\Family\DefaultImplementation\HookArgument;
-use Drupal\crumbs\PluginSystem\Discovery\Hook\HookCrumbsPlugins;
-use Drupal\crumbs\PluginSystem\Discovery\Hook\HookInterface;
+use Drupal\crumbs\PluginSystem\Tree\TreeNode;
 
 class PluginDiscovery {
 
@@ -16,56 +13,42 @@ class PluginDiscovery {
   protected $pluginFilesIncluded = FALSE;
 
   /**
-   * @param \Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface $parentPluginCollector
-   * @param \Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface $titlePluginCollector
-   * @param bool[] $uncacheableModules
+   * @param \Drupal\crumbs\PluginSystem\Tree\TreeNode $findParentTree
+   *   Hierarchy of parent-finding plugins.
+   * @param \Drupal\crumbs\PluginSystem\Tree\TreeNode $findTitleTree
+   *   Hierarchy of title-finding plugins.
    */
-  function discoverPlugins(
-    RoutelessPluginCollectorInterface $parentPluginCollector,
-    RoutelessPluginCollectorInterface $titlePluginCollector,
-    array &$uncacheableModules
-  ) {
+  function discoverPlugins(TreeNode $findParentTree, TreeNode $findTitleTree) {
+    $system_list = system_list('module_enabled');
     $this->includePluginFiles();
+    $entityRoutes = array();
     foreach (module_implements('crumbs_plugins') as $module) {
-      $hasUncachablePlugins = FALSE;
+
+      $module_name = isset($system_list[$module]->info['name'])
+        ? $system_list[$module]->info['name']
+        : $module;
+
       $api = new HookArgument(
-        $parentPluginCollector,
-        $titlePluginCollector,
-        $hasUncachablePlugins,
+        $moduleFindParentTree = $findParentTree->child($module)->describe($module_name),
+        $moduleFindTitleTree = $findTitleTree->child($module)->describe($module_name),
         $module);
+
       $f = $module . '_crumbs_plugins';
       $f($api);
-      if ($hasUncachablePlugins) {
-        $uncacheableModules[$module] = TRUE;
+
+      if ($moduleFindParentTree->isEmpty()) {
+        $findParentTree->unchild($module);
       }
+
+      if ($moduleFindTitleTree->isEmpty()) {
+        $findTitleTree->unchild($module);
+      }
+
+      $entityRoutes += $api->getEntityRoutes();
     }
 
-    $parentPluginCollector->finalize();
-    $titlePluginCollector->finalize();
-  }
-
-  /**
-   * @param \Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface $parentPluginCollector
-   * @param \Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface $titlePluginCollector
-   * @param bool[] $uncacheableModules
-   */
-  function discoverUncacheablePlugins(
-    RoutelessPluginCollectorInterface $parentPluginCollector,
-    RoutelessPluginCollectorInterface $titlePluginCollector,
-    array $uncacheableModules
-  ) {
-    $this->includePluginFiles();
-    foreach ($uncacheableModules as $module => $cTrue) {
-      $api = new CallbackHookArgument(
-        $parentPluginCollector,
-        $titlePluginCollector,
-        $module);
-      $f = $module . '_crumbs_plugins';
-      $f($api);
-    }
-
-    $parentPluginCollector->finalize();
-    $titlePluginCollector->finalize();
+    $findParentTree->unfoldEntityPlugins($entityRoutes);
+    $findTitleTree->unfoldEntityPlugins($entityRoutes);
   }
 
   /**

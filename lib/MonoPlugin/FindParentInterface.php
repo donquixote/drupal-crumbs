@@ -12,7 +12,7 @@ interface crumbs_MonoPlugin_FindParentInterface extends crumbs_MonoPlugin, Paren
    * @param array $item
    *   Item as returned from crumbs_get_router_item()
    *
-   * @return string|NULL
+   * @return string|null
    *   Parent path candidate, or NULL if none found.
    */
   function findParent($path, $item);

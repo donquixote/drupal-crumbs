@@ -1,10 +1,15 @@
 
+.crumbs_ui-treetable {
+  width: auto;
+}
+
 .crumbs_ui-treetable > tbody > tr > td {
   overflow: hidden;
   vertical-align: middle;
   padding-top: 0;
   padding-bottom: 0;
   line-height: 24px;
+  white-space: nowrap;
 }
 
 input.crumbs_ui-checkboxtree_item {

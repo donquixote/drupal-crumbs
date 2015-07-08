@@ -2,12 +2,24 @@
 
 namespace Drupal\crumbs\PluginApi\Family\DefaultImplementation;
 
-use Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface;
+use Drupal\crumbs\PluginApi\Aggregate\EntityRoute;
 use Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface;
 use Drupal\crumbs\PluginApi\HookArgument\Helper;
+use Drupal\crumbs\PluginApi\HookArgument\LegacyArgumentInterface;
+use Drupal\crumbs\PluginApi\Offset\IllegalTreeOffset;
+use Drupal\crumbs\PluginSystem\Tree\TreeNode;
+use Drupal\crumbs\PluginSystem\Plugin\LegacyWrapper\MonoParentPluginLegacyWrapper;
+use Drupal\crumbs\PluginSystem\Plugin\LegacyWrapper\MonoTitlePluginLegacyWrapper;
+use Drupal\crumbs\PluginSystem\Plugin\LegacyWrapper\MultiParentPluginLegacyWrapper;
+use Drupal\crumbs\PluginSystem\Plugin\LegacyWrapper\MultiTitlePluginLegacyWrapper;
+use Drupal\crumbs\Util;
 
-
-class HookArgument extends RoutelessPluginMapper implements ArgumentInterface {
+/**
+ * Argument to be passed into hook_crumbs_plugins()
+ *
+ * @see hook_crumbs_plugins()
+ */
+class HookArgument extends LoreFamily implements ArgumentInterface, LegacyArgumentInterface {
 
   /**
    * @var string
@@ -20,34 +32,30 @@ class HookArgument extends RoutelessPluginMapper implements ArgumentInterface {
   private $helper;
 
   /**
-   * @param \Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface $parentPluginCollector
-   * @param \Drupal\crumbs\PluginApi\Collector\RoutelessPluginCollectorInterface $titlePluginCollector
-   * @param bool $hasUncachablePlugins
+   * Known routes for entity types.
+   *
+   * @var \Drupal\crumbs\PluginApi\Aggregate\EntityRouteInterface[]
+   *   Format: $[$route] = new EntityRoute();
+   */
+  protected $entityRoutes = array();
+
+  /**
+   * @param \Drupal\crumbs\PluginSystem\Tree\TreeNode $findParentTreeNode
+   * @param \Drupal\crumbs\PluginSystem\Tree\TreeNode $findTitleTreeNode
    * @param string $module
    */
-  function __construct(
-    RoutelessPluginCollectorInterface $parentPluginCollector,
-    RoutelessPluginCollectorInterface $titlePluginCollector,
-    &$hasUncachablePlugins,
-    $module
-  ) {
-    parent::__construct(
-      $parentPluginCollector,
-      $titlePluginCollector,
-      $callbackPluginBuilder,
-      $module . '-');
+  function __construct(TreeNode $findParentTreeNode, TreeNode $findTitleTreeNode, $module) {
+    parent::__construct($findParentTreeNode, $findTitleTreeNode);
+    $this->module = $module;
     $this->helper = new Helper($module);
   }
 
   /**
-   * @return \Drupal\crumbs\PluginApi\Family\FamilyLoreInterface
+   * @return array[]
+   *   Format: $[$route] = array($entity_type, $bundle_key, $entity_type_label);
    */
-  function modulePluginFamily() {
-    return new PluginFamilyMapper(
-      $this->parentPluginCollector,
-      $this->titlePluginCollector,
-      $this->hasUncachablePlugins,
-      $this->module . '.');
+  function getEntityRoutes() {
+    return $this->entityRoutes;
   }
 
   /**
@@ -60,8 +68,7 @@ class HookArgument extends RoutelessPluginMapper implements ArgumentInterface {
    * @param string $bundle_name
    */
   function entityRoute($entity_type, $route, $bundle_key, $bundle_name) {
-    $this->parentPluginCollector->entityRoute($entity_type, $route, $bundle_key, $bundle_name);
-    $this->titlePluginCollector->entityRoute($entity_type, $route, $bundle_key, $bundle_name);
+    $this->entityRoutes[$route] = new EntityRoute($entity_type, $bundle_key, $bundle_name);
   }
 
   /**
@@ -75,7 +82,7 @@ class HookArgument extends RoutelessPluginMapper implements ArgumentInterface {
    *   Or NULL, to have the plugin object automatically created based on a
    *   class name guessed from the $key parameter and the module name.
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    *
    * @throws \Exception
    * @deprecated Use dedicated methods for title and parent plugins.
@@ -84,8 +91,43 @@ class HookArgument extends RoutelessPluginMapper implements ArgumentInterface {
     if (!isset($plugin)) {
       $plugin = $this->helper->monoPluginFromKey($key);
     }
-    // @todo What if $key is empty?
-    return parent::monoPlugin($key, $plugin);
+    if ($plugin instanceof \crumbs_MonoPlugin_FindParentInterface) {
+      return $this->getFindParentTreeNode()
+        ->child($key, TRUE)
+        ->setMonoPlugin($plugin)
+        ->offset();
+    }
+    elseif ($plugin instanceof \crumbs_MonoPlugin_FindTitleInterface) {
+      return $this->getFindTitleTreeNode()
+        ->child($key, TRUE)
+        ->setMonoPlugin($plugin)
+        ->offset();
+    }
+    else {
+      $reflectionObject = new \ReflectionObject($plugin);
+      foreach ($reflectionObject->getMethods() as $method) {
+        if ('findParent' === $method->name) {
+          $wrapper = new MonoParentPluginLegacyWrapper($plugin, $method->name);
+          parent::monoPlugin($key, $wrapper);
+        }
+        elseif ('findTitle' === $method->name) {
+          $wrapper = new MonoTitlePluginLegacyWrapper($plugin, $method->name);
+          parent::monoPlugin($key, $wrapper);
+        }
+        elseif (0 === strpos($method->name, 'findParent__')) {
+          $wrapper = new MonoParentPluginLegacyWrapper($plugin, $method->name);
+          $route = Util::routeFromMethodSuffix(substr($method->name, 12));
+          parent::route($route)->monoPlugin($key, $wrapper);
+        }
+        elseif (0 === strpos($method->name, 'findTitle__')) {
+          $wrapper = new MonoTitlePluginLegacyWrapper($plugin, $method->name);
+          $route = Util::routeFromMethodSuffix(substr($method->name, 11));
+          parent::route($route)->monoPlugin($key, $wrapper);
+        }
+      }
+      // Return a placeholder tree offset.
+      return new IllegalTreeOffset('Cannot use tree offset from legacy plugin.');
+    }
   }
 
   /**
@@ -95,13 +137,12 @@ class HookArgument extends RoutelessPluginMapper implements ArgumentInterface {
    * @param string $key
    * @param \crumbs_MonoPlugin $plugin
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    */
   function routeMonoPlugin($route, $key = NULL, \crumbs_MonoPlugin $plugin = NULL) {
     if (!isset($plugin)) {
       $plugin = $this->helper->monoPluginFromKey($key);
     }
-    // @todo What if $key is empty?
     return $this->route($route)->monoPlugin($key, $plugin);
   }
 
@@ -116,7 +157,7 @@ class HookArgument extends RoutelessPluginMapper implements ArgumentInterface {
    *   Or NULL, to have the plugin object automatically created based on a
    *   class name guessed from the $key parameter and the module name.
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    *
    * @throws \Exception
    */
@@ -124,8 +165,43 @@ class HookArgument extends RoutelessPluginMapper implements ArgumentInterface {
     if (!isset($plugin)) {
       $plugin = $this->helper->multiPluginFromKey($key);
     }
-    // @todo What if the key is empty?
-    return parent::multiPlugin($key, $plugin);
+    if ($plugin instanceof \crumbs_MultiPlugin_FindParentInterface) {
+      return $this->getFindParentTreeNode()
+        ->child($key, FALSE)
+        ->setMultiPlugin($plugin)
+        ->offset();
+    }
+    elseif ($plugin instanceof \crumbs_MultiPlugin_FindTitleInterface) {
+      return $this->getFindTitleTreeNode()
+        ->child($key, FALSE)
+        ->setMultiPlugin($plugin)
+        ->offset();
+    }
+    else {
+      $reflectionObject = new \ReflectionObject($plugin);
+      foreach ($reflectionObject->getMethods() as $method) {
+        if ('findParent' === $method->name) {
+          $wrapper = new MultiParentPluginLegacyWrapper($plugin, $method->name);
+          parent::multiPlugin($key, $wrapper);
+        }
+        elseif ('findTitle' === $method->name) {
+          $wrapper = new MultiTitlePluginLegacyWrapper($plugin, $method->name);
+          parent::multiPlugin($key, $wrapper);
+        }
+        elseif (0 === strpos($method->name, 'findParent__')) {
+          $wrapper = new MultiParentPluginLegacyWrapper($plugin, $method->name);
+          $route = Util::routeFromMethodSuffix(substr($method->name, 12));
+          parent::route($route)->multiPlugin($key, $wrapper);
+        }
+        elseif (0 === strpos($method->name, 'findTitle__')) {
+          $wrapper = new MultiTitlePluginLegacyWrapper($plugin, $method->name);
+          $route = Util::routeFromMethodSuffix(substr($method->name, 11));
+          parent::route($route)->multiPlugin($key, $wrapper);
+        }
+      }
+      // Return a placeholder tree offset.
+      return new IllegalTreeOffset('Cannot use tree offset from legacy plugin.');
+    }
   }
 
   /**
@@ -133,13 +209,12 @@ class HookArgument extends RoutelessPluginMapper implements ArgumentInterface {
    * @param string|null $key
    * @param \crumbs_MultiPlugin|null $plugin
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    */
   function routeMultiPlugin($route, $key = NULL, \crumbs_MultiPlugin $plugin = NULL) {
     if (!isset($plugin)) {
       $plugin = $this->helper->multiPluginFromKey($key);
     }
-    // @todo What if the key is empty?
     return $this->route($route)->multiPlugin($key, $plugin);
   }
 
@@ -148,7 +223,7 @@ class HookArgument extends RoutelessPluginMapper implements ArgumentInterface {
    * @param string $key
    * @param string $parent_path
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    */
   function routeParentPath($route, $key, $parent_path) {
     return $this->route($route)->fixedParentPath($key, $parent_path);
@@ -167,7 +242,7 @@ class HookArgument extends RoutelessPluginMapper implements ArgumentInterface {
    *   $callback(string $path, array $item), like the findParent() method of
    *   a typical crumbs_MonoPlugin.
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    */
   function routeParentCallback($route, $key, $callback) {
     return $this->route($route)->parentCallback($key, $callback);
@@ -178,7 +253,7 @@ class HookArgument extends RoutelessPluginMapper implements ArgumentInterface {
    * @param string $key
    * @param string $title
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    */
   function routeTranslateTitle($route, $key, $title) {
     return $this->route($route)->translateTitle($key, $title);
@@ -197,7 +272,7 @@ class HookArgument extends RoutelessPluginMapper implements ArgumentInterface {
    *   $callback(string $path, array $item), like the findParent() method of
    *   a typical crumbs_MonoPlugin.
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    */
   function routeTitleCallback($route, $key, $callback) {
     return $this->route($route)->titleCallback($key, $callback);
@@ -207,7 +282,7 @@ class HookArgument extends RoutelessPluginMapper implements ArgumentInterface {
    * @param string $route
    * @param string $key
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    */
   function routeSkipItem($route, $key) {
     return $this->route($route)->skipItem($key);
@@ -219,6 +294,8 @@ class HookArgument extends RoutelessPluginMapper implements ArgumentInterface {
    * @param array|string $keys
    *   Array of keys, relative to the module name, OR
    *   a single string key, relative to the module name.
+   *
+   * @return $this
    */
   function disabledByDefault($keys = NULL) {
     if (is_array($keys)) {
@@ -230,7 +307,9 @@ class HookArgument extends RoutelessPluginMapper implements ArgumentInterface {
       $this->pluginFamily($keys)->disabledByDefault();
     }
     else {
-      $this->modulePluginFamily()->disabledByDefault();
+      $this->getFindTitleTreeNode()->disabledByDefault();
+      $this->getFindParentTreeNode()->disabledByDefault();
     }
+    return $this;
   }
 }

@@ -6,7 +6,7 @@
  * @param \Drupal\crumbs\PluginApi\HookArgument\ArgumentInterface $api
  */
 function text_crumbs_plugins($api) {
-  $family = $api->modulePluginFamily()
+  $family = $api->pluginFamily('fields')
     ->describeFindTitle(t('Text fields'));
   foreach (field_info_fields() as $field_name => $field_info) {
     if (0

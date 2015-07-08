@@ -42,7 +42,7 @@ class crumbs_MultiPlugin_EntityFindSomething extends crumbs_MultiPlugin_EntityFi
    *   The label for the bundle, e.g. "Node type" or "Vocabulary".
    *   This is an untranslated string.
    */
-  function __construct($plugin, $entity_type, $bundle_key, $bundle_name) {
+  function __construct(\crumbs_EntityPlugin $plugin, $entity_type, $bundle_key, $bundle_name) {
     $this->entityType = $entity_type;
     $this->bundleKey = $bundle_key;
     $this->bundleName = $bundle_name;

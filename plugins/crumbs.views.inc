@@ -15,9 +15,6 @@ function views_crumbs_plugins($api) {
   $staticDisplays = array();
   $dynamicDisplays = array();
 
-  $family = $api->modulePluginFamily()
-    ->describeFindTitle('Views');
-
   foreach ($q->execute() as $row) {
 
     if (0
@@ -69,7 +66,7 @@ function views_crumbs_plugins($api) {
     }
   }
 
-  $pageTitlePluginFamily = $family->pluginFamily('pageTitle')
+  $pageTitlePluginFamily = $api->pluginFamily('pageTitle')
     ->describeFindTitle(t('Views page title'));
 
   foreach ($staticDisplays as $view_name => $displays) {
@@ -86,14 +83,17 @@ function views_crumbs_plugins($api) {
         // first of the router paths.
         sort($routes);
       }
-      $viewPluginFamily->route($routes[0])->monoPlugin(
-        $view_display_id,
-        new views_CrumbsMonoPlugin_PageTitle($view_name, $view_display_id))
+      $plugin = new views_CrumbsMonoPlugin_PageTitle($view_name, $view_display_id);
+      $viewPluginFamily
+        ->validate()
+        ->route($routes[0])
+        ->validate()
+        ->monoPlugin($view_display_id, $plugin)
         ->describe(t('Display ID') . ': ' . check_plain($view_display_id));
     }
   }
 
-  $argTitlePluginFamily = $family->pluginFamily('argTitle')
+  $argTitlePluginFamily = $api->pluginFamily('argTitle')
     ->describeFindTitle(t('Views argument title'));
 
   foreach ($dynamicDisplays as $view_name => $displays) {
@@ -103,9 +103,9 @@ function views_crumbs_plugins($api) {
     foreach ($displays as $view_display_id => $routes) {
       // There should be only one route.
       // If there are more, we take the first.
-      $viewPluginFamily->route($routes[0])->monoPlugin(
-        "argTitle.$view_name.$view_display_id",
-        new views_CrumbsMonoPlugin_PageTitle($view_name, $view_display_id))
+      $plugin = new views_CrumbsMonoPlugin_PageTitle($view_name, $view_display_id);
+      $viewPluginFamily->route($routes[0])
+        ->monoPlugin($view_display_id, $plugin)
         ->describe(t('Display ID') . ': ' . check_plain($view_display_id));
     }
   }

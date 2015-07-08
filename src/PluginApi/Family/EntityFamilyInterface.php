@@ -13,7 +13,7 @@ interface EntityFamilyInterface {
    *   An array of entity types, or a single entity type, or NULL to allow all
    *   entity types.
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    */
   function entityParentPlugin($key, $entity_plugin, $types = NULL);
 
@@ -28,7 +28,7 @@ interface EntityFamilyInterface {
    *   An array of entity types, or a single entity type, or NULL to allow all
    *   entity types.
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    */
   function entityParentCallback($key, $callback, $types = NULL);
 
@@ -41,7 +41,7 @@ interface EntityFamilyInterface {
    *   An array of entity types, or a single entity type, or NULL to allow all
    *   entity types.
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    */
   function entityTitlePlugin($key, $entity_plugin = NULL, $types = NULL);
 
@@ -62,7 +62,7 @@ interface EntityFamilyInterface {
    *   An array of entity types, or a single entity type, or NULL to allow all
    *   entity types.
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    */
   function entityTitleCallback($key, $callback, $types = NULL);
 

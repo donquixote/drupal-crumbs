@@ -10,9 +10,10 @@ use Drupal\crumbs\Util;
 function taxonomy_crumbs_plugins(ArgumentInterface $api) {
 
   $plugin = new taxonomy_CrumbsMultiPlugin_termParent;
-  $api->route('taxonomy/term/%')->multiPlugin('termParent', $plugin);
+  $api->route('taxonomy/term/%')->multiPlugin('termParent', $plugin)
+    ->describe('Term hierarchy');
 
-  $family = $api->modulePluginFamily()
+  $family = $api->pluginFamily('termReference')
     ->describeFindParent(t('Term reference fields'))
     ->disabledByDefault();
 

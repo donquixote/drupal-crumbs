@@ -11,6 +11,7 @@ use Drupal\crumbs_ui\Widget\PathSelectorWidget;
 use Drupal\crumbs_ui\Widget\RouterItemDemo;
 use Drupal\crumbs_ui\Widget\TabsWidget;
 use Drupal\crumbs_ui\Widget\TitleFinderDemo;
+use Drupal\crumbs_ui\Widget\TitlePluginDemo;
 use Drupal\crumbs_ui\Widget\TrailFinderDemo;
 
 class DebugController implements ControllerInterface {
@@ -57,6 +58,11 @@ class DebugController implements ControllerInterface {
         'parent-finding-decorators',
         new ParentFinderDemo($routerItem),
         t('Parent-finding decorators'));
+
+      $tabs->addChild(
+        'title-finding-plugins',
+        new TitlePluginDemo($routerItem),
+        t('Title-finding plugins'));
 
       $tabs->addChild(
         'title-finding-decorators',

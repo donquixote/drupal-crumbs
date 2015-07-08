@@ -218,8 +218,10 @@ function crumbs_clean_token_values(&$replacements, $data = array(), $options = a
  * @param string|null $key
  *   Optional service name.
  *
- * @return ServiceContainer|object
+ * @return ServiceContainer
  *   The service container, or a service obtained from the container.
+ *   The deprecated object case is not documented in the type hint, to allow a
+ *   stricter IDE code checking for the regular case.
  */
 function crumbs($key = NULL) {
   static $services = NULL;

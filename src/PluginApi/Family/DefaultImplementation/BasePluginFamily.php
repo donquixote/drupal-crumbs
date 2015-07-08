@@ -2,66 +2,94 @@
 
 namespace Drupal\crumbs\PluginApi\Family\DefaultImplementation;
 
-use Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface;
+
 use Drupal\crumbs\PluginApi\Family\BaseFamilyInterface;
+
+use Drupal\crumbs\PluginSystem\Tree\TreeNode;
 use Drupal\crumbs\PluginSystem\Plugin\ParentPluginInterface;
 use Drupal\crumbs\PluginSystem\Plugin\TitlePluginInterface;
 
 class BasePluginFamily implements BaseFamilyInterface {
 
   /**
-   * @var \Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface
+   * @var \Drupal\crumbs\PluginSystem\Tree\TreeNode
    */
-  protected $parentPluginCollector;
+  private $findParentTreeNode;
 
   /**
-   * @var \Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface
+   * @var \Drupal\crumbs\PluginSystem\Tree\TreeNode
    */
-  protected $titlePluginCollector;
+  private $findTitleTreeNode;
 
   /**
-   * @var bool
+   * @param \Drupal\crumbs\PluginSystem\Tree\TreeNode $findParentTreeNode
+   * @param \Drupal\crumbs\PluginSystem\Tree\TreeNode $findTitleTreeNode
    */
-  protected $hasUncachablePlugins;
+  function __construct(TreeNode $findParentTreeNode, TreeNode $findTitleTreeNode) {
+    $this->findParentTreeNode = $findParentTreeNode;
+    $this->findTitleTreeNode = $findTitleTreeNode;
+    $this->validate();
+  }
 
   /**
-   * @var string
+   * @throws \Exception
+   *
+   * @return $this
    */
-  protected $prefix;
+  function validate() {
+    $parentPlugin = new \crumbs_MonoPlugin_ParentPathCallback(function(){});
+    $titlePlugin = new \crumbs_MonoPlugin_TitleCallback(function(){});
+    $this->findParentTreeNode->validateMonoPlugin($parentPlugin);
+    $this->findTitleTreeNode->validateMonoPlugin($titlePlugin);
+    return $this;
+  }
 
-  /**
-   * @param \Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface $parentPluginCollector
-   * @param \Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface $titlePluginCollector
-   * @param bool $hasUncachablePlugins
-   *   By-reference flag.
-   * @param string $prefix
-   */
-  function __construct(
-    PluginCollectorInterface $parentPluginCollector,
-    PluginCollectorInterface $titlePluginCollector,
-    &$hasUncachablePlugins,
-    $prefix
-  ) {
-    $this->parentPluginCollector = $parentPluginCollector;
-    $this->titlePluginCollector = $titlePluginCollector;
-    $this->hasUncachablePlugins =& $hasUncachablePlugins;
-    $this->prefix = $prefix;
+  protected function getFindParentTreeNode() {
+    return $this->findParentTreeNode;
+  }
+
+  protected function getFindTitleTreeNode() {
+    return $this->findTitleTreeNode;
   }
 
   /**
    * @param \crumbs_PluginInterface $plugin
    *
-   * @return \Drupal\crumbs\PluginApi\Collector\PluginCollectorInterface
+   * @return string
+   *   The plugin type, either 'parent' or 'title'.
    */
-  protected function pluginGetCollectionContainer(\crumbs_PluginInterface $plugin) {
+  protected function pluginGetType(\crumbs_PluginInterface $plugin) {
     if ($plugin instanceof ParentPluginInterface) {
-      return $this->parentPluginCollector;
+      return 'parent';
     }
     elseif ($plugin instanceof TitlePluginInterface) {
-      return $this->titlePluginCollector;
+      return 'title';
     }
     else {
       throw new \InvalidArgumentException("Invalid plugin type.");
+    }
+  }
+
+  /**
+   * @param \crumbs_PluginInterface $plugin
+   *
+   * @return \Drupal\crumbs\PluginSystem\Tree\TreeNode
+   */
+  protected function pluginGetTreeNode(\crumbs_PluginInterface $plugin) {
+    if ($plugin instanceof ParentPluginInterface) {
+      $this->findParentTreeNode->validatePlugin($plugin);
+      return $this->findParentTreeNode;
+    }
+    elseif ($plugin instanceof TitlePluginInterface) {
+      $this->findTitleTreeNode->validatePlugin($plugin);
+      return $this->findTitleTreeNode;
+    }
+    elseif ('object' === $type = gettype($plugin)) {
+      $class = get_class($plugin);
+      throw new \InvalidArgumentException("Invalid plugin type: $class");
+    }
+    else {
+      throw new \InvalidArgumentException("Invalid plugin type: $type.");
     }
   }
 
@@ -75,12 +103,15 @@ class BasePluginFamily implements BaseFamilyInterface {
    * @param \crumbs_MultiPlugin $plugin
    *   Plugin object.
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    *
    * @throws \Exception
    */
   function multiPlugin($key, \crumbs_MultiPlugin $plugin) {
-    return $this->pluginGetCollectionContainer($plugin)->multiPlugin($key, $plugin);
+    return $this->pluginGetTreeNode($plugin)
+      ->child($key, FALSE)
+      ->setMultiPlugin($plugin)
+      ->offset();
   }
 
   /**
@@ -92,37 +123,42 @@ class BasePluginFamily implements BaseFamilyInterface {
    * @param \crumbs_MonoPlugin $plugin
    *   Plugin object.
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    *
    * @throws \Exception
    */
   function monoPlugin($key, \crumbs_MonoPlugin $plugin) {
-    return $this->pluginGetCollectionContainer($plugin)->monoPlugin($key, $plugin);
+    return $this->pluginGetTreeNode($plugin)
+      ->child($key, TRUE)
+      ->setMonoPlugin($plugin)
+      ->offset();
   }
 
   /**
    * @param string $key
    * @param callable $callback
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    */
   function parentCallback($key, $callback) {
-    $key = $this->prefix . $key;
-    $this->hasUncachablePlugins = TRUE;
-    // Ignore this plugin, since it is uncachable.
-    return $this->parentPluginCollector->pluginOffset($key);
+    $plugin = new \crumbs_MonoPlugin_ParentPathCallback($callback);
+    return $this->findParentTreeNode
+      ->child($key, TRUE)
+      ->setMonoPlugin($plugin)
+      ->offset();
   }
 
   /**
    * @param string $key
    * @param callable $callback
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    */
   function titleCallback($key, $callback) {
-    $key = $this->prefix . $key;
-    $this->hasUncachablePlugins = TRUE;
-    // Ignore this plugin, since it is uncachable.
-    return $this->titlePluginCollector->pluginOffset($key);
+    $plugin = new \crumbs_MonoPlugin_TitleCallback($callback);
+    return $this->findTitleTreeNode
+      ->child($key, TRUE)
+      ->setMonoPlugin($plugin)
+      ->offset();
   }
 }

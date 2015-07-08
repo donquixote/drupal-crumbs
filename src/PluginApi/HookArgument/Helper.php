@@ -19,7 +19,7 @@ class Helper {
    * @param string $module
    *   The module name.
    */
-  function __construc($module) {
+  function __construct($module) {
     $this->module = $module;
   }
 

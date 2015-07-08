@@ -12,8 +12,8 @@ interface crumbs_MonoPlugin_FindTitleInterface extends crumbs_MonoPlugin, TitleP
    * @param array $item
    *   Item as returned from crumbs_get_router_item()
    *
-   * @return NULL|string Title candidate.
-   * Title candidate.
+   * @return string|null
+   *   Title candidate.
    */
   function findTitle($path, $item);
 }

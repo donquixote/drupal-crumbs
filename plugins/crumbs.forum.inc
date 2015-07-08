@@ -9,23 +9,22 @@ use Drupal\crumbs\Util;
  */
 function forum_crumbs_plugins(ArgumentInterface $api) {
 
-  $family = $api->modulePluginFamily()
-    ->describeFindParent(t('Forum'))
-    ->describeFindTitle(t('Forum'));
-
-  $family->route('forum/%')->monoPlugin('term', new forum_CrumbsMonoPlugin_forumTerm)
+  $api->route('forum/%')
+    ->monoPlugin('term', new forum_CrumbsMonoPlugin_forumTerm)
     ->translateDescription('Forum term hierarchy');
 
-  $family->route('forum/%')->monoPlugin('termName', new forum_CrumbsMonoPlugin_forumTermName)
+  $api->route('forum/%')
+    ->monoPlugin('termName', new forum_CrumbsMonoPlugin_forumTermName)
     ->translateDescription('Forum term name');
 
-  $family->route('node/%')->monoPlugin('thread', new forum_CrumbsMonoPlugin_forumThread)
+  $api->route('node/%')
+    ->monoPlugin('thread', new forum_CrumbsMonoPlugin_forumThread)
     ->describe('forum/% &raquo; node/%');
 
-  $family->monoPlugin('forumThreadCreate', new forum_CrumbsMonoPlugin_forumThreadCreate)
+  $api->monoPlugin('forumThreadCreate', new forum_CrumbsMonoPlugin_forumThreadCreate)
     ->describe('forum/% &raquo; node/add/*/*');
 
-  $family->monoPlugin('forumThreadCreateTitle', new forum_CrumbsMonoPlugin_forumThreadCreateTitle)
+  $api->monoPlugin('forumThreadCreateTitle', new forum_CrumbsMonoPlugin_forumThreadCreateTitle)
     ->translateDescription('Title "New topic" for node/add/*/* in a forum.');
 }
 
@@ -143,7 +142,7 @@ class forum_CrumbsMonoPlugin_forumThreadCreate implements crumbs_MonoPlugin_Find
       preg_match('#^node/add/([^/]+)/(\d+)$#', $path, $m)
     ) {
       $type = $m[1];
-      $tid = (int)$m[2];
+      # $tid = (int)$m[2];
       // We need to find out if the node type is forum-enabled.
       // See _forum_node_check_node_type() in forum.module.
       $field = field_info_instance('node', 'taxonomy_forums', $type);
@@ -179,7 +178,7 @@ class forum_CrumbsMonoPlugin_forumThreadCreateTitle implements crumbs_MonoPlugin
       preg_match('#^node/add/([^/]+)/(\d+)$#', $path, $m)
     ) {
       $type = $m[1];
-      $tid = (int)$m[2];
+      # $tid = (int)$m[2];
       // We need to find out if the node type is forum-enabled.
       // See _forum_node_check_node_type() in forum.module.
       $field = field_info_instance('node', 'taxonomy_forums', $type);
@@ -198,7 +197,7 @@ class forum_CrumbsMonoPlugin_forumThreadCreateTitle implements crumbs_MonoPlugin
   /**
    * Method that can be overwritten by subclasses.
    *
-   * @param $type
+   * @param string $type
    *
    * @return null|string
    */

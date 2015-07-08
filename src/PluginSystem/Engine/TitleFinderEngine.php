@@ -2,66 +2,49 @@
 
 namespace Drupal\crumbs\PluginSystem\Engine;
 
-use Drupal\crumbs\PluginSystem\Plugin\FindTitleMultiPluginOffset;
+use Drupal\crumbs\TitleFinder\TitleFinderInterface;
 
-class TitleFinderEngine {
-
-  /**
-   * @var \crumbs_MonoPlugin_FindTitleInterface[]
-   *   Format: $[$pluginKey] = $plugin
-   */
-  private $pluginsSorted;
+class TitleFinderEngine implements TitleFinderInterface {
 
   /**
-   * @param \crumbs_MonoPlugin_FindTitleInterface[] $pluginsSorted
+   * @var \Drupal\crumbs\PluginSystem\Wrapper\Title\TitlePluginWrapperInterface[][]
+   *   Format: $[$bestWeight][] = $wrapper
    */
-  function __construct(array $pluginsSorted) {
-    $this->pluginsSorted = $pluginsSorted;
-  }
+  private $pluginWrappersGrouped = array();
 
   /**
-   * @param string $path
-   * @param array $item
-   * @param array $breadcrumb
-   *
-   * @return NULL|string
-   *   The breadcrumb link title, or NULL.
+   * @param \Drupal\crumbs\PluginSystem\Wrapper\Title\TitlePluginWrapperInterface[] $pluginWrappers
    */
-  function findTitle($path, array $item, array $breadcrumb) {
-    foreach ($this->pluginsSorted as $key => $plugin) {
-      /** @noinspection PhpMethodParametersCountMismatchInspection */
-      $candidate = $plugin->findTitle($path, $item, $breadcrumb);
-      if (isset($candidate)) {
-        return $candidate;
+  function __construct(array $pluginWrappers) {
+    foreach ($pluginWrappers as $wrapper) {
+      $wrapperBestWeight = $wrapper->getBestWeight();
+      if ($wrapperBestWeight !== FALSE) {
+        $this->pluginWrappersGrouped[$wrapperBestWeight][] = $wrapper;
       }
     }
-    return NULL;
+    ksort($this->pluginWrappersGrouped);
   }
 
   /**
    * @param string $path
-   * @param array $item
+   * @param array $routerItem
+   * @param array[] $breadcrumb
    *
-   * @return string[]
-   *   The breadcrumb link title candidates.
+   * @return string|null
    */
-  function findAllTitles($path, array $item) {
-    $all = array();
-    foreach ($this->pluginsSorted as $key => $plugin) {
-      if ($plugin instanceof FindTitleMultiPluginOffset) {
-        $all += $plugin->findAllTitles($path, $item);
-      }
-      elseif ($plugin instanceof \crumbs_MonoPlugin_FindTitleInterface) {
-        $candidate = $plugin->findTitle($path, $item);
-        if (isset($candidate)) {
-          $all[$key] = $candidate;
+  function findTitle($path, array $routerItem, array $breadcrumb = array()) {
+    $bestCandidate = NULL;
+    $bestWeight = NULL;
+    foreach ($this->pluginWrappersGrouped as $wrapperBestWeight => $wrappers) {
+      foreach ($wrappers as $wrapper) {
+        if (isset($bestWeight) && $wrapperBestWeight >= $bestWeight) {
+          return TRUE;
         }
-      }
-      else {
-        throw new \RuntimeException('Invalid plugin type.');
+        $wrapper->findBestTitle($checker, $bestWeight, $path, $routerItem);
       }
     }
-    return $all;
+
+    return isset($bestWeight);
   }
 
 }

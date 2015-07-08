@@ -1,8 +1,6 @@
 <?php
 
-use Drupal\crumbs\PluginSystem\Plugin\CallbackPluginInterface;
-
-class crumbs_MonoPlugin_ParentPathCallback implements crumbs_MonoPlugin_FindParentInterface, CallbackPluginInterface {
+class crumbs_MonoPlugin_ParentPathCallback implements crumbs_MonoPlugin_FindParentInterface {
 
   /**
    * @var callback

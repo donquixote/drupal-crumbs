@@ -1,17 +1,12 @@
 <?php
 namespace Drupal\crumbs\PluginApi\HookArgument;
 
-use Drupal\crumbs\PluginApi\Family\FamilyInterface;
+use Drupal\crumbs\PluginApi\Family\LoreFamilyInterface;
 
 /**
  * Interface for the argument passed to hook_crumbs_plugins().
  */
-interface ArgumentInterface extends FamilyInterface {
-
-  /**
-   * @return \Drupal\crumbs\PluginApi\Family\FamilyLoreInterface
-   */
-  function modulePluginFamily();
+interface ArgumentInterface extends LoreFamilyInterface {
 
   /**
    * Register an entity route.
@@ -38,11 +33,11 @@ interface ArgumentInterface extends FamilyInterface {
    *   Or NULL, to have the plugin object automatically created based on a
    *   class name guessed from the $key parameter and the module name.
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    *
    * @throws \Exception
    */
-  function monoPlugin($key = NULL, \crumbs_MonoPlugin $plugin = NULL);
+  # function monoPlugin($key = NULL, \crumbs_MonoPlugin $plugin = NULL);
 
   /**
    * Register a "Multi" plugin.
@@ -58,9 +53,9 @@ interface ArgumentInterface extends FamilyInterface {
    *   Or NULL, to have the plugin object automatically created based on a
    *   class name guessed from the $key parameter and the module name.
    *
-   * @return \Drupal\crumbs\PluginApi\PluginOffset\TreeOffsetMetaInterface
+   * @return \Drupal\crumbs\PluginApi\Offset\TreeOffsetMetaInterface
    *
    * @throws \Exception
    */
-  function multiPlugin($key = NULL, \crumbs_MultiPlugin $plugin = NULL);
+  # function multiPlugin($key = NULL, \crumbs_MultiPlugin $plugin = NULL);
 }

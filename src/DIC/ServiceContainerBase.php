@@ -41,7 +41,19 @@ abstract class ServiceContainerBase {
     // Method to be implemented in a subclass.
     $method = $name;
     if (!method_exists($this, $method)) {
-      throw new \Exception("Unknown service '$name'.");
+      $trace = debug_backtrace(FALSE, 3);
+      $line = $trace[1]['line'];
+      $file = $trace[1]['file'];
+      if (!isset($trace[2]['function'])) {
+        $caller = '??';
+      }
+      elseif (!isset($trace[2]['class'])) {
+        $caller = $trace[2]['function'] . '()';
+      }
+      else {
+        $caller = $trace[2]['class'] . $trace[2]['type'] . $trace[2]['function'] . '()';
+      }
+      throw new \Exception("Unknown service '$name' requested in $caller. (Line $line of $file).");
     }
     return $this->$method();
   }
