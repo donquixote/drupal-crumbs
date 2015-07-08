@@ -2,7 +2,7 @@
 
 namespace Drupal\crumbs\PluginSystem\Tree;
 
-use Drupal\crumbs\PluginApi\Aggregate\EntityPluginAggregate;
+use Drupal\crumbs\PluginSystem\Tree\EntityRoute\EntityPluginAggregate;
 use Drupal\crumbs\PluginApi\DescribeArgument\DescribeMultiPluginArg;
 use Drupal\crumbs\PluginApi\Offset\TreeOffset;
 use Drupal\crumbs\PluginSystem\PluginType\PluginTypeInterface;
@@ -90,7 +90,7 @@ class TreeNode extends TreeNodeBase {
   /**
    * Adds real plugins for the entity plugins.
    *
-   * @param \Drupal\crumbs\PluginApi\Aggregate\EntityRouteInterface[] $entityRoutes
+   * @param \Drupal\crumbs\PluginSystem\Tree\EntityRoute\EntityRouteInterface[] $entityRoutes
    */
   function unfoldEntityPlugins(array $entityRoutes) {
     if (!empty($this->entityPluginAggregate)) {

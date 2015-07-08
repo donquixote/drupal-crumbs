@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\crumbs\PluginApi\Aggregate;
+namespace Drupal\crumbs\PluginSystem\Tree\EntityRoute;
 
 use Drupal\crumbs\PluginSystem\Tree\TreeNode;
 use Drupal\crumbs\PluginSystem\PluginType\PluginTypeInterface;
