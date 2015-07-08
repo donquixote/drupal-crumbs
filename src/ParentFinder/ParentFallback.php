@@ -26,26 +26,24 @@ class ParentFallback extends ParentFinderDecoratorBase {
    *   The router item to find a parent for..
    * @param \Drupal\crumbs\ParentFinder\Approval\CheckerInterface $checker
    *
-   * @return array|NULL
-   *   The parent router item, or NULL.
+   * @return bool
+   *   TRUE, if it was found.
    */
   function findParentRouterItem(array $routerItem, CheckerInterface $checker) {
 
-    $parentRouterItem = $this->decorated->findParentRouterItem($routerItem, $checker);
-    if (isset($parentRouterItem)) {
-      return $parentRouterItem;
+    if ($this->decorated->findParentRouterItem($routerItem, $checker)) {
+      return TRUE;
     }
 
     // Chop off path fragments at the end, to find a valid parent.
     $fragments = $routerItem['fragments'];
     while (count($fragments) > 1) {
       array_pop($fragments);
-      $parentRouterItem = $checker->checkParentPath(implode('/', $fragments), '.ParentFallback');
-      if (isset($parentRouterItem)) {
-        return $parentRouterItem;
+      if ($checker->checkParentPath(implode('/', $fragments), '.ParentFallback')) {
+        return TRUE;
       }
     }
 
-    return NULL;
+    return FALSE;
   }
 }

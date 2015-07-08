@@ -21,8 +21,8 @@ class ParentBuffer extends ParentFinderDecoratorBase {
    *   The router item to find a parent for..
    * @param \Drupal\crumbs\ParentFinder\Approval\CheckerInterface $checker
    *
-   * @return array|NULL
-   *   The parent router item, or NULL.
+   * @return bool
+   *   TRUE, if it was found.
    */
   function findParentRouterItem(array $routerItem, CheckerInterface $checker) {
     $path = $routerItem['link_path'];
